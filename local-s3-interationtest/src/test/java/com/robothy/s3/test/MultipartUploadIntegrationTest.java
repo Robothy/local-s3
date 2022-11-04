@@ -31,12 +31,6 @@ public class MultipartUploadIntegrationTest {
     URL url = s3.getUrl("a", "b");
     AwsClientBuilder.EndpointConfiguration endpointConfiguration =
         new AwsClientBuilder.EndpointConfiguration("http://" + url.getHost() + ":" + url.getPort(), "local");
-    s3 = AmazonS3ClientBuilder.standard().withEndpointConfiguration(endpointConfiguration)
-        .withClientConfiguration(new ClientConfiguration().withProxyHost("127.0.0.1")
-            .withProxyPort(15555))
-        .enablePathStyleAccess()
-        .build();
-
 
     String bucket = "my-bucket";
     String key1 = "a.txt";
