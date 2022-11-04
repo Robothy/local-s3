@@ -1,0 +1,18 @@
+plugins {
+    id 'local-s3.java-conventions'
+    id 'local-s3.publish'
+}
+
+dependencies {
+    implementation project(":local-s3-core")
+    implementation project(":local-s3-datatypes")
+    implementation "io.netty:netty-all:${libVersion['io.netty.netty-all']}"
+    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${libVersion['com.fasterxml.jackson.dataformat.jackson-dataformat-xml']}"
+    implementation "com.fasterxml.jackson.core:jackson-databind:${libVersion['com.fasterxml.jackson.core.jackson-databind']}"
+    implementation "org.apache.commons:commons-io:${libVersion['org.apache.commons.commons-io']}"
+    implementation "org.apache.commons:commons-lang3:${libVersion['org.apache.commons.commons-lang3']}"
+    implementation "org.apache.commons:commons-collections4:${libVersion['org.apache.commons.commons-collections4']}"
+    implementation "org.slf4j:slf4j-api:${libVersion['org.slf4j.slf4j-api']}"
+    implementation "com.robothy:netty-http-router:${libVersion['com.robothy.netty-http-router']}"
+    testImplementation "org.mockito:mockito-inline:${libVersion['org.mockito.mockito-inline']}"
+}

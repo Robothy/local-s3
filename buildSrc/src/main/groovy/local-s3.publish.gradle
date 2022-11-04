@@ -1,0 +1,55 @@
+import io.franzbecker.gradle.lombok.task.DelombokTask
+
+plugins {
+    id 'maven-publish'
+    id 'io.franzbecker.gradle-lombok'
+}
+
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
+publishing {
+
+    publications {
+        maven(MavenPublication) {
+            groupId = group
+            artifactId = project.name
+            from components.java
+        }
+    }
+
+    repositories {
+        mavenLocal()
+
+        repositories {
+            mavenLocal()
+            maven {
+                name = "GitHubPackages"
+                url = uri("https://maven.pkg.github.com/Robothy/local-s3")
+                credentials {
+                    username = project.findProperty("GITHUB_USERNAME") ?: System.getenv("GITHUB_USERNAME")
+                    password = project.findProperty("GITHUB_TOKEN") ?: System.getenv("GITHUB_TOKEN")
+                }
+            }
+        }
+    }
+}
+
+
+
+task delombok(type: DelombokTask, dependsOn: compileJava) {
+    ext.outputDir = file("$buildDir/delombok")
+    outputs.dir(outputDir)
+    sourceSets.main.java.srcDirs.each {
+        inputs.dir(it)
+        args(it, "-d", outputDir)
+    }
+}
+
+javadoc {
+    dependsOn delombok
+    source = delombok.outputDir
+    //failOnError = false
+}

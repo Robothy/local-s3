@@ -1,0 +1,15 @@
+plugins {
+    id 'local-s3.java-conventions'
+    id 'local-s3.publish'
+}
+
+dependencies {
+    implementation project(":local-s3-rest")
+    implementation("software.amazon.awssdk:s3:${libVersion['software.amazon.awssdk.s3']}")
+    implementation("com.amazonaws:aws-java-sdk:${libVersion['com.amazonaws.aws-java-sdk']}")
+    implementation "org.apache.commons:commons-io:${libVersion['org.apache.commons.commons-io']}"
+    implementation "org.apache.commons:commons-lang3:${libVersion['org.apache.commons.commons-lang3']}"
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
+    implementation "org.junit.jupiter:junit-jupiter:${libVersion['org.junit.jupiter.junit-jupiter']}"
+}
+

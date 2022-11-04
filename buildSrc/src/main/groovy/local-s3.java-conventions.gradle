@@ -1,0 +1,94 @@
+plugins {
+    id 'java'
+    id 'jacoco'
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    jcenter()
+    maven {
+        url 'https://maven.pkg.github.com/robothy/netty-http-router'
+        credentials {
+            username = "${GITHUB_USERNAME}"
+            password = "${GITHUB_TOKEN}"
+        }
+    }
+
+    maven {
+        url 'https://maven.pkg.github.com/robothy-platform/maven'
+        credentials {
+            username = "${GITHUB_USERNAME}"
+            password = "${GITHUB_TOKEN}"
+        }
+    }
+
+
+//    maven { url 'https://maven.aliyun.com/repository/google/' }
+//    maven { url 'https://maven.aliyun.com/repository/public/' }
+//    maven { url 'https://maven.aliyun.com/repository/spring/' }
+//    maven { url 'https://maven.aliyun.com/repository/gradle-plugin/' }
+//    maven { url 'https://maven.aliyun.com/repository/spring-plugin/' }
+
+}
+
+project.group = 'com.robothy'
+
+// Load version
+ext {
+    libVersion = new Properties()
+    def versionFile = new File("${project.rootProject.rootDir}/buildSrc/src/main/resources/version.properties")
+    ext.libVersion.load(versionFile.newInputStream())
+}
+
+dependencies {
+    implementation platform("com.robothy:platform-dependencies:${libVersion['com.robothy.platform-dependencies']}")
+    compileOnly platform("com.robothy:platform-dependencies:${libVersion['com.robothy.platform-dependencies']}")
+    annotationProcessor platform("com.robothy:platform-dependencies:${libVersion['com.robothy.platform-dependencies']}")
+    testImplementation platform("com.robothy:platform-dependencies:${libVersion['com.robothy.platform-dependencies']}")
+    testAnnotationProcessor platform("com.robothy:platform-dependencies:${libVersion['com.robothy.platform-dependencies']}")
+    testCompileOnly platform("com.robothy:platform-dependencies:${libVersion['com.robothy.platform-dependencies']}")
+
+
+    implementation "com.robothy:platform-utils"
+    implementation "org.projectlombok:lombok"
+    compileOnly "org.projectlombok:lombok"
+    annotationProcessor "org.projectlombok:lombok"
+    testImplementation "org.projectlombok:lombok"
+    testCompileOnly "org.projectlombok:lombok"
+    testAnnotationProcessor "org.projectlombok:lombok"
+    implementation "org.slf4j:slf4j-api"
+    testImplementation "org.mockito:mockito-inline"
+    testImplementation "org.junit.jupiter:junit-jupiter"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
+}
+
+test {
+    useJUnitPlatform()
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        html.enabled true
+    }
+}
+
+jar {
+    duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+}
+
+tasks.compileJava {
+    options.encoding = "UTF-8"
+}
+
+tasks.compileTestJava {
+    options.encoding = "UTF-8"
+}
+
+//java {
+//    toolchain {
+//        languageVersion = JavaLanguageVersion.of(15)
+//    }
+//}
+

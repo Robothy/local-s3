@@ -1,0 +1,7 @@
+plugins {
+    id 'local-s3.java-conventions'
+}
+
+dependencies {
+    implementation (project(":local-s3-rest"))
+}

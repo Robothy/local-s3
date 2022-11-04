@@ -1,0 +1,12 @@
+plugins {
+    id 'local-s3.java-conventions'
+    id 'local-s3.publish'
+}
+
+dependencies {
+    implementation project(":local-s3-datatypes")
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8'
+    implementation "com.fasterxml.jackson.core:jackson-databind"
+    implementation "org.apache.commons:commons-io:${libVersion['org.apache.commons.commons-io']}"
+    implementation "org.apache.commons:commons-lang3:${libVersion['org.apache.commons.commons-lang3']}"
+}
