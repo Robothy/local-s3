@@ -21,21 +21,21 @@ task fatJar(type: Jar, dependsOn: classes) {
 def os = DefaultNativePlatform.getCurrentOperatingSystem()
 def executor = os.isWindows() ? Arrays.asList("cmd", "/c") : Arrays.asList("sh", "-c")
 
-task dockerBuild(type: Exec, dependsOn: fatJar) {
-    doFirst {
-        var cmd = new ArrayList(executor)
-        cmd.add("docker build -t luofuxiang/local-s3:latest -t luofuxiang/local-s3:${project.version} .")
-        commandLine(cmd)
-    }
-}
-
-task dockerPush(type: Exec, dependsOn: dockerBuild) {
-    doFirst {
-        var cmd = new ArrayList(executor)
-        cmd.add("docker push luofuxiang/local-s3:${project.version}")
-        //cmd.add("&& docker push ${DOCKER_HUB_USERNAME}/local-s3:latest")
-        commandLine(cmd)
-    }
-}
+//task dockerBuild(type: Exec, dependsOn: fatJar) {
+//    doFirst {
+//        var cmd = new ArrayList(executor)
+//        cmd.add("docker build -t luofuxiang/local-s3:latest -t luofuxiang/local-s3:${project.version} .")
+//        commandLine(cmd)
+//    }
+//}
+//
+//task dockerPush(type: Exec, dependsOn: dockerBuild) {
+//    doFirst {
+//        var cmd = new ArrayList(executor)
+//        cmd.add("docker push luofuxiang/local-s3:${project.version}")
+//        //cmd.add("&& docker push ${DOCKER_HUB_USERNAME}/local-s3:latest")
+//        commandLine(cmd)
+//    }
+//}
 
 //rootProject.tasks.release.dependsOn(dockerPush)
