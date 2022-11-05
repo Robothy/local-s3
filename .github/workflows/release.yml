@@ -53,6 +53,8 @@ jobs:
           echo "GITHUB_TOKEN=${{secrets.PACKAGES_TOKEN}}" > ~/.gradle/gradle.properties
           echo "GITHUB_USERNAME=Robothy" >> ~/.gradle/gradle.properties
           chmod +x gradlew
+          pwd
+          ls -l
 
       - name: Release
         if: ${{inputs.gradleLogLevel == 'None'}}
