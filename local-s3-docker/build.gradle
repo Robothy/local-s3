@@ -38,4 +38,4 @@ task dockerPush(type: Exec, dependsOn: dockerBuild) {
     }
 }
 
-rootProject.tasks.release.dependsOn(dockerPush)
+//rootProject.tasks.release.dependsOn(dockerPush)
