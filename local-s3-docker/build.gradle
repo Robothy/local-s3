@@ -10,16 +10,16 @@ dependencies {
     runtimeOnly "ch.qos.logback:logback-classic"
 }
 
-task fatJar(type: Jar, dependsOn: classes) {
-    manifest.attributes["Main-Class"] = "com.robothy.s3.docker.App"
-    var runtimeClasses = configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-    from runtimeClasses
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    archiveFileName.set("s3.jar")
-}
+//task fatJar(type: Jar, dependsOn: classes) {
+//    manifest.attributes["Main-Class"] = "com.robothy.s3.docker.App"
+//    var runtimeClasses = configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+//    from runtimeClasses
+//    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+//    archiveFileName.set("s3.jar")
+//}
 
-def os = DefaultNativePlatform.getCurrentOperatingSystem()
-def executor = os.isWindows() ? Arrays.asList("cmd", "/c") : Arrays.asList("sh", "-c")
+//def os = DefaultNativePlatform.getCurrentOperatingSystem()
+//def executor = os.isWindows() ? Arrays.asList("cmd", "/c") : Arrays.asList("sh", "-c")
 
 //task dockerBuild(type: Exec, dependsOn: fatJar) {
 //    doFirst {
