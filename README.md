@@ -1,5 +1,7 @@
 # LocalS3
 
+[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/Robothy/local-s3?display_name=tag&color=blueviolet)](https://github.com/Robothy?tab=packages&repo_name=local-s3)
+
 LocalS3 is a lightweight Amazon S3 mock service based on Netty.
 
 ## Features

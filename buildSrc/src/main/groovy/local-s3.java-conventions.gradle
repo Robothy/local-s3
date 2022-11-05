@@ -48,16 +48,13 @@ dependencies {
     testImplementation platform("com.robothy:platform-dependencies:${libVersion['com.robothy.platform-dependencies']}")
     testAnnotationProcessor platform("com.robothy:platform-dependencies:${libVersion['com.robothy.platform-dependencies']}")
     testCompileOnly platform("com.robothy:platform-dependencies:${libVersion['com.robothy.platform-dependencies']}")
-
-
     implementation "com.robothy:platform-utils"
-    implementation "org.projectlombok:lombok"
+    implementation "org.slf4j:slf4j-api"
     compileOnly "org.projectlombok:lombok"
     annotationProcessor "org.projectlombok:lombok"
-    testImplementation "org.projectlombok:lombok"
+
     testCompileOnly "org.projectlombok:lombok"
     testAnnotationProcessor "org.projectlombok:lombok"
-    implementation "org.slf4j:slf4j-api"
     testImplementation "org.mockito:mockito-inline"
     testImplementation "org.junit.jupiter:junit-jupiter"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
