@@ -5,7 +5,7 @@ public enum Mode {
   /**
    * Persist the data.
    */
-  PERSIST,
+  PERSISTENCE,
 
   /**
    * Store data in memory. Data will be lost after restart the service.

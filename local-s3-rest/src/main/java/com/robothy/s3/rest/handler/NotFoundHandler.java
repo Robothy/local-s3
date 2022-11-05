@@ -6,6 +6,8 @@ import com.robothy.netty.http.HttpResponse;
 import com.robothy.platform.utils.DigestUtil;
 import com.robothy.s3.datatypes.response.Error;
 import com.robothy.s3.rest.utils.XmlUtils;
+import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import java.util.Random;
 
@@ -24,6 +26,7 @@ class NotFoundHandler implements HttpRequestHandler {
         .build();
 
     response.status(HttpResponseStatus.INTERNAL_SERVER_ERROR)
+        .putHeader(HttpHeaderNames.CONTENT_TYPE.toString(), HttpHeaderValues.APPLICATION_XML)
         .write(XmlUtils.toXml(error));
   }
 }

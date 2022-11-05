@@ -12,7 +12,7 @@ import lombok.SneakyThrows;
 public class LocalS3Launcher {
 
   public static void main(String[] args) {
-    if (args.length == 0 || (!Mode.PERSIST.name().equalsIgnoreCase(args[0])
+    if (args.length == 0 || (!Mode.PERSISTENCE.name().equalsIgnoreCase(args[0])
         && !Mode.IN_MEMORY.name().equalsIgnoreCase(args[0]))) {
       System.out.println("Usage:    java -jar local-s3.jar [persist | in_memory]");
       System.exit(0);

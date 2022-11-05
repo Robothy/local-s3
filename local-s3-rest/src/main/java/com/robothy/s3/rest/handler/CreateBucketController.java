@@ -12,6 +12,8 @@ import com.robothy.s3.rest.assertions.RequestAssertions;
 import com.robothy.s3.rest.service.ServiceFactory;
 import com.robothy.s3.rest.utils.ResponseUtils;
 import io.netty.buffer.ByteBufInputStream;
+import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpHeaderValues;
 import java.io.InputStream;
 import lombok.extern.slf4j.Slf4j;
 
@@ -40,6 +42,7 @@ class CreateBucketController implements HttpRequestHandler {
         .bucketArn(DigestUtil.md5AsHex(bucketName.getBytes()))
         .build();
     response.putHeader("Location", "local")
+        .putHeader(HttpHeaderNames.CONTENT_TYPE.toString(), HttpHeaderValues.APPLICATION_XML)
         .write(xmlMapper.writeValueAsString(createBucketResult));
     ResponseUtils.addDateHeader(response);
     ResponseUtils.addAmzRequestId(response);
