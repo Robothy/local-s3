@@ -10,32 +10,34 @@ dependencies {
     runtimeOnly "ch.qos.logback:logback-classic"
 }
 
-//tasks.jar {
-//    manifest.attributes["Main-Class"] = "com.robothy.s3.docker.App"
-//    var runtimeClasses = configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-//    from runtimeClasses
-//    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-//    archiveFileName.set("s3.jar")
-//}
-//
-//def os = DefaultNativePlatform.getCurrentOperatingSystem()
-//def executor = os.isWindows() ? Arrays.asList("cmd", "/c") : Arrays.asList("sh", "-c")
-//
-//task dockerBuild(type: Exec, dependsOn: jar) {
-//    doFirst {
-//        var cmd = new ArrayList(executor)
-//        cmd.add("docker build -t luofuxiang/local-s3:latest -t luofuxiang/local-s3:${project.version} .")
-//        commandLine(cmd)
-//    }
-//}
-//
-//task dockerPush(type: Exec, dependsOn: dockerBuild) {
-//    doFirst {
-//        var cmd = new ArrayList(executor)
-//        cmd.add("docker push luofuxiang/local-s3:${project.version}")
-//        //cmd.add("&& docker push ${DOCKER_HUB_USERNAME}/local-s3:latest")
-//        commandLine(cmd)
-//    }
-//}
+task fatJar(type: Jar, dependsOn: classes) {
+    doFirst {
+        manifest.attributes["Main-Class"] = "com.robothy.s3.docker.App"
+        var runtimeClasses = configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+        from runtimeClasses
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        archiveFileName.set("s3.jar")
+    }
+}
 
-//rootProject.tasks.release.dependsOn(dockerPush)
+def os = DefaultNativePlatform.getCurrentOperatingSystem()
+def executor = os.isWindows() ? Arrays.asList("cmd", "/c") : Arrays.asList("sh", "-c")
+
+task dockerBuild(type: Exec, dependsOn: fatJar) {
+    doFirst {
+        var cmd = new ArrayList(executor)
+        cmd.add("docker build -t luofuxiang/local-s3:latest -t luofuxiang/local-s3:${project.version} .")
+        commandLine(cmd)
+    }
+}
+
+task dockerPush(type: Exec, dependsOn: dockerBuild) {
+    doFirst {
+        var cmd = new ArrayList(executor)
+        cmd.add("docker push luofuxiang/local-s3:${project.version}")
+        //cmd.add("&& docker push ${DOCKER_HUB_USERNAME}/local-s3:latest")
+        commandLine(cmd)
+    }
+}
+
+rootProject.tasks.release.dependsOn(dockerPush)
