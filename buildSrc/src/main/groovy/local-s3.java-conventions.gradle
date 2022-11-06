@@ -32,7 +32,7 @@ repositories {
 
 }
 
-project.group = 'com.robothy'
+project.group = 'io.github.robothy'
 
 // Load version
 ext {

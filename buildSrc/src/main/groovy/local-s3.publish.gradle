@@ -17,6 +17,31 @@ publishing {
             groupId = group
             artifactId = project.name
             from components.java
+
+            pom {
+                name = "LocalS3"
+                description 'An AmazonS3 service implementation.'
+
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = 'robothy'
+                        name = "Fuxiang Luo"
+                        email = "robothyluo@gmail.com"
+                    }
+                }
+
+                scm {
+                    url = "https://github.com/Robothy/local-s3"
+                }
+
+            }
         }
     }
 
