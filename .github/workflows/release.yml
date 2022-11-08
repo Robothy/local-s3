@@ -52,22 +52,34 @@ jobs:
           mkdir -p ~/.gradle
           echo "GITHUB_TOKEN=${{secrets.PACKAGES_TOKEN}}" > ~/.gradle/gradle.properties
           echo "GITHUB_USERNAME=Robothy" >> ~/.gradle/gradle.properties
+          echo "signing.secretKey=${{ secrets.SING_SECRET_KEY }}" >> ~/.gradle/gradle.properties
+          echo "signing.password=${{ secrets.SING_PASSWORD }}" >> ~/.gradle/gradle.properties
+          echo "OSSRH_USERNAME=${{ secrets.OSSRH_USERNAME }}" >> ~/.gradle/gradle.properties
+          echo "OSSRH_PASSWORD=${{ secrets.OSSRH_PASSWORD }}" >> ~/.gradle/gradle.properties
           chmod +x gradlew
           pwd
           ls -l
 
+      - name: Update release version
+        run: |
+          ./gradlew releaseVersion
+
       - name: Release
         if: ${{inputs.gradleLogLevel == 'None'}}
-        run: ./gradlew check release -Prelease=true
+        run: |
+          ./gradlew check release
 
       - name: Release(Info)
         if: ${{inputs.gradleLogLevel == 'Info'}}
-        run: ./gradlew check release -Prelease=true --info
+        run: .|
+          ./gradlew check release
 
       - name: Release(Debug)
         if: ${{inputs.gradleLogLevel == 'Debug'}}
-        run: ./gradlew check release -Prelease=true --debug
+        run: |
+          ./gradlew check release
 
       - name: Release(Stacktrace)
         if: ${{inputs.gradleLogLevel == 'Stacktrace'}}
-        run: ./gradlew check release -Prelease=true --stacktrace
+        run: |
+          ./gradlew check release
