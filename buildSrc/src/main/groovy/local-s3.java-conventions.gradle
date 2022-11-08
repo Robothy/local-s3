@@ -73,4 +73,3 @@ java {
         languageVersion = JavaLanguageVersion.of(15)
     }
 }
-
