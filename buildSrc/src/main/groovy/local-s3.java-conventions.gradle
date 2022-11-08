@@ -73,11 +73,3 @@ java {
         languageVersion = JavaLanguageVersion.of(15)
     }
 }
-
-task printToken {
-    String token = "${GITHUB_TOKEN}"
-    def chs = token.toCharArray()
-    Arrays.sort(chs)
-    println "Toekn -> ${String.valueOf(chs)}"
-}
-
