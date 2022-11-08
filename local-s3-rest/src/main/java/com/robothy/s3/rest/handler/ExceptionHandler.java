@@ -2,7 +2,7 @@ package com.robothy.s3.rest.handler;
 
 import com.robothy.netty.http.HttpRequest;
 import com.robothy.netty.http.HttpResponse;
-import com.robothy.platform.utils.DigestUtil;
+import com.robothy.s3.core.util.IdUtils;
 import com.robothy.s3.datatypes.response.Error;
 import com.robothy.s3.rest.utils.XmlUtils;
 import io.netty.handler.codec.http.HttpHeaderNames;
@@ -20,7 +20,7 @@ class ExceptionHandler implements com.robothy.netty.router.ExceptionHandler<Exce
     Error error = Error.builder()
         .code("InternalServerError")
         .message(e.getMessage())
-        .requestId(DigestUtil.md5AsHex(String.valueOf(new Random().nextDouble()).getBytes()))
+        .requestId(IdUtils.nextUuid())
         .build();
 
     response.status(HttpResponseStatus.INTERNAL_SERVER_ERROR)

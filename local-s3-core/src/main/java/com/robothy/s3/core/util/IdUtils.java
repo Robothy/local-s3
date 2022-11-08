@@ -1,5 +1,7 @@
 package com.robothy.s3.core.util;
 
+import java.util.UUID;
+
 public class IdUtils {
 
   private final static long S4_EPOCH = 1645837713L;
@@ -26,8 +28,19 @@ public class IdUtils {
 
   private static final IdUtils GENERATOR = new IdUtils(0, 0);
 
+  /**
+   * Snow flake ID generator.
+   */
   public static IdUtils defaultGenerator() {
     return GENERATOR;
+  }
+
+  /**
+   * Generate an UUID.
+   * @return an UUID.
+   */
+  public static String nextUuid() {
+    return UUID.randomUUID().toString();
   }
 
   public IdUtils(long datacenterId, long workerId) {

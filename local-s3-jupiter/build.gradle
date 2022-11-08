@@ -9,7 +9,7 @@ dependencies {
     implementation("com.amazonaws:aws-java-sdk:${libVersion['com.amazonaws.aws-java-sdk']}")
     implementation "org.apache.commons:commons-io:${libVersion['org.apache.commons.commons-io']}"
     implementation "org.apache.commons:commons-lang3:${libVersion['org.apache.commons.commons-lang3']}"
-    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
+    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${libVersion['com.fasterxml.jackson.dataformat.jackson-dataformat-xml']}"
     implementation "org.junit.jupiter:junit-jupiter:${libVersion['org.junit.jupiter.junit-jupiter']}"
 }
 

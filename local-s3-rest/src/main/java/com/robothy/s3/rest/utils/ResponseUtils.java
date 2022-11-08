@@ -30,7 +30,7 @@ public class ResponseUtils {
    * @param response the response to add 'x-amz-request-id' header.
    */
   public static void addAmzRequestId(HttpResponse response) {
-    response.putHeader(AmzHeaderNames.X_AMZ_REQUEST_ID, IdUtils.defaultGenerator().nextStrId());
+    response.putHeader(AmzHeaderNames.X_AMZ_REQUEST_ID, IdUtils.nextUuid());
   }
 
   /**

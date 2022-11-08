@@ -7,7 +7,7 @@ plugins {
 
 dependencies {
     implementation(project(":local-s3-rest"))
-    runtimeOnly "ch.qos.logback:logback-classic"
+    runtimeOnly "ch.qos.logback:logback-classic:${libVersion['ch.qos.logback.logback-classic']}"
 }
 
 task fatJar(type: Jar, dependsOn: classes) {
