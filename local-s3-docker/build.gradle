@@ -35,7 +35,7 @@ task dockerPush(type: Exec, dependsOn: dockerBuild) {
     doFirst {
         var cmd = new ArrayList(executor)
         cmd.add("docker push luofuxiang/local-s3:${project.version}")
-        //cmd.add("&& docker push ${DOCKER_HUB_USERNAME}/local-s3:latest")
+        cmd.add("&& docker push luofuxiang/local-s3:latest")
         commandLine(cmd)
     }
 }

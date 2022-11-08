@@ -7,13 +7,6 @@ repositories {
     mavenLocal()
     mavenCentral()
     jcenter()
-    maven {
-        url 'https://maven.pkg.github.com/robothy/netty-http-router'
-        credentials {
-            username = "${GITHUB_USERNAME}"
-            password = "${GITHUB_TOKEN}"
-        }
-    }
 
     maven {
         url 'https://maven.pkg.github.com/robothy-platform/maven'
@@ -32,7 +25,7 @@ repositories {
 
 }
 
-project.group = 'com.robothy'
+project.group = 'io.github.robothy'
 
 // Load version
 ext {
