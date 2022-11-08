@@ -1,6 +1,7 @@
 # LocalS3
 
-[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/Robothy/local-s3?display_name=tag&color=blueviolet)](https://github.com/Robothy?tab=packages&repo_name=local-s3)
+[![Apache 2.0 License](https://img.shields.io/badge/license-Apache%202.0-green.svg)](https://github.com/robothy/local-s3/blob/main/LICENSE)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.robothy/local-s3-rest.svg)](https://search.maven.org/artifact/io.github.robothy/local-s3-rest/)
 [![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?logo=docker&logoColor=white)](https://hub.docker.com/r/luofuxiang/local-s3)
 
 
@@ -21,7 +22,7 @@ Developers could integrate LocalS3 into their own Java applications or testing f
 
 ```xml
 <dependency>
-    <groupId>com.robothy</groupId>
+    <groupId>io.github.robothy</groupId>
     <artifactId>local-s3-rest</artifactId>
 </dependency>
 ```
@@ -65,7 +66,7 @@ LocalS3 for Junit5 exports a Java annotation `@LocalS3` helps you easily integra
 
 ```xml
 <dependency>
-    <groupId>com.robothy</groupId>
+    <groupId>io.github.robothy</groupId>
     <artifactId>local-s3-jupiter</artifactId>
     <scope>test</scope>
 </dependency>
