@@ -4,8 +4,8 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.robothy.netty.http.HttpRequest;
 import com.robothy.netty.http.HttpRequestHandler;
 import com.robothy.netty.http.HttpResponse;
-import com.robothy.platform.utils.DigestUtil;
 import com.robothy.s3.core.service.BucketService;
+import com.robothy.s3.core.util.IdUtils;
 import com.robothy.s3.datatypes.request.CreateBucketConfiguration;
 import com.robothy.s3.datatypes.response.CreateBucketResult;
 import com.robothy.s3.rest.assertions.RequestAssertions;
@@ -39,7 +39,7 @@ class CreateBucketController implements HttpRequestHandler {
     String bucketName = RequestAssertions.assertBucketNameProvided(request);
     bucketService.createBucket(bucketName);
     CreateBucketResult createBucketResult = CreateBucketResult.builder()
-        .bucketArn(DigestUtil.md5AsHex(bucketName.getBytes()))
+        .bucketArn(IdUtils.nextUuid())
         .build();
     response.putHeader("Location", "local")
         .putHeader(HttpHeaderNames.CONTENT_TYPE.toString(), HttpHeaderValues.APPLICATION_XML)

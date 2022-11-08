@@ -14,5 +14,5 @@ dependencies {
 
     testImplementation(project(":local-s3-core"))
 
-    testRuntimeOnly "ch.qos.logback:logback-core"
+    testRuntimeOnly "ch.qos.logback:logback-core:${libVersion['ch.qos.logback.logback-core']}"
 }
