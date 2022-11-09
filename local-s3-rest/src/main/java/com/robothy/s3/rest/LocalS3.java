@@ -85,6 +85,7 @@ public class LocalS3 {
         .sync();
     log.info("LocalS3 started.");
     this.serverSocketChannel = channelFuture.channel();
+    Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
   }
 
   private void registerServices() {

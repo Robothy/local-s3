@@ -4,7 +4,7 @@ import java.util.Properties;
 
 public interface LocalS3Bootstrap {
 
-  static LocalS3Bootstrap bootstrap(Mode mode, Properties config) {
+  static LocalS3Bootstrap bootstrap(LocalS3Mode mode, Properties config) {
     return switch (mode){
       case PERSISTENCE -> new FileSystemLocalS3Bootstrap(config);
       case IN_MEMORY -> new InMemoryLocalS3Bootstrap(config);

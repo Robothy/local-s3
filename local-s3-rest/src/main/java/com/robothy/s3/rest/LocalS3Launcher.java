@@ -1,7 +1,7 @@
 package com.robothy.s3.rest;
 
 import com.robothy.s3.rest.bootstrap.LocalS3Bootstrap;
-import com.robothy.s3.rest.bootstrap.Mode;
+import com.robothy.s3.rest.bootstrap.LocalS3Mode;
 import com.robothy.s3.rest.config.ConfigNames;
 import java.io.InputStream;
 import java.util.Locale;
@@ -12,15 +12,15 @@ import lombok.SneakyThrows;
 public class LocalS3Launcher {
 
   public static void main(String[] args) {
-    if (args.length == 0 || (!Mode.PERSISTENCE.name().equalsIgnoreCase(args[0])
-        && !Mode.IN_MEMORY.name().equalsIgnoreCase(args[0]))) {
+    if (args.length == 0 || (!LocalS3Mode.PERSISTENCE.name().equalsIgnoreCase(args[0])
+        && !LocalS3Mode.IN_MEMORY.name().equalsIgnoreCase(args[0]))) {
       System.out.println("Usage:    java -jar local-s3.jar [persist | in_memory]");
       System.exit(0);
     }
 
     System.setProperty(ConfigNames.PORT, "18080");
     Properties properties = loadProperties();
-    LocalS3Bootstrap.bootstrap(Mode.valueOf(args[0].toUpperCase(Locale.ROOT)), properties)
+    LocalS3Bootstrap.bootstrap(LocalS3Mode.valueOf(args[0].toUpperCase(Locale.ROOT)), properties)
         .start();
   }
 
