@@ -1,6 +1,6 @@
 package com.robothy.s3.rest.bootstrap;
 
-public enum Mode {
+public enum LocalS3Mode {
 
   /**
    * Persist the data.

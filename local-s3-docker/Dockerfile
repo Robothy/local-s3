@@ -8,4 +8,4 @@ VOLUME /data
 
 EXPOSE 80
 
-ENTRYPOINT java -jar s3.jar
+CMD exec java -jar s3.jar
