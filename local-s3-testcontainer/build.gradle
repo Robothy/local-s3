@@ -1,0 +1,13 @@
+plugins {
+    id 'local-s3.java-conventions'
+    id 'local-s3.publish'
+}
+
+
+dependencies {
+    implementation "org.testcontainers:testcontainers:${libVersion['org.testcontainers.testcontainers']}"
+}
+
+test {
+    useJUnitPlatform()
+}
