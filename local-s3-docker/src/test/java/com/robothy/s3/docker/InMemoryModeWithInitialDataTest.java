@@ -12,7 +12,7 @@ import com.amazonaws.services.s3.model.HeadBucketRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.robothy.s3.rest.LocalS3;
 import com.robothy.s3.rest.bootstrap.LocalS3Mode;
-import com.robothy.s3.testcontainer.LocalS3Container;
+import com.robothy.s3.testcontainers.LocalS3Container;
 import java.io.File;
 import java.io.IOException;
 import org.junit.jupiter.api.BeforeAll;

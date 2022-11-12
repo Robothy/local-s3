@@ -8,7 +8,7 @@ import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.S3Object;
-import com.robothy.s3.testcontainer.LocalS3Container;
+import com.robothy.s3.testcontainers.LocalS3Container;
 import java.io.File;
 import java.io.IOException;
 import org.junit.jupiter.api.AfterAll;
