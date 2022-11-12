@@ -18,9 +18,21 @@ class LocalFileSystemStorage implements Storage {
 
   private final Path directory;
 
+  @Deprecated
   public LocalFileSystemStorage(StorageOptions options) {
     this.directory = options.getDirectory();
     Objects.requireNonNull(directory);
+    PathUtils.createDirectoryIfNotExit(directory);
+  }
+
+  /**
+   * Construct a {@linkplain LocalFileSystemStorage} instance.
+   *
+   * @param dataPath the path is where data stores in.
+   */
+  public LocalFileSystemStorage(Path dataPath) {
+    Objects.requireNonNull(dataPath);
+    this.directory = dataPath;
     PathUtils.createDirectoryIfNotExit(directory);
   }
 
@@ -64,8 +76,13 @@ class LocalFileSystemStorage implements Storage {
     return id;
   }
 
+  @Override
+  public boolean isExist(Long id) {
+    return Files.exists(Paths.get(directory.toString(), String.valueOf(id)));
+  }
+
   private void ensureExists(Long id) {
-    if (!Files.exists(Paths.get(directory.toString(), String.valueOf(id)))) {
+    if (!isExist(id)) {
       throw new IllegalArgumentException("Object id='" + id + "' not exist.");
     }
   }

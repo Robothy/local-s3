@@ -9,11 +9,7 @@ class InMemoryStorageTest {
   @Test
   void test() {
     int _2KB = 2 * 1024;
-    StorageOptions options = StorageOptions.builder()
-        .inMemory(true)
-        .maxTotalSize(_2KB)
-        .build();
-    InMemoryStorage storage = new InMemoryStorage(options);
+    InMemoryStorage storage = new InMemoryStorage(_2KB);
     assertThrows(TotalSizeExceedException.class, () -> storage.put(new byte[_2KB + 1]));
     Long id = storage.put(new byte[_2KB]);
     assertNotNull(id);

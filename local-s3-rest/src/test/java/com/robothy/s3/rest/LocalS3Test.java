@@ -1,6 +1,5 @@
 package com.robothy.s3.rest;
 
-import static org.junit.jupiter.api.Assertions.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,7 +18,7 @@ class LocalS3Test {
     Path tempDirectory = Files.createTempDirectory("local-s3");
     localS3 = LocalS3.builder()
         .port(19090)
-        .dataDirectory(tempDirectory)
+        .dataPath(tempDirectory.toAbsolutePath().toString())
         .build();
     localS3.start();
     localS3.shutdown();

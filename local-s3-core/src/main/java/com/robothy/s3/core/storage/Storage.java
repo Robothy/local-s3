@@ -2,15 +2,62 @@ package com.robothy.s3.core.storage;
 
 import com.robothy.s3.core.util.IdUtils;
 import java.io.InputStream;
+import java.nio.file.Path;
 
 /**
  * Key-Value based storage abstraction.
  */
 public interface Storage {
 
-  static Storage create(StorageOptions options) {
-    return options.isInMemory() ? new InMemoryStorage(options)
-        : new LocalFileSystemStorage(options);
+  /**
+   * Create an {@linkplain InMemoryStorage} without total size limitation.
+   *
+   * @return a {@linkplain Storage} instance.
+   */
+  static Storage createInMemory() {
+    return new InMemoryStorage();
+  }
+
+  /**
+   * Create an {@linkplain InMemoryStorage} instance with max total size limit.
+   *
+   * @param maxTotalSize max total size.
+   * @return a {@linkplain Storage} instance.
+   */
+  static Storage createInMemory(int maxTotalSize) {
+    return new InMemoryStorage(maxTotalSize);
+  }
+
+  /**
+   * Create a persistent storage with a specified path. The path
+   * will be created if not exists.
+   *
+   * @param path where data stores in.
+   * @return a {@linkplain Storage} instance.
+   */
+  static Storage createPersistent(Path path) {
+    return new LocalFileSystemStorage(path);
+  }
+
+  /**
+   * Create a {@linkplain LayeredStorage} instance.
+   *
+   * @param frontend the fronted storage of the created instance.
+   * @param backend the backend storage of the created instance.
+   * @return a new {@linkplain LayeredStorage} instance.
+   */
+  static Storage createLayered(Storage frontend, Storage backend) {
+    return new LayeredStorage(frontend, backend);
+  }
+
+  /**
+   * Create a {@linkplain CopyOnAccessStorage} instance.
+   *
+   * @param base the base storage of the {@linkplain CopyOnAccessStorage}.
+   * @return a {@linkplain CopyOnAccessStorage} instance.
+   */
+  static Storage createCopyOnAccess(Storage base) {
+    return new CopyOnAccessStorage(base);
   }
 
   /**
@@ -70,5 +117,13 @@ public interface Storage {
    * @return deleted Object ID.
    */
   Long delete(Long id);
+
+  /**
+   * Is the object with specified ID exists.
+   *
+   * @param id object ID.
+   * @return {@code true} if the ID exists; otherwise {@code false}.
+   */
+  boolean isExist(Long id);
 
 }

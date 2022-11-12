@@ -1,6 +1,9 @@
+package com.robothy.s3.docker;
+
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import com.amazonaws.ClientConfiguration;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
@@ -39,6 +42,7 @@ public class PersistenceModeTest {
     assertTrue(container.isRunning());
     AmazonS3 s3 = AmazonS3ClientBuilder.standard()
         .enablePathStyleAccess()
+        .withClientConfiguration(new ClientConfiguration().withSocketTimeout(1000).withConnectionTimeout(1000))
         .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(
             "http://localhost:" + container.getPort(), "local"
         )).build();
@@ -54,9 +58,9 @@ public class PersistenceModeTest {
     assertTrue(container.isRunning());
     AmazonS3 s3 = AmazonS3ClientBuilder.standard()
         .enablePathStyleAccess()
-        .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(
-            "http://localhost:" + container.getPort(), "local"
-        )).build();
+        .withClientConfiguration(new ClientConfiguration().withSocketTimeout(1000).withConnectionTimeout(1000))
+        .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration("http://localhost:" + container.getPort(), "local"))
+        .build();
     String bucket = "my-bucket";
     S3Object object = s3.getObject(bucket, "a.txt");
     assertEquals("Hello World", new String(object.getObjectContent().readAllBytes()));

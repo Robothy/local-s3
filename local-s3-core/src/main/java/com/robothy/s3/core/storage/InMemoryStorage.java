@@ -18,15 +18,22 @@ class InMemoryStorage implements Storage {
 
   private final AtomicLong totalSize = new AtomicLong(0);
 
-  private final StorageOptions options;
+  private final AtomicLong maxTotalSize = new AtomicLong(Long.MAX_VALUE);
 
   /**
-   * Construct an instance with options.
+   * Create an {@linkplain InMemoryStorage} instance with total size limitation.
    *
-   * @param options options.
+   * @param maxTotalSize max total size.
    */
-  public InMemoryStorage(StorageOptions options) {
-    this.options = options;
+  InMemoryStorage(long maxTotalSize) {
+    this.maxTotalSize.set(maxTotalSize);
+  }
+
+  /**
+   * Create an {@linkplain InMemoryStorage} instance without total size limitation.
+   */
+  InMemoryStorage() {
+
   }
 
   @Override
@@ -66,15 +73,20 @@ class InMemoryStorage implements Storage {
     return id;
   }
 
+  @Override
+  public boolean isExist(Long id) {
+    return store.containsKey(id);
+  }
+
   private void ensureObjectExist(Long id) {
-    if (!store.containsKey(id)) {
-      throw new IllegalArgumentException("Object id='" + id + "' not exist.");
+    if (!isExist(id)) {
+      throw new IllegalArgumentException("Object id='" + id + "' not exists.");
     }
   }
 
   private void ensureNotExceedTotalSize(int incrementalSize) {
-    if (totalSize.get() + incrementalSize > options.getMaxTotalSize()) {
-      throw new TotalSizeExceedException(options.getMaxTotalSize(), totalSize.get() + incrementalSize);
+    if (totalSize.get() + incrementalSize > maxTotalSize.get()) {
+      throw new TotalSizeExceedException(maxTotalSize.get(), totalSize.get() + incrementalSize);
     }
   }
 

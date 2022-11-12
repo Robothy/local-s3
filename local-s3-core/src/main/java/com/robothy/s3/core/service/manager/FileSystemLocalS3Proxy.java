@@ -22,8 +22,6 @@ import java.util.Objects;
 
 public class FileSystemLocalS3Proxy implements LocalS3Manager {
 
-  private static final String STORAGE_DIRECTORY = ".storage";
-
   private final LocalS3Metadata s3Metadata;
 
   private final MetadataStore<BucketMetadata> bucketMetaStore;
@@ -31,10 +29,10 @@ public class FileSystemLocalS3Proxy implements LocalS3Manager {
   private final Storage storage;
 
   FileSystemLocalS3Proxy(Path dataDirectory) {
+    Objects.requireNonNull(dataDirectory, "Data directory is required to create a persistent LocalS3 service.");
     this.bucketMetaStore = FileSystemBucketMetadataStore.create(dataDirectory);
     this.s3Metadata = FileSystemS3MetadataLoader.create().load(dataDirectory);
-    this.storage = Storage.create(StorageOptions.builder().inMemory(false)
-        .directory(Paths.get(dataDirectory.toAbsolutePath().toString(), STORAGE_DIRECTORY)).build());
+    this.storage = Storage.createPersistent(Paths.get(dataDirectory.toAbsolutePath().toString(), STORAGE_DIRECTORY));
   }
 
   @Override

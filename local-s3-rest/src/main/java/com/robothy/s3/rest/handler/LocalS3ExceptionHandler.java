@@ -11,6 +11,8 @@ import com.robothy.s3.core.exception.S3ErrorCode;
 import com.robothy.s3.core.util.IdUtils;
 import com.robothy.s3.datatypes.response.Error;
 import com.robothy.s3.rest.service.ServiceFactory;
+import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import java.util.Optional;
 
@@ -32,6 +34,7 @@ class LocalS3ExceptionHandler implements ExceptionHandler<LocalS3Exception> {
 
     try {
       response.status(HttpResponseStatus.valueOf(s3ErrorCode.httpStatus()))
+          .putHeader(HttpHeaderNames.CONNECTION.toString(), HttpHeaderValues.CLOSE)
           .write(xmlMapper.writeValueAsString(error));
     } catch (JsonProcessingException ex) {
       throw new IllegalStateException(ex);

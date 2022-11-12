@@ -23,9 +23,11 @@ class StorageTest {
   void testCreate() throws IOException {
     Path storage = Files.createTempDirectory("storage");
     storage.toFile().deleteOnExit();
-    assertInstanceOf(InMemoryStorage.class, Storage.create(StorageOptions.builder().build()));
-    assertInstanceOf(LocalFileSystemStorage.class,
-        Storage.create(StorageOptions.builder().directory(storage).inMemory(false).build()));
+    assertInstanceOf(InMemoryStorage.class, Storage.createInMemory());
+    assertInstanceOf(InMemoryStorage.class, Storage.createInMemory(100));
+    assertInstanceOf(LocalFileSystemStorage.class, Storage.createPersistent(storage));
+    assertInstanceOf(LayeredStorage.class, Storage.createLayered(Storage.createInMemory(), Storage.createInMemory()));
+    assertInstanceOf(CopyOnAccessStorage.class, Storage.createCopyOnAccess(Storage.createInMemory()));
   }
 
   @ParameterizedTest
@@ -51,10 +53,12 @@ class StorageTest {
 
   static Stream<Arguments> testCases() throws IOException {
     Path storage = Files.createTempDirectory("storage");
-    return Stream.of(arguments(new InMemoryStorage(StorageOptions.builder().build())),
-        arguments(new LocalFileSystemStorage(StorageOptions.builder()
-            .directory(storage)
-            .build())));
+    return Stream.of(
+        arguments(Storage.createPersistent(storage)),
+        arguments(Storage.createPersistent(storage)),
+        arguments(Storage.createInMemory(), Storage.createInMemory()),
+        arguments(Storage.createCopyOnAccess(Storage.createInMemory()))
+    );
   }
 
 }

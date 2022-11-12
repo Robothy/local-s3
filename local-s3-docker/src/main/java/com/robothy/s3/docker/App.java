@@ -23,14 +23,14 @@ public class App {
       System.exit(1);
     }
 
-    log.info("Run LocalS3 in {} mode.", mode);
+    log.info("Starting LocalS3 in {} mode.", mode);
 
-    LocalS3.Builder builder = LocalS3.builder().port(80);
-    if (LocalS3Mode.valueOf(mode.toUpperCase()) == LocalS3Mode.PERSISTENCE) {
-      builder.dataDirectory(Paths.get("/data"));
-    }
-
-    builder.build().start();
+    LocalS3.builder()
+        .port(80)
+        .mode(LocalS3Mode.valueOf(mode.toUpperCase()))
+        .dataPath("/data")
+        .build()
+        .start();
   }
 
 }

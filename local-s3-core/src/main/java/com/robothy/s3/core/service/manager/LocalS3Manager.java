@@ -10,12 +10,21 @@ import java.nio.file.Path;
 public interface LocalS3Manager {
 
   /**
+   * Relative path of storage.
+   */
+   String STORAGE_DIRECTORY = ".storage";
+
+  /**
    * Create an in-memory implementation of {@linkplain LocalS3Manager}.
    *
    * @return an instance of in-memory implementation.
    */
   static LocalS3Manager createInMemoryS3Manager() {
-    return new InMemoryLocalS3Manager(null);
+    return new InMemoryLocalS3Manager(null, false);
+  }
+
+  static LocalS3Manager createInMemoryS3Manager(Path dataDirectory, boolean enabledInitialDataCache) {
+    return new InMemoryLocalS3Manager(dataDirectory, enabledInitialDataCache);
   }
 
   /**
@@ -25,7 +34,6 @@ public interface LocalS3Manager {
    */
   static LocalS3Manager createFileSystemS3Manager(Path dataDirectory) {
     return new FileSystemLocalS3Proxy(dataDirectory);
-    //return new FileSystemLocalS3Manager(dataDirectory);
   }
 
   /**
