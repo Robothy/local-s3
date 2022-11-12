@@ -8,7 +8,7 @@ plugins {
 dependencies {
     implementation(project(":local-s3-rest"))
     runtimeOnly "ch.qos.logback:logback-classic:${libVersion['ch.qos.logback.logback-classic']}"
-    testImplementation(project(":local-s3-testcontainer"))
+    testImplementation(project(":local-s3-testcontainers"))
     testImplementation("org.testcontainers:testcontainers:${libVersion['org.testcontainers.testcontainers']}")
     testImplementation "org.testcontainers:junit-jupiter:${libVersion['org.testcontainers.junit-jupiter']}"
     testImplementation "software.amazon.awssdk:s3:${libVersion['software.amazon.awssdk.s3']}"

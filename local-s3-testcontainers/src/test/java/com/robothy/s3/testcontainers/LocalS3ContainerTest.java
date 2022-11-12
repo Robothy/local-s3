@@ -1,4 +1,4 @@
-package com.robothy.s3.testcontainer;
+package com.robothy.s3.testcontainers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
