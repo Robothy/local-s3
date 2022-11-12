@@ -1,4 +1,4 @@
-package com.robothy.s3.testcontainer;
+package com.robothy.s3.testcontainers;
 
 import java.io.IOException;
 import java.net.ServerSocket;
