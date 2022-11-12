@@ -9,6 +9,7 @@ import com.robothy.netty.initializer.HttpServerInitializer;
 import com.robothy.s3.core.service.BucketService;
 import com.robothy.s3.core.service.ObjectService;
 import com.robothy.s3.core.service.manager.LocalS3Manager;
+import com.robothy.s3.rest.bootstrap.LocalS3Mode;
 import com.robothy.s3.rest.handler.LocalS3RouterFactory;
 import com.robothy.s3.rest.service.ServiceFactory;
 import io.netty.bootstrap.ServerBootstrap;
@@ -20,15 +21,20 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.concurrent.EventExecutorGroup;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.net.ServerSocket;
 import java.nio.file.Path;
-import java.util.Objects;
+import java.nio.file.Paths;
 import javax.xml.stream.XMLInputFactory;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.reflect.FieldUtils;
 
 /**
- * local-s3 service starter.
+ * LocalS3 service launcher.
  */
 @Slf4j
 public class LocalS3 {
@@ -38,7 +44,11 @@ public class LocalS3 {
   private int port = 8080;
 
   @Getter
-  private Path dataDirectory;
+  private Path dataPath;
+
+  private LocalS3Mode mode = LocalS3Mode.IN_MEMORY;
+
+  private boolean initialDataCacheEnabled = true;
 
   private int nettyParentEventGroupThreadNum = 1;
 
@@ -59,7 +69,7 @@ public class LocalS3 {
   /**
    * Create a {@linkplain Builder}.
    *
-   * @return a new {@linkplain Builder} instacne.
+   * @return a new {@linkplain Builder} instance.
    */
   public static Builder builder() {
     return new Builder();
@@ -89,9 +99,18 @@ public class LocalS3 {
   }
 
   private void registerServices() {
-    LocalS3Manager manager = Objects.nonNull(dataDirectory) ?
-        LocalS3Manager.createFileSystemS3Manager(dataDirectory) :
-        LocalS3Manager.createInMemoryS3Manager();
+    if (mode == LocalS3Mode.IN_MEMORY) {
+      log.info("Created in-memory LocalS3 manager.");
+      LocalS3Manager.createInMemoryS3Manager(dataPath, initialDataCacheEnabled);
+    } else {
+      log.info("Created file system LocalS3 manager.");
+      LocalS3Manager.createFileSystemS3Manager(dataPath);
+    }
+
+    LocalS3Manager manager = mode == LocalS3Mode.IN_MEMORY ?
+        LocalS3Manager.createInMemoryS3Manager(dataPath, initialDataCacheEnabled) :
+        LocalS3Manager.createFileSystemS3Manager(dataPath);
+
     BucketService bucketService = manager.bucketService();
     ObjectService objectService = manager.objectService();
     ServiceFactory.register(BucketService.class, () -> bucketService);
@@ -129,28 +148,71 @@ public class LocalS3 {
     private final LocalS3 propHolder = new LocalS3();
 
     /**
-     * Set the port that local-s3 service listen to.
-     * Default port is 8080.
+     * Set the port that local-s3 service listen to. Default port is 8080.
+     * Set the value to {@code -1} if you want to assign a random port.
      *
      * @param port customized port.
      * @return builder.
      */
     public Builder port(int port) {
-      propHolder.port = port;
+      if (port < 0) {
+        propHolder.port = findFreeTcpPort();
+      } else {
+        propHolder.port = port;
+      }
       return this;
     }
 
     /**
-     * Set the local-s3 data directory. The value is {@code null} by default,
-     * while data is stored in Java Heap. If the path is specified, s3-local
-     * service load data from and store data into this directory.
+     * Set the LocalS3 data directory. The default value is {@code null},
+     * while data is stored in Java Heap.
+     *
+     * <p>
+     *   If the path is specified and the {@code mode} is {@code PERSISTENCE},
+     *   then the LocalS3 service load data from and store data in this directory.
+     *
+     * <p>
+     *   If the data directory is set and LocalS3 runs in {@code IN_MEMORY} mode,
+     *   then data from that path will be loaded as initial data. All changes are
+     *   only available in the memory, i.e. won't write back to the specified path.
+     *
+     *   Besides, LocalS3 will cache accessed data from this path; which could reduce
+     *   disk I/O when start LocalS3 in {@code IN_MEMORY} mode with the same initial
+     *   data for multi-times.
      *
      *
-     * @param dataDirectory data directory.
+     * @param dataPath data path.
      * @return builder.
      */
-    public Builder dataDirectory(Path dataDirectory) {
-      propHolder.dataDirectory = dataDirectory;
+    public Builder dataPath(String dataPath) {
+      this.propHolder.dataPath = dataPath == null ? null : Paths.get(dataPath);
+      return this;
+    }
+
+    /**
+     * Set LocalS3 service running mode. Default value is {@code PERSISTENCE}.
+     *
+     * @param mode LocalS3 service running mode.
+     * @return builder.
+     */
+    public Builder mode(LocalS3Mode mode) {
+      propHolder.mode = mode;
+      return this;
+    }
+
+    /**
+     * This option only available when running LocalS3 in {@code IN_MEMORY} mode
+     * with initial data. If initial data cache is enabled, LocalS3 caches the
+     * accessed initial data in memory. This could reduce dist I/O when running
+     * tests with initial data in the same path.
+     *
+     * <p> The default value is {@code true}.
+     *
+     * @param enabled is the initial data cache enabled.
+     * @return if the initial data cache enabled.
+     */
+    public Builder initialDataCacheEnabled(boolean enabled) {
+      this.propHolder.initialDataCacheEnabled = enabled;
       return this;
     }
 
@@ -197,12 +259,31 @@ public class LocalS3 {
      */
     public LocalS3 build() {
       LocalS3 localS3 = new LocalS3();
-      localS3.port = propHolder.port;
-      localS3.dataDirectory = propHolder.dataDirectory;
-      localS3.nettyParentEventGroupThreadNum = propHolder.nettyParentEventGroupThreadNum;
-      localS3.nettyChildEventGroupThreadNum = propHolder.nettyChildEventGroupThreadNum;
-      localS3.s3ExecutorThreadNum = propHolder.s3ExecutorThreadNum;
+      for (Field field : FieldUtils.getAllFields(LocalS3.class)) {
+        if (Modifier.isStatic(field.getModifiers()) || Modifier.isFinal(field.getModifiers())) {
+          continue;
+        }
+
+        try {
+          field.setAccessible(true);
+          Object value = FieldUtils.readField(field, propHolder);
+          FieldUtils.writeField(field, localS3, value);
+          log.debug(field.getName() + ": " + value);
+        } catch (IllegalAccessException e) {
+          throw new IllegalStateException(e);
+        }
+      }
       return localS3;
+    }
+
+    private int findFreeTcpPort() {
+      int freePort;
+      try (ServerSocket serverSocket = new ServerSocket(0)) {
+        freePort = serverSocket.getLocalPort();
+      } catch (IOException e) {
+        throw new IllegalStateException("TCP port is not available.");
+      }
+      return freePort;
     }
 
   }

@@ -1,22 +1,23 @@
-package com.robothy.s3.jupiter;
+package com.robothy.s3.jupiter.extensions;
 
+import com.robothy.s3.jupiter.LocalS3;
+import com.robothy.s3.jupiter.supplier.DataPathSupplier;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.net.ServerSocket;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Objects;
 import lombok.SneakyThrows;
-import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.platform.commons.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AbstractLocalS3Extension implements BeforeAllCallback, AfterAllCallback, BeforeEachCallback, AfterEachCallback {
+public class LocalS3Extension implements BeforeAllCallback, AfterAllCallback, BeforeEachCallback, AfterEachCallback {
 
   private static final Logger logger = LoggerFactory.getLogger(LocalS3Extension.class);
 
@@ -69,23 +70,28 @@ public class AbstractLocalS3Extension implements BeforeAllCallback, AfterAllCall
 
   @SneakyThrows
   private com.robothy.s3.rest.LocalS3 launch(LocalS3 s3Config) {
-    com.robothy.s3.rest.LocalS3 localS3;
     int port = s3Config.port();
     if (port == -1) {
       port = findFreeTcpPort();
     }
 
-    if (s3Config.inmemory()) {
-      localS3 = com.robothy.s3.rest.LocalS3.builder()
-          .port(port)
-          .build();
-    } else {
-      Path dataDir = Files.createTempDirectory("local-s3");
-      localS3 = com.robothy.s3.rest.LocalS3.builder()
-          .port(port)
-          .dataDirectory(dataDir)
-          .build();
+    String dataPath = s3Config.dataPath();
+    if (StringUtils.isBlank(dataPath) && s3Config.dataPathSupplier() != DataPathSupplier.class) {
+      try {
+        Constructor<? extends DataPathSupplier> constructor = s3Config.dataPathSupplier().getDeclaredConstructor();
+        DataPathSupplier dataPathSupplier = constructor.newInstance();
+        dataPath = dataPathSupplier.get();
+      } catch (NoSuchMethodException e) {
+        throw new IllegalArgumentException("You must define no-args constructor in " + s3Config.dataPathSupplier());
+      }
     }
+
+    com.robothy.s3.rest.LocalS3 localS3 = com.robothy.s3.rest.LocalS3.builder()
+        .port(port)
+        .dataPath(StringUtils.isBlank(dataPath) ? null : dataPath)
+        .mode(s3Config.mode())
+        .initialDataCacheEnabled(s3Config.initialDataCacheEnabled())
+        .build();
     localS3.start();
     logger.debug("LocalS3 endpoint http://localhost:" + port);
     return localS3;
@@ -93,12 +99,7 @@ public class AbstractLocalS3Extension implements BeforeAllCallback, AfterAllCall
 
   @SneakyThrows
   private void shutdown(com.robothy.s3.rest.LocalS3 localS3) {
-    Path dataDirectory = localS3.getDataDirectory();
     localS3.shutdown();
-
-    if (Objects.nonNull(dataDirectory)) {
-      FileUtils.deleteDirectory(dataDirectory.toFile());
-    }
   }
 
   private int findFreeTcpPort() {
@@ -110,4 +111,5 @@ public class AbstractLocalS3Extension implements BeforeAllCallback, AfterAllCall
     }
     return freePort;
   }
+
 }

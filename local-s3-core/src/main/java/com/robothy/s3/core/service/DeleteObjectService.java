@@ -86,7 +86,6 @@ public interface DeleteObjectService extends LocalS3MetadataApplicable, StorageA
     VersionedObjectMetadata versionedObjectMetadata = new VersionedObjectMetadata();
     versionedObjectMetadata.setDeleted(true);
     versionedObjectMetadata.setCreationDate(System.currentTimeMillis());
-    versionedObjectMetadata.setModificationDate(versionedObjectMetadata.getCreationDate());
     return versionedObjectMetadata;
   }
 

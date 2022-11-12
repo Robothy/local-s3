@@ -9,6 +9,7 @@ import java.util.Objects;
 import java.util.Properties;
 import lombok.SneakyThrows;
 
+@Deprecated
 public class LocalS3Launcher {
 
   public static void main(String[] args) {
