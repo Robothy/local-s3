@@ -48,15 +48,31 @@ localS3.stop();
 
 #### Run LocalS3 in Persistence mode
 
-When a data directory is specified, LocalS3 tries to load data from and store all data into the path.
-
+When LocalS3 runs in persistence mode, a data path is required. LocalS3 loads data from and stores all data into 
+the specified path.
 
 ```java
 LocalS3 localS3 = LocalS3.builder()
     .port(19090)
-    .dataDirectory(Paths.get("C://local-s3"))
-    .build()
-    .start();
+    .mode(LocalS3Mode.PERSISTENCE)
+    .dataDirectory("C://local-s3")
+    .build();
+
+localS3.start();
+```
+
+#### Run LocalS3 in In-Memory mode with initial data.
+
+LocalS3 loads initial data from the specified path. Changes on such LocalS3 instance only modify the
+data in memory, not persist to the disk.
+
+```java
+LocalS3 localS3 = LocalS3.builder()
+    .port(-1) // assign a random port
+    .dataDirectory("/data")
+    .build();
+
+localS3.start();
 ```
 
 ### LocalS3 for Junit5
@@ -92,6 +108,55 @@ If `@LocalS3` is on a test class, the Junit5 extension will create a shared serv
 and shut it down in the "after all" callback.
 If `@LocalS3` is on a test method, the extension creates an exclusive service for the method and shut down the
 service in the "after each" callback.
+
+### Run LocalS3 in Docker
+
+You can run LocalS3 in Docker since it's image is published to [DockerHub](https://hub.docker.com/r/luofuxiang/local-s3).
+
+```shell
+docker run --name s3 -d -v C:\\local-s3:/data -p 8080:80 luofuxiang/local-s3
+```
+
+### LocalS3 test container
+
+LocalS3 provides a [testcontainers](https://www.testcontainers.org/) implementation. You can run LocalS3 in your tests 
+with testcontainers API.
+
+#### Dependency
+
+```xml
+<dependency>
+    <groupId>io.github.robothy</groupId>
+    <artifactId>local-s3-testcontainers</artifactId>
+</dependency>
+```
+
+#### Start LocalS3 with testcontainers
+
+```java
+@Testcontainers
+public class AppTest {
+
+  @Container
+  public LocalS3Container container = new LocalS3Container("latest")
+      .withMode(LocalS3Container.Mode.IN_MEMORY)
+      .withRandomHttpPort();
+  
+  @Test
+  void test() {
+    assertTrue(container.isRunning());
+    int port = container.getPort();
+    AmazonS3 s3 = AmazonS3ClientBuilder.standard()
+        .enablePathStyleAccess()
+        .withClientConfiguration(new ClientConfiguration().withSocketTimeout(1000).withConnectionTimeout(1000))
+        .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(
+            "http://localhost:" + port, "local"
+        )).build();
+    s3.createBucket("my-bucket");
+  }
+  
+}
+```
 
 ## Supported S3 APIs
 
