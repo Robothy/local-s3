@@ -23,9 +23,14 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 class CreateBucketController implements HttpRequestHandler {
 
-  BucketService bucketService = ServiceFactory.getInstance(BucketService.class);
+  BucketService bucketService;
 
-  XmlMapper xmlMapper = ServiceFactory.getInstance(XmlMapper.class);
+  XmlMapper xmlMapper;
+
+  CreateBucketController(ServiceFactory serviceFactory) {
+    this.bucketService = serviceFactory.getInstance(BucketService.class);
+    this.xmlMapper = serviceFactory.getInstance(XmlMapper.class);
+  }
 
   @Override
   public void handle(HttpRequest request, HttpResponse response) throws Exception {

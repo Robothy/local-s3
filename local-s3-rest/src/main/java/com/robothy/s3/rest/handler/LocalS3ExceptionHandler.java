@@ -21,7 +21,11 @@ import java.util.Optional;
  */
 class LocalS3ExceptionHandler implements ExceptionHandler<LocalS3Exception> {
 
-  private final XmlMapper xmlMapper = ServiceFactory.getInstance(XmlMapper.class);
+  private final XmlMapper xmlMapper;
+
+  LocalS3ExceptionHandler(ServiceFactory serviceFactory) {
+    this.xmlMapper = serviceFactory.getInstance(XmlMapper.class);
+  }
 
   @Override
   public void handle(LocalS3Exception e, HttpRequest request, HttpResponse response) {

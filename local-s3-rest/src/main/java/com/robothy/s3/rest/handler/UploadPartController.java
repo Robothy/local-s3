@@ -7,17 +7,10 @@ import com.robothy.s3.core.model.request.UploadPartOptions;
 import com.robothy.s3.core.service.ObjectService;
 import com.robothy.s3.core.service.UploadPartService;
 import com.robothy.s3.rest.assertions.RequestAssertions;
-import com.robothy.s3.rest.constants.AmzHeaderNames;
-import com.robothy.s3.rest.constants.AmzHeaderValues;
 import com.robothy.s3.rest.model.request.DecodedAmzRequestBody;
 import com.robothy.s3.rest.service.ServiceFactory;
-import com.robothy.s3.rest.utils.InputStreamUtils;
 import com.robothy.s3.rest.utils.RequestUtils;
 import com.robothy.s3.rest.utils.ResponseUtils;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufInputStream;
-import io.netty.handler.codec.http.HttpHeaderNames;
-import java.io.InputStream;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -26,7 +19,11 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 class UploadPartController implements HttpRequestHandler {
 
-  private final UploadPartService uploadPartService = ServiceFactory.getInstance(ObjectService.class);
+  private final UploadPartService uploadPartService;
+
+  UploadPartController(ServiceFactory serviceFactory) {
+    this.uploadPartService = serviceFactory.getInstance(ObjectService.class);
+  }
 
   @Override
   public void handle(HttpRequest request, HttpResponse response) throws Exception {

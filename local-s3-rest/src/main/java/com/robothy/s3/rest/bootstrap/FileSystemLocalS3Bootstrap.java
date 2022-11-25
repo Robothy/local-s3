@@ -47,7 +47,7 @@ class FileSystemLocalS3Bootstrap implements LocalS3Bootstrap {
     ChannelFuture channelFuture = serverBootstrap.group(parentGroup, childGroup)
         .handler(new LoggingHandler(LogLevel.DEBUG))
         .channel(NioServerSocketChannel.class)
-        .childHandler(new HttpServerInitializer(executorGroup, LocalS3RouterFactory.create()))
+        .childHandler(new HttpServerInitializer(executorGroup, LocalS3RouterFactory.create(null)))
         .bind(options.getPort())
         .sync();
     this.serverSocketChannel = channelFuture.channel();

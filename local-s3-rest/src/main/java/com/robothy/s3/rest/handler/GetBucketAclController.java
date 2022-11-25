@@ -18,9 +18,14 @@ import io.netty.handler.codec.http.HttpResponseStatus;
  */
 class GetBucketAclController implements HttpRequestHandler {
 
-  private final BucketAclService aclService = ServiceFactory.getInstance(BucketService.class);
+  private final BucketAclService aclService;
 
-  private final XmlMapper xmlMapper = ServiceFactory.getInstance(XmlMapper.class);
+  private final XmlMapper xmlMapper;
+
+  GetBucketAclController(ServiceFactory serviceFactory) {
+    this.aclService = serviceFactory.getInstance(BucketService.class);
+    this.xmlMapper = serviceFactory.getInstance(XmlMapper.class);
+  }
 
   @Override
   public void handle(HttpRequest request, HttpResponse response) throws Exception {

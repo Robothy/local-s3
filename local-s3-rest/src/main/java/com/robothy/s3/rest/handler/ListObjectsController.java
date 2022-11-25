@@ -26,9 +26,14 @@ import java.util.stream.Collectors;
  */
 class ListObjectsController implements HttpRequestHandler {
 
-  private final ListObjectsService listObjectsService = ServiceFactory.getInstance(ObjectService.class);
+  private final ListObjectsService listObjectsService;
 
-  private final XmlMapper xmlMapper = ServiceFactory.getInstance(XmlMapper.class);
+  private final XmlMapper xmlMapper;
+
+  public ListObjectsController(ServiceFactory serviceFactory) {
+    this.listObjectsService = serviceFactory.getInstance(ObjectService.class);
+    this.xmlMapper = serviceFactory.getInstance(XmlMapper.class);
+  }
 
   @Override
   public void handle(HttpRequest request, HttpResponse response) throws Exception {
