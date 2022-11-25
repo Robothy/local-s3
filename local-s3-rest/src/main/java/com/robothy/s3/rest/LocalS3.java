@@ -11,6 +11,7 @@ import com.robothy.s3.core.service.ObjectService;
 import com.robothy.s3.core.service.manager.LocalS3Manager;
 import com.robothy.s3.rest.bootstrap.LocalS3Mode;
 import com.robothy.s3.rest.handler.LocalS3RouterFactory;
+import com.robothy.s3.rest.service.DefaultServiceFactory;
 import com.robothy.s3.rest.service.ServiceFactory;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
@@ -80,17 +81,16 @@ public class LocalS3 {
    */
   @SneakyThrows
   public void start() {
-    registerServices();
+    ServiceFactory serviceFactory = createServiceFactory();
 
     this.parentGroup = new NioEventLoopGroup(nettyParentEventGroupThreadNum);
     this.childGroup = new NioEventLoopGroup(nettyChildEventGroupThreadNum);
     this.executorGroup = new DefaultEventLoopGroup(s3ExecutorThreadNum);
-
     ServerBootstrap serverBootstrap = new ServerBootstrap();
     ChannelFuture channelFuture = serverBootstrap.group(parentGroup, childGroup)
         .handler(new LoggingHandler(LogLevel.DEBUG))
         .channel(NioServerSocketChannel.class)
-        .childHandler(new HttpServerInitializer(executorGroup, LocalS3RouterFactory.create()))
+        .childHandler(new HttpServerInitializer(executorGroup, LocalS3RouterFactory.create(serviceFactory)))
         .bind(port)
         .sync();
     log.info("LocalS3 started.");
@@ -98,29 +98,29 @@ public class LocalS3 {
     Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
   }
 
-  private void registerServices() {
+  private ServiceFactory createServiceFactory() {
+
+    LocalS3Manager manager;
     if (mode == LocalS3Mode.IN_MEMORY) {
       log.info("Created in-memory LocalS3 manager.");
-      LocalS3Manager.createInMemoryS3Manager(dataPath, initialDataCacheEnabled);
+      manager = LocalS3Manager.createInMemoryS3Manager(dataPath, initialDataCacheEnabled);
     } else {
       log.info("Created file system LocalS3 manager.");
-      LocalS3Manager.createFileSystemS3Manager(dataPath);
+      manager = LocalS3Manager.createFileSystemS3Manager(dataPath);
     }
 
-    LocalS3Manager manager = mode == LocalS3Mode.IN_MEMORY ?
-        LocalS3Manager.createInMemoryS3Manager(dataPath, initialDataCacheEnabled) :
-        LocalS3Manager.createFileSystemS3Manager(dataPath);
-
+    ServiceFactory serviceFactory = new DefaultServiceFactory();
     BucketService bucketService = manager.bucketService();
     ObjectService objectService = manager.objectService();
-    ServiceFactory.register(BucketService.class, () -> bucketService);
-    ServiceFactory.register(ObjectService.class, () -> objectService);
+    serviceFactory.register(BucketService.class, () -> bucketService);
+    serviceFactory.register(ObjectService.class, () -> objectService);
 
     XMLInputFactory input = new WstxInputFactory();
     input.setProperty(XMLInputFactory.IS_NAMESPACE_AWARE, Boolean.FALSE);
     XmlMapper xmlMapper = new XmlMapper(new XmlFactory(input, new WstxOutputFactory()));
     xmlMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    ServiceFactory.register(XmlMapper.class, () -> xmlMapper);
+    serviceFactory.register(XmlMapper.class, () -> xmlMapper);
+    return serviceFactory;
   }
 
   /**

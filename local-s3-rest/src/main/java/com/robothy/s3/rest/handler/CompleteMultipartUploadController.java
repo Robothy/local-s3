@@ -8,7 +8,6 @@ import com.robothy.s3.core.model.answers.CompleteMultipartUploadAns;
 import com.robothy.s3.core.model.request.CompleteMultipartUploadPartOption;
 import com.robothy.s3.core.service.CompleteMultipartUploadService;
 import com.robothy.s3.core.service.ObjectService;
-import com.robothy.s3.core.util.JsonUtils;
 import com.robothy.s3.rest.assertions.RequestAssertions;
 import com.robothy.s3.rest.constants.AmzHeaderNames;
 import com.robothy.s3.rest.model.request.CompleteMultipartUpload;
@@ -26,9 +25,14 @@ import java.util.stream.Collectors;
  */
 class CompleteMultipartUploadController implements HttpRequestHandler {
 
-  private final CompleteMultipartUploadService uploadService = ServiceFactory.getInstance(ObjectService.class);
+  private final CompleteMultipartUploadService uploadService;
 
-  private final XmlMapper xmlMapper = ServiceFactory.getInstance(XmlMapper.class);
+  private final XmlMapper xmlMapper;
+
+  CompleteMultipartUploadController(ServiceFactory serviceFactory) {
+    this.uploadService = serviceFactory.getInstance(ObjectService.class);
+    this.xmlMapper = serviceFactory.getInstance(XmlMapper.class);
+  }
 
   @Override
   public void handle(HttpRequest request, HttpResponse response) throws Exception {

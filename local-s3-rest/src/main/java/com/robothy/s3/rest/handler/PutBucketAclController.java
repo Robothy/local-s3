@@ -22,9 +22,14 @@ import java.util.Optional;
  */
 class PutBucketAclController implements HttpRequestHandler {
 
-  private final BucketAclService aclService = ServiceFactory.getInstance(BucketService.class);
+  private final BucketAclService aclService;
 
-  private final XmlMapper xmlMapper = new XmlMapper();
+  private final XmlMapper xmlMapper;
+
+  PutBucketAclController(ServiceFactory serviceFactory) {
+    this.aclService = serviceFactory.getInstance(BucketService.class);
+    this.xmlMapper = serviceFactory.getInstance(XmlMapper.class);
+  }
 
   private static final Map<String, String> HEADER_PERMISSION_MAP = Map.of(
       "x-amz-grant-full-control", "FULL_CONTROL",

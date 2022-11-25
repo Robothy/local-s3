@@ -21,7 +21,11 @@ import io.netty.handler.codec.http.HttpResponseStatus;
  */
 class GetObjectController implements HttpRequestHandler {
 
-  private final ObjectService objectService = ServiceFactory.getInstance(ObjectService.class);
+  private final ObjectService objectService;
+
+  GetObjectController(ServiceFactory serviceFactory) {
+    this.objectService = serviceFactory.getInstance(ObjectService.class);
+  }
 
   @Override
   public void handle(HttpRequest request, HttpResponse response) throws Exception {

@@ -11,7 +11,6 @@ import com.robothy.s3.rest.service.ServiceFactory;
 import com.robothy.s3.rest.utils.ResponseUtils;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -19,9 +18,14 @@ import java.util.Map;
  */
 class GetBucketTaggingController implements HttpRequestHandler {
 
-  private final BucketService bucketService = ServiceFactory.getInstance(BucketService.class);
+  private final BucketService bucketService;
 
-  private final XmlMapper xmlMapper = ServiceFactory.getInstance(XmlMapper.class);
+  private final XmlMapper xmlMapper;
+
+  GetBucketTaggingController(ServiceFactory serviceFactory) {
+    this.bucketService = serviceFactory.getInstance(BucketService.class);
+    this.xmlMapper = serviceFactory.getInstance(XmlMapper.class);
+  }
 
   @Override
   public void handle(HttpRequest request, HttpResponse response) throws Exception {

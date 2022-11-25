@@ -19,22 +19,22 @@ import org.junit.jupiter.api.extension.ExtendWith;
  *
  * <p>Below example injects an {@code AmazonS3} instance to the parameter:
  *
- * <pre>
- *  &#064;LocalS3
+ * <pre>{@code
+ *  @LocalS3
  *  class AppTest {
- *    &#064;Test
+ *    @Test
  *    void test(AmazonS3 s3) {
  *      s3.createBucket("my-bucket");
  *    }
  *  }
- * </pre>
+ * }</pre>
  *
  *  Or resolve a {@linkplain LocalS3Endpoint}.
  *
- * <pre>
+ * <pre>{@code
  *  class AppTest {
- *    &#064;Test
- *    &#064;LocalS3
+ *    @Test
+ *    @LocalS3
  *    void test1(LocalS3Endpoint endpoint) {
  *      AmazonS3 client = AmazonS3ClientBuilder.standard()
  *        .enablePathStyleAccess()
@@ -42,9 +42,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
  *        .build();
  *      assertDoesNotThrow(() -> client.createBucket("my-bucket"));
  *    }
- *
  *  }
- * </pre>
+ * }</pre>
  *
  * <p> If {@code @LocalS3} is on a test class, the Junit5 extension will create a shared
  * service for all test methods in the class and shut it down in the "after all" callback.
@@ -52,7 +51,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
  * for the method and shut down the service in the "after each" callback.
  *
  */
-@Target({ElementType.TYPE, ElementType.METHOD})
+@Target({ElementType.TYPE, ElementType.METHOD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 @ExtendWith(LocalS3Extension.class)
 @ExtendWith(AmazonS3Resolver.class)

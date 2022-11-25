@@ -8,7 +8,6 @@ import com.robothy.s3.rest.utils.XmlUtils;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import java.util.Random;
 
 /**
  * Handle any unhandled exceptions and construct an error response body.

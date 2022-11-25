@@ -25,9 +25,14 @@ import java.util.stream.Stream;
  */
 class CopyObjectController implements HttpRequestHandler {
 
-  private final CopyObjectService objectService = ServiceFactory.getInstance(ObjectService.class);
+  private final CopyObjectService objectService;
 
-  private final XmlMapper xmlMapper = ServiceFactory.getInstance(XmlMapper.class);
+  private final XmlMapper xmlMapper;
+
+  CopyObjectController(ServiceFactory serviceFactory) {
+    this.objectService = serviceFactory.getInstance(ObjectService.class);
+    this.xmlMapper = serviceFactory.getInstance(XmlMapper.class);
+  }
 
   @Override
   public void handle(HttpRequest request, HttpResponse response) throws Exception {

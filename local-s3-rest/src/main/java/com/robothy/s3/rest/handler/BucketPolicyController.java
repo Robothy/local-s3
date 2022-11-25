@@ -15,7 +15,11 @@ import java.io.InputStream;
 
 class BucketPolicyController {
 
-  private final BucketPolicyService bucketPolicyService = ServiceFactory.getInstance(BucketService.class);
+  private final BucketPolicyService bucketPolicyService;
+
+  BucketPolicyController(ServiceFactory serviceFactory) {
+    this.bucketPolicyService = serviceFactory.getInstance(BucketService.class);
+  }
 
   /**
    * Handle <a href="https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetBucketPolicy.html">GetBucketPolicy</a>

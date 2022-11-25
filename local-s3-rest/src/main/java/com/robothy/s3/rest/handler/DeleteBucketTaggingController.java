@@ -13,7 +13,11 @@ import com.robothy.s3.rest.utils.ResponseUtils;
  */
 class DeleteBucketTaggingController implements HttpRequestHandler {
 
-  private final BucketService bucketService = ServiceFactory.getInstance(BucketService.class);
+  private final BucketService bucketService;
+
+  DeleteBucketTaggingController(ServiceFactory serviceFactory) {
+    this.bucketService = serviceFactory.getInstance(BucketService.class);
+  }
 
   @Override
   public void handle(HttpRequest request, HttpResponse response) throws Exception {

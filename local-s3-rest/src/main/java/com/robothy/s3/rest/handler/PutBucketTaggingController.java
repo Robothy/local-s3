@@ -17,9 +17,14 @@ import java.io.InputStream;
  */
 class PutBucketTaggingController implements HttpRequestHandler {
 
-  private final BucketService bucketService = ServiceFactory.getInstance(BucketService.class);
+  private final BucketService bucketService;
 
-  private final XmlMapper xmlMapper = ServiceFactory.getInstance(XmlMapper.class);
+  private final XmlMapper xmlMapper;
+
+  PutBucketTaggingController(ServiceFactory serviceFactory) {
+    this.bucketService = serviceFactory.getInstance(BucketService.class);
+    this.xmlMapper = serviceFactory.getInstance(XmlMapper.class);
+  }
 
   @Override
   public void handle(HttpRequest request, HttpResponse response) throws Exception {

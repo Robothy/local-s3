@@ -8,16 +8,12 @@ import com.robothy.s3.core.model.request.PutObjectOptions;
 import com.robothy.s3.core.service.ObjectService;
 import com.robothy.s3.rest.assertions.RequestAssertions;
 import com.robothy.s3.rest.constants.AmzHeaderNames;
-import com.robothy.s3.rest.constants.AmzHeaderValues;
 import com.robothy.s3.rest.model.request.DecodedAmzRequestBody;
 import com.robothy.s3.rest.service.ServiceFactory;
-import com.robothy.s3.rest.utils.InputStreamUtils;
 import com.robothy.s3.rest.utils.RequestUtils;
 import com.robothy.s3.rest.utils.ResponseUtils;
-import io.netty.buffer.ByteBufInputStream;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import java.io.InputStream;
 import java.util.Objects;
 
 /**
@@ -25,7 +21,11 @@ import java.util.Objects;
  */
 class PutObjectController implements HttpRequestHandler {
 
-  private final ObjectService objectService = ServiceFactory.getInstance(ObjectService.class);
+  private final ObjectService objectService;
+
+  PutObjectController(ServiceFactory serviceFactory) {
+    this.objectService = serviceFactory.getInstance(ObjectService.class);
+  }
 
   @Override
   public void handle(HttpRequest request, HttpResponse response) throws Exception {

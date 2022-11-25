@@ -17,7 +17,11 @@ import io.netty.handler.codec.http.HttpResponseStatus;
  */
 class DeleteObjectController implements HttpRequestHandler {
 
-  private final DeleteObjectService deleteObjectService = ServiceFactory.getInstance(ObjectService.class);
+  private final DeleteObjectService deleteObjectService;
+
+  DeleteObjectController(ServiceFactory serviceFactory) {
+    this.deleteObjectService = serviceFactory.getInstance(ObjectService.class);
+  }
 
   @Override
   public void handle(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
