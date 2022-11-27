@@ -54,7 +54,5 @@ jobs:
       - name: Build
         run: ./gradlew test jacocoTestReport
 
-      - name: Upload report
-        run: |
-          export CODECOV_TOKEN=${{secrets.CODECOV_TOKEN}}
-          bash <(curl -s https://codecov.io/bash)
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
