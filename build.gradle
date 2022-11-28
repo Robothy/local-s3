@@ -14,9 +14,9 @@ task mergeReports(type: JacocoReport) {
     sourceDirectories.from(project.fileTree(dir: '.', include: '**/src/main/java/**'))
     classDirectories.from(project.fileTree(dir: '.', include: '**/build/classes/java/main/**'))
     reports {
-        xml.required = true
-        html.required = true
-        csv.required = true
+        xml.required.set(true)
+        html.required.set(true)
+        //csv.required.set(true)
     }
 }
 
