@@ -1,4 +1,27 @@
 plugins {
     id 'robothy-platform-release'
+    id 'jacoco'
 //    id "com.dorongold.task-tree" version "2.1.0"
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+task mergeReports(type: JacocoReport) {
+    executionData.from(project.fileTree(dir: '.', include: '**/build/jacoco/test.exec'))
+    sourceDirectories.from(project.fileTree(dir: '.', include: '**/src/main/java/**'))
+    classDirectories.from(project.fileTree(dir: '.', include: '**/build/classes/java/main/**'))
+    reports {
+        xml.required = true
+        html.required = true
+        csv.required = true
+    }
+}
+
+project.subprojects.each {
+    it.afterEvaluate {
+        mergeReports.dependsOn(it.tasks['test'])
+    }
 }

@@ -52,7 +52,7 @@ jobs:
           ls -l
 
       - name: Build
-        run: ./gradlew test jacocoTestReport
+        run: ./gradlew mergeReports
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
