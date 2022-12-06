@@ -2,7 +2,6 @@ package com.robothy.s3.core.service;
 
 import com.robothy.s3.core.annotations.BucketChanged;
 import com.robothy.s3.core.model.Bucket;
-import com.robothy.s3.core.model.S3Object;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,11 +24,6 @@ public interface BucketService extends BucketTaggingService,
    * Get bucket info.
    */
   Bucket getBucket(String bucketName);
-
-  /**
-   * List all objects of the bucket.
-   */
-  List<S3Object> listObjects(String bucketName);
 
   /**
    * Set if versioning enabled of a given bucket.

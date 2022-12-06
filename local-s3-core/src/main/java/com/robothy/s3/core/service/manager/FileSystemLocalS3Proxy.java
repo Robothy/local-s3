@@ -11,7 +11,6 @@ import com.robothy.s3.core.service.loader.FileSystemS3MetadataLoader;
 import com.robothy.s3.core.storage.FileSystemBucketMetadataStore;
 import com.robothy.s3.core.storage.MetadataStore;
 import com.robothy.s3.core.storage.Storage;
-import com.robothy.s3.core.storage.StorageOptions;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

@@ -6,7 +6,6 @@ import com.robothy.s3.core.exception.BucketNotExistException;
 import com.robothy.s3.core.exception.BucketPolicyNotExistException;
 import com.robothy.s3.core.exception.BucketTaggingNotExistException;
 import com.robothy.s3.core.exception.InvalidBucketNameException;
-import com.robothy.s3.core.exception.VersionedObjectNotExistException;
 import com.robothy.s3.core.model.internal.BucketMetadata;
 import com.robothy.s3.core.model.internal.LocalS3Metadata;
 import java.util.Collection;

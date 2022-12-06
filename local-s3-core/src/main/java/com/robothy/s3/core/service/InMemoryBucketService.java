@@ -2,10 +2,8 @@ package com.robothy.s3.core.service;
 
 import com.robothy.s3.core.asserionts.BucketAssertions;
 import com.robothy.s3.core.model.Bucket;
-import com.robothy.s3.core.model.S3Object;
 import com.robothy.s3.core.model.internal.BucketMetadata;
 import com.robothy.s3.core.model.internal.LocalS3Metadata;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -61,13 +59,6 @@ public class InMemoryBucketService implements BucketService {
     BucketAssertions.assertBucketNameIsValid(bucketName);
     BucketMetadata bucketMetadata = BucketAssertions.assertBucketExists(s3Metadata, bucketName);
     return Bucket.fromBucketMetadata(bucketMetadata);
-  }
-
-  @Override
-  public List<S3Object> listObjects(String bucketName) {
-    BucketAssertions.assertBucketNameIsValid(bucketName);
-    BucketMetadata bucketMetadata = BucketAssertions.assertBucketExists(s3Metadata, bucketName);
-    throw new UnsupportedOperationException();
   }
 
   @Override

@@ -1,10 +1,7 @@
 package com.robothy.s3.core.service;
 
-import com.robothy.s3.core.model.VersionedObject;
 import com.robothy.s3.core.model.internal.LocalS3Metadata;
-import com.robothy.s3.core.model.request.ListObjectVersionsOptions;
 import com.robothy.s3.core.storage.Storage;
-import java.util.List;
 
 public class InMemoryObjectService implements ObjectService {
 

@@ -18,13 +18,6 @@ class LocalFileSystemStorage implements Storage {
 
   private final Path directory;
 
-  @Deprecated
-  public LocalFileSystemStorage(StorageOptions options) {
-    this.directory = options.getDirectory();
-    Objects.requireNonNull(directory);
-    PathUtils.createDirectoryIfNotExit(directory);
-  }
-
   /**
    * Construct a {@linkplain LocalFileSystemStorage} instance.
    *

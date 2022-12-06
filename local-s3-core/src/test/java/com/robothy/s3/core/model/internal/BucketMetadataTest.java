@@ -9,7 +9,9 @@ import com.robothy.s3.datatypes.Grantee;
 import com.robothy.s3.datatypes.Owner;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableMap;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentSkipListMap;
 import org.junit.jupiter.api.Test;
 
 class BucketMetadataTest {
@@ -54,7 +56,7 @@ class BucketMetadataTest {
     VersionedObjectMetadata versionedObj1 = new VersionedObjectMetadata();
     versionedObj1.setFileId(111L);
     versionedObj1.setContentType("application/json");
-    versionedObj1.setModificationDate(1L);;
+    versionedObj1.setModificationDate(1L);
     versionedObj1.setCreationDate(2L);
     ObjectMetadata obj1 = new ObjectMetadata("a.txt", "12", versionedObj1);
     ObjectMetadata obj2 = new ObjectMetadata("b.json", "11", versionedObj1);
@@ -71,6 +73,9 @@ class BucketMetadataTest {
     part2.setLastModified(102);
     part2.setFileId(1L);
     part2.setSize(10);
+    NavigableMap<String, UploadMetadata> upload = new ConcurrentSkipListMap<>();
+    upload.put("upload-id", uploadMetadata);
+    bucketMetadata.getUploads().put("a.txt", upload);
 
     String json = JsonUtils.toJson(bucketMetadata);
     BucketMetadata deserialized = JsonUtils.fromJson(json, BucketMetadata.class);
