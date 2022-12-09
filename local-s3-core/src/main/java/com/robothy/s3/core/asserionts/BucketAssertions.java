@@ -4,6 +4,7 @@ import com.robothy.s3.core.exception.BucketAlreadyExistsException;
 import com.robothy.s3.core.exception.BucketNotEmptyException;
 import com.robothy.s3.core.exception.BucketNotExistException;
 import com.robothy.s3.core.exception.BucketPolicyNotExistException;
+import com.robothy.s3.core.exception.BucketReplicationNotExistException;
 import com.robothy.s3.core.exception.BucketTaggingNotExistException;
 import com.robothy.s3.core.exception.InvalidBucketNameException;
 import com.robothy.s3.core.model.internal.BucketMetadata;
@@ -89,6 +90,18 @@ public class BucketAssertions {
    */
   public static String assertBucketPolicyExist(BucketMetadata bucketMetadata) {
     return bucketMetadata.getPolicy().orElseThrow(() -> new BucketPolicyNotExistException(bucketMetadata.getBucketName()));
+  }
+
+  /**
+   * Assert the specified bucket has configured replication.
+   *
+   * @param s3Metadata LocalS3 metadata.
+   * @param bucketName the bucket name.
+   * @return bucket replication configuration.
+   */
+  public static String assertBucketReplicationExist(LocalS3Metadata s3Metadata, String bucketName) {
+    BucketMetadata bucketMetadata = assertBucketExists(s3Metadata, bucketName);
+    return bucketMetadata.getReplication().orElseThrow(BucketReplicationNotExistException::new);
   }
 
 }

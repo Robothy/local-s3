@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public interface BucketService extends BucketTaggingService,
-    BucketAclService, BucketPolicyService {
+    BucketAclService, BucketPolicyService, BucketReplicationService {
 
   /**
    * Create a bucket.

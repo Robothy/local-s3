@@ -42,4 +42,17 @@ public class ResponseUtils {
     response.putHeader(HttpHeaderNames.SERVER.toString(), LocalS3Constants.SERVER_NAME);
   }
 
+  /**
+   * Add common headers to the give response.
+   *
+   * @param response HTTP response to set common headers.
+   * @return the response parameter.
+   */
+  public static HttpResponse addCommonHeaders(HttpResponse response) {
+    addDateHeader(response);
+    addAmzRequestId(response);
+    addServerHeader(response);
+    return response;
+  }
+
 }

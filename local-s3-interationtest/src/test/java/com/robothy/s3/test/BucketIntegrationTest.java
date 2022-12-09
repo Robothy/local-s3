@@ -1,5 +1,6 @@
 package com.robothy.s3.test;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -11,17 +12,22 @@ import com.amazonaws.services.s3.model.AccessControlList;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.Bucket;
 import com.amazonaws.services.s3.model.BucketPolicy;
+import com.amazonaws.services.s3.model.BucketReplicationConfiguration;
 import com.amazonaws.services.s3.model.BucketTaggingConfiguration;
 import com.amazonaws.services.s3.model.BucketVersioningConfiguration;
 import com.amazonaws.services.s3.model.CanonicalGrantee;
 import com.amazonaws.services.s3.model.CreateBucketRequest;
+import com.amazonaws.services.s3.model.DeleteMarkerReplication;
 import com.amazonaws.services.s3.model.GroupGrantee;
 import com.amazonaws.services.s3.model.HeadBucketRequest;
 import com.amazonaws.services.s3.model.HeadBucketResult;
 import com.amazonaws.services.s3.model.Owner;
 import com.amazonaws.services.s3.model.Permission;
+import com.amazonaws.services.s3.model.ReplicationDestinationConfig;
+import com.amazonaws.services.s3.model.ReplicationRule;
 import com.amazonaws.services.s3.model.SetBucketVersioningConfigurationRequest;
 import com.amazonaws.services.s3.model.TagSet;
+import com.amazonaws.services.s3.model.replication.ReplicationFilter;
 import com.robothy.s3.core.exception.S3ErrorCode;
 import com.robothy.s3.jupiter.LocalS3;
 import java.util.Map;
@@ -142,5 +148,26 @@ public class BucketIntegrationTest {
 //    assertFalse(getBucketResult.getPublicAccessBlockEnabled()); // always false.
 //    assertNotNull(getBucketResult.getCreationDate());
 //  }
+
+  @Test
+  @LocalS3
+  void testBucketReplication(AmazonS3 s3) {
+    String bucketName = "my-bucket";
+    assertDoesNotThrow(() -> s3.createBucket(bucketName));
+
+    ReplicationDestinationConfig destinationConfig =
+        new ReplicationDestinationConfig().withBucketARN("arn:aws:s3:::exampletargetbucket");
+    assertDoesNotThrow(() -> s3.setBucketReplicationConfiguration(bucketName, new BucketReplicationConfiguration()
+        .addRule("1", new ReplicationRule().withDestinationConfig(destinationConfig)
+            .withPriority(1).withDeleteMarkerReplication(new DeleteMarkerReplication().withStatus("Disabled")))));
+
+    BucketReplicationConfiguration replication = s3.getBucketReplicationConfiguration(bucketName);
+    ReplicationRule rule = replication.getRule("1");
+    assertEquals("Disabled", rule.getDeleteMarkerReplication().getStatus());
+    assertEquals("arn:aws:s3:::exampletargetbucket", rule.getDestinationConfig().getBucketARN());
+    assertEquals(1, rule.getPriority());
+
+    assertDoesNotThrow(() -> s3.deleteBucketReplicationConfiguration(bucketName));
+  }
 
 }

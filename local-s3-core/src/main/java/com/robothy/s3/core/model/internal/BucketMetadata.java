@@ -45,6 +45,8 @@ public class BucketMetadata {
 
   private String policy;
 
+  private String replication;
+
   public Optional<ObjectMetadata> getObjectMetadata(String key) {
     return Optional.ofNullable(objectMap.get(key));
   }
@@ -109,6 +111,24 @@ public class BucketMetadata {
    */
   public void setPolicy(String policy) {
     this.policy = policy;
+  }
+
+  /**
+   * Get replication configuration.
+   *
+   * @return replication configuration of current bucket.
+   */
+  public Optional<String> getReplication() {
+    return Optional.ofNullable(replication);
+  }
+
+  /**
+   * Set replication configuration.
+   *
+   * @param replication replication configuration.
+   */
+  public void setReplication(String replication) {
+    this.replication = replication;
   }
 
 }
