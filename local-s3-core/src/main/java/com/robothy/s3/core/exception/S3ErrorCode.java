@@ -74,6 +74,7 @@ public enum S3ErrorCode {
   RequestTimeout("RequestTimeout", 400, "Your socket connection to the server was not read from or written to within the timeout period."),
   RequestTimeTooSkewed("RequestTimeTooSkewed", 403, "The difference between the request time and the server's time is too large."),
   RequestTorrentOfBucketError("RequestTorrentOfBucketError", 400, "Requesting the torrent file of a bucket is not permitted."),
+  ReplicationConfigurationNotFoundError("ReplicationConfigurationNotFoundError", 404, "The replication configuration was not found"),
   //SignatureDoesNotMatch("SignatureDoesNotMatch", 403, "The request signature we calculated does not match the signature you provided. Check your AWS secret access key and signing method. For more information, see REST Authentication and "),
   ServiceUnavailable("ServiceUnavailable", 503, "Service is unable to handle request."),
   //SlowDown("SlowDown", 503, "Reduce your request rate."),

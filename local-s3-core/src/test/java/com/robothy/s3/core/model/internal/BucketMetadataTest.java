@@ -77,6 +77,8 @@ class BucketMetadataTest {
     upload.put("upload-id", uploadMetadata);
     bucketMetadata.getUploads().put("a.txt", upload);
 
+    bucketMetadata.setReplication("Replication Configuration");
+
     String json = JsonUtils.toJson(bucketMetadata);
     BucketMetadata deserialized = JsonUtils.fromJson(json, BucketMetadata.class);
     assertEquals(bucketMetadata, deserialized);

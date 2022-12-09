@@ -1,7 +1,6 @@
 package com.robothy.s3.core.service;
 
 import com.robothy.s3.core.annotations.BucketChanged;
-import com.robothy.s3.core.exception.InvalidArgumentException;
 import com.robothy.s3.core.model.answers.CopyObjectAns;
 import com.robothy.s3.core.model.answers.GetObjectAns;
 import com.robothy.s3.core.model.answers.PutObjectAns;

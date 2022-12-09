@@ -16,6 +16,7 @@ public class LocalS3RouterFactory {
   public static Router create(ServiceFactory serviceFactory) {
     Objects.requireNonNull(serviceFactory);
     BucketPolicyController bucketPolicy = new BucketPolicyController(serviceFactory);
+    BucketReplicationController bucketReplicationController = new BucketReplicationController(serviceFactory);
 
     Route CopyObject = Route.builder()
         .method(HttpMethod.PUT)
@@ -28,6 +29,18 @@ public class LocalS3RouterFactory {
         .method(HttpMethod.PUT)
         .path("/{bucket}")
         .handler(new CreateBucketController(serviceFactory))
+        .build();
+
+    Route PutBucketReplication = Route.builder().method(HttpMethod.PUT)
+        .path("/{bucket}")
+        .paramMatcher(params -> params.containsKey("replication"))
+        .handler(bucketReplicationController::put)
+        .build();
+
+    Route PutBucketReplication_ = Route.builder().method(HttpMethod.PUT)
+        .path("/{bucket}/")
+        .paramMatcher(params -> params.containsKey("replication"))
+        .handler(bucketReplicationController::put)
         .build();
 
     Route CreateMultipartUpload = Route.builder()
@@ -61,6 +74,20 @@ public class LocalS3RouterFactory {
         .path("/{bucket}/")
         .paramMatcher(params -> params.containsKey("policy"))
         .handler(bucketPolicy::delete)
+        .build();
+
+    Route DeleteBucketReplication = Route.builder()
+        .method(HttpMethod.DELETE)
+        .path("/{bucket}/")
+        .paramMatcher(params -> params.containsKey("replication"))
+        .handler(bucketReplicationController::delete)
+        .build();
+
+    Route DeleteBucketReplication_ = Route.builder()
+        .method(HttpMethod.DELETE)
+        .path("/{bucket}/")
+        .paramMatcher(params -> params.containsKey("replication"))
+        .handler(bucketReplicationController::delete)
         .build();
 
     Route DeleteBucketTagging = Route.builder()
@@ -101,6 +128,20 @@ public class LocalS3RouterFactory {
         .path("/{bucket}/")
         .paramMatcher(params -> params.containsKey("acl"))
         .handler(new GetBucketAclController(serviceFactory))
+        .build();
+
+    Route GetBucketReplication = Route.builder()
+        .method(HttpMethod.GET)
+        .path("/{bucket}")
+        .paramMatcher(params -> params.containsKey("replication"))
+        .handler(bucketReplicationController::get)
+        .build();
+
+    Route GetBucketReplication_ = Route.builder()
+        .method(HttpMethod.GET)
+        .path("/{bucket}/")
+        .paramMatcher(params -> params.containsKey("replication"))
+        .handler(bucketReplicationController::get)
         .build();
 
     Route GetBucketPolicy = Route.builder()
@@ -266,6 +307,8 @@ public class LocalS3RouterFactory {
         .route(DeleteBucket)
         .route(DeleteBucketPolicy)
         .route(DeleteBucketPolicy_)
+        .route(DeleteBucketReplication_)
+        .route(DeleteBucketReplication)
         .route(DeleteBucketTagging)
         .route(DeleteBucketTagging_)
         .route(DeleteObject)
@@ -275,6 +318,8 @@ public class LocalS3RouterFactory {
         .route(GetBucketAcl_)
         .route(GetBucketPolicy)
         .route(GetBucketPolicy_)
+        .route(GetBucketReplication)
+        .route(GetBucketReplication_)
         .route(GetBucketVersioning)
         .route(GetBucketVersioning_)
         .route(GetBucketTagging)
@@ -290,6 +335,8 @@ public class LocalS3RouterFactory {
         .route(PutBucketAcl_)
         .route(PutBucketPolicy)
         .route(PutBucketPolicy_)
+        .route(PutBucketReplication)
+        .route(PutBucketReplication_)
         .route(PutBucketVersioning)
         .route(PutBucketVersioning_)
         .route(PutBucketTagging)
