@@ -41,18 +41,15 @@ public class ObjectMetadata {
   private String virtualVersion;
 
 
-
   /**
    * Construct an {@linkplain ObjectMetadata} instance. A new {@linkplain ObjectMetadata} instance must
    * associate with a {@linkplain VersionedObjectMetadata}.
    *
-   * @param key the object key.
    * @param version the version ID. If the bucket versioning is not enabled, it
    *                should be set to virtual version via {@linkplain #setVirtualVersion(String)}.
    * @param firstVersion first versioned instance of the {@linkplain ObjectMetadata}.
    */
-  public ObjectMetadata(String key, String version, VersionedObjectMetadata firstVersion) {
-    this.key = key;
+  public ObjectMetadata(String version, VersionedObjectMetadata firstVersion) {
     this.putVersionedObjectMetadata(version, firstVersion);
   }
 

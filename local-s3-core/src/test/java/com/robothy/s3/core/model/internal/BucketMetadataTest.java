@@ -19,11 +19,10 @@ class BucketMetadataTest {
   @Test
   void addObjectMetadata() {
     BucketMetadata bucketMetadata = new BucketMetadata();
-    assertThrows(InvalidObjectKeyException.class, () -> bucketMetadata.addObjectMetadata(new ObjectMetadata()));
+    assertThrows(InvalidObjectKeyException.class, () -> bucketMetadata.putObjectMetadata("", new ObjectMetadata()));
 
     ObjectMetadata objectMetadata = new ObjectMetadata();
-    objectMetadata.setKey("abc.txt");
-    bucketMetadata.addObjectMetadata(objectMetadata);
+    bucketMetadata.putObjectMetadata("abc.txt", objectMetadata);
     Optional<ObjectMetadata> optionalObjectMetadata = bucketMetadata.getObjectMetadata("abc.txt");
     assertTrue(optionalObjectMetadata.isPresent());
     assertTrue(bucketMetadata.getObjectMap().containsKey("abc.txt"));
@@ -58,10 +57,10 @@ class BucketMetadataTest {
     versionedObj1.setContentType("application/json");
     versionedObj1.setModificationDate(1L);
     versionedObj1.setCreationDate(2L);
-    ObjectMetadata obj1 = new ObjectMetadata("a.txt", "12", versionedObj1);
-    ObjectMetadata obj2 = new ObjectMetadata("b.json", "11", versionedObj1);
-    bucketMetadata.addObjectMetadata(obj1);
-    bucketMetadata.addObjectMetadata(obj2);
+    ObjectMetadata obj1 = new ObjectMetadata("12", versionedObj1);
+    ObjectMetadata obj2 = new ObjectMetadata("11", versionedObj1);
+    bucketMetadata.putObjectMetadata("a.txt", obj1);
+    bucketMetadata.putObjectMetadata("b.json", obj2);
 
     UploadMetadata uploadMetadata = new UploadMetadata();
     uploadMetadata.setCreateDate(1000);
@@ -78,6 +77,7 @@ class BucketMetadataTest {
     bucketMetadata.getUploads().put("a.txt", upload);
 
     bucketMetadata.setReplication("Replication Configuration");
+    bucketMetadata.setEncryption("Encryption");
 
     String json = JsonUtils.toJson(bucketMetadata);
     BucketMetadata deserialized = JsonUtils.fromJson(json, BucketMetadata.class);

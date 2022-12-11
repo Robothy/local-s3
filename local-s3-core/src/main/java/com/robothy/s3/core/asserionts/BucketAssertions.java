@@ -7,6 +7,7 @@ import com.robothy.s3.core.exception.BucketPolicyNotExistException;
 import com.robothy.s3.core.exception.BucketReplicationNotExistException;
 import com.robothy.s3.core.exception.BucketTaggingNotExistException;
 import com.robothy.s3.core.exception.InvalidBucketNameException;
+import com.robothy.s3.core.exception.ServerSideEncryptionConfigurationNotFoundException;
 import com.robothy.s3.core.model.internal.BucketMetadata;
 import com.robothy.s3.core.model.internal.LocalS3Metadata;
 import java.util.Collection;
@@ -102,6 +103,19 @@ public class BucketAssertions {
   public static String assertBucketReplicationExist(LocalS3Metadata s3Metadata, String bucketName) {
     BucketMetadata bucketMetadata = assertBucketExists(s3Metadata, bucketName);
     return bucketMetadata.getReplication().orElseThrow(BucketReplicationNotExistException::new);
+  }
+
+  /**
+   * Assert the specified bucket has configured server side encryption.
+   *
+   * @param localS3Metadata LocalS3 metadata.
+   * @param bucketName the bucket name.
+   * @return bucket encryption configuration.
+   */
+  public static String assertBucketEncryptionExist(LocalS3Metadata localS3Metadata, String bucketName) {
+    BucketMetadata bucketMetadata = assertBucketExists(localS3Metadata, bucketName);
+    return bucketMetadata.getEncryption().orElseThrow(() ->
+        new ServerSideEncryptionConfigurationNotFoundException(bucketName));
   }
 
 }

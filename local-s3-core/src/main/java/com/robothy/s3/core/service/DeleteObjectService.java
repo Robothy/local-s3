@@ -70,12 +70,12 @@ public interface DeleteObjectService extends LocalS3MetadataApplicable, StorageA
     } else { // key not exists.
       VersionedObjectMetadata deleteMarker = createDeleteMarker();
       String versionId = returnedVersionId = IdUtils.defaultGenerator().nextStrId();
-      ObjectMetadata objectMetadata = new ObjectMetadata(key, versionId, deleteMarker);
+      ObjectMetadata objectMetadata = new ObjectMetadata(versionId, deleteMarker);
       if (!Boolean.TRUE.equals(bucketMetadata.getVersioningEnabled())) {
         objectMetadata.setVirtualVersion(versionId);
         returnedVersionId = ObjectMetadata.NULL_VERSION;
       }
-      bucketMetadata.addObjectMetadata(objectMetadata);
+      bucketMetadata.putObjectMetadata(key, objectMetadata);
     }
 
     return DeleteObjectAns.builder()

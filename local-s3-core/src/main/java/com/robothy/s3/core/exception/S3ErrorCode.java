@@ -76,6 +76,7 @@ public enum S3ErrorCode {
   RequestTorrentOfBucketError("RequestTorrentOfBucketError", 400, "Requesting the torrent file of a bucket is not permitted."),
   ReplicationConfigurationNotFoundError("ReplicationConfigurationNotFoundError", 404, "The replication configuration was not found"),
   //SignatureDoesNotMatch("SignatureDoesNotMatch", 403, "The request signature we calculated does not match the signature you provided. Check your AWS secret access key and signing method. For more information, see REST Authentication and "),
+  ServerSideEncryptionConfigurationNotFoundError("ServerSideEncryptionConfigurationNotFoundError", 404, "The server side encryption configuration was not found"),
   ServiceUnavailable("ServiceUnavailable", 503, "Service is unable to handle request."),
   //SlowDown("SlowDown", 503, "Reduce your request rate."),
   //TemporaryRedirect("TemporaryRedirect", 307, "You are being redirected to the bucket while DNS updates."),

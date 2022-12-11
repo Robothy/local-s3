@@ -17,6 +17,7 @@ public class LocalS3RouterFactory {
     Objects.requireNonNull(serviceFactory);
     BucketPolicyController bucketPolicy = new BucketPolicyController(serviceFactory);
     BucketReplicationController bucketReplicationController = new BucketReplicationController(serviceFactory);
+    BucketEncryptionController bucketEncryptionController = new BucketEncryptionController(serviceFactory);
 
     Route CopyObject = Route.builder()
         .method(HttpMethod.PUT)
@@ -43,6 +44,18 @@ public class LocalS3RouterFactory {
         .handler(bucketReplicationController::put)
         .build();
 
+    Route PutBucketEncryption = Route.builder().method(HttpMethod.PUT)
+        .path("/{bucket}")
+        .paramMatcher(params -> params.containsKey("encryption"))
+        .handler(bucketEncryptionController::put)
+        .build();
+
+    Route PutBucketEncryption_ = Route.builder().method(HttpMethod.PUT)
+        .path("/{bucket}/")
+        .paramMatcher(params -> params.containsKey("encryption"))
+        .handler(bucketEncryptionController::put)
+        .build();
+
     Route CreateMultipartUpload = Route.builder()
         .method(HttpMethod.POST)
         .path("/{bucket}/{*key}")
@@ -60,6 +73,20 @@ public class LocalS3RouterFactory {
         .method(HttpMethod.DELETE)
         .path("/{bucket}")
         .handler(new DeleteBucketController(serviceFactory))
+        .build();
+
+    Route DeleteBucketEncryption = Route.builder()
+        .method(HttpMethod.DELETE)
+        .path("/{bucket}")
+        .paramMatcher(params -> params.containsKey("encryption"))
+        .handler(bucketEncryptionController::delete)
+        .build();
+
+    Route DeleteBucketEncryption_ = Route.builder()
+        .method(HttpMethod.DELETE)
+        .path("/{bucket}/")
+        .paramMatcher(params -> params.containsKey("encryption"))
+        .handler(bucketEncryptionController::delete)
         .build();
 
     Route DeleteBucketPolicy = Route.builder()
@@ -142,6 +169,20 @@ public class LocalS3RouterFactory {
         .path("/{bucket}/")
         .paramMatcher(params -> params.containsKey("replication"))
         .handler(bucketReplicationController::get)
+        .build();
+
+    Route GetBucketEncryption = Route.builder()
+        .method(HttpMethod.GET)
+        .path("/{bucket}")
+        .paramMatcher(params -> params.containsKey("encryption"))
+        .handler(bucketEncryptionController::get)
+        .build();
+
+    Route GetBucketEncryption_ = Route.builder()
+        .method(HttpMethod.GET)
+        .path("/{bucket}/")
+        .paramMatcher(params -> params.containsKey("encryption"))
+        .handler(bucketEncryptionController::get)
         .build();
 
     Route GetBucketPolicy = Route.builder()
@@ -305,6 +346,8 @@ public class LocalS3RouterFactory {
         .route(CreateMultipartUpload)
         .route(CompleteMultipartUpload)
         .route(DeleteBucket)
+        .route(DeleteBucketEncryption_)
+        .route(DeleteBucketEncryption)
         .route(DeleteBucketPolicy)
         .route(DeleteBucketPolicy_)
         .route(DeleteBucketReplication_)
@@ -316,6 +359,8 @@ public class LocalS3RouterFactory {
         .route(GetObject)
         .route(GetBucketAcl)
         .route(GetBucketAcl_)
+        .route(GetBucketEncryption)
+        .route(GetBucketEncryption_)
         .route(GetBucketPolicy)
         .route(GetBucketPolicy_)
         .route(GetBucketReplication)
@@ -333,6 +378,8 @@ public class LocalS3RouterFactory {
         .route(PutObject)
         .route(PutBucketAcl)
         .route(PutBucketAcl_)
+        .route(PutBucketEncryption)
+        .route(PutBucketEncryption_)
         .route(PutBucketPolicy)
         .route(PutBucketPolicy_)
         .route(PutBucketReplication)

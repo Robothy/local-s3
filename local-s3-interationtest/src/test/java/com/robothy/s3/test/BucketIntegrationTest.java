@@ -18,6 +18,7 @@ import com.amazonaws.services.s3.model.BucketVersioningConfiguration;
 import com.amazonaws.services.s3.model.CanonicalGrantee;
 import com.amazonaws.services.s3.model.CreateBucketRequest;
 import com.amazonaws.services.s3.model.DeleteMarkerReplication;
+import com.amazonaws.services.s3.model.GetBucketEncryptionResult;
 import com.amazonaws.services.s3.model.GroupGrantee;
 import com.amazonaws.services.s3.model.HeadBucketRequest;
 import com.amazonaws.services.s3.model.HeadBucketResult;
@@ -25,11 +26,15 @@ import com.amazonaws.services.s3.model.Owner;
 import com.amazonaws.services.s3.model.Permission;
 import com.amazonaws.services.s3.model.ReplicationDestinationConfig;
 import com.amazonaws.services.s3.model.ReplicationRule;
+import com.amazonaws.services.s3.model.ServerSideEncryptionByDefault;
+import com.amazonaws.services.s3.model.ServerSideEncryptionConfiguration;
+import com.amazonaws.services.s3.model.ServerSideEncryptionRule;
+import com.amazonaws.services.s3.model.SetBucketEncryptionRequest;
 import com.amazonaws.services.s3.model.SetBucketVersioningConfigurationRequest;
 import com.amazonaws.services.s3.model.TagSet;
-import com.amazonaws.services.s3.model.replication.ReplicationFilter;
 import com.robothy.s3.core.exception.S3ErrorCode;
 import com.robothy.s3.jupiter.LocalS3;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -168,6 +173,33 @@ public class BucketIntegrationTest {
     assertEquals(1, rule.getPriority());
 
     assertDoesNotThrow(() -> s3.deleteBucketReplicationConfiguration(bucketName));
+  }
+
+  @Test
+  @LocalS3
+  void testBucketEncryption(AmazonS3 s3) {
+    String bucketName = "my-bucket";
+    s3.createBucket(bucketName);
+
+    assertThrows(AmazonServiceException.class, () -> s3.getBucketEncryption(bucketName));
+
+    SetBucketEncryptionRequest setBucketEncryptionRequest = new SetBucketEncryptionRequest();
+    setBucketEncryptionRequest.setBucketName(bucketName);
+    setBucketEncryptionRequest.setServerSideEncryptionConfiguration(new ServerSideEncryptionConfiguration()
+        .withRules(new ServerSideEncryptionRule().withBucketKeyEnabled(true)
+                .withApplyServerSideEncryptionByDefault(new ServerSideEncryptionByDefault()
+                    .withSSEAlgorithm("AES256").withKMSMasterKeyID("arn:aws:kms:us-east-1:1234/5678example"))));
+
+    assertDoesNotThrow(() -> s3.setBucketEncryption(setBucketEncryptionRequest));
+    GetBucketEncryptionResult bucketEncryption = s3.getBucketEncryption(bucketName);
+    List<ServerSideEncryptionRule> rules = bucketEncryption.getServerSideEncryptionConfiguration().getRules();
+    assertEquals(1, rules.size());
+    ServerSideEncryptionRule rule = rules.get(0);
+    assertEquals(true, rule.getBucketKeyEnabled());
+    assertEquals("AES256", rule.getApplyServerSideEncryptionByDefault().getSSEAlgorithm());
+    assertEquals("arn:aws:kms:us-east-1:1234/5678example", rule.getApplyServerSideEncryptionByDefault().getKMSMasterKeyID());
+
+    assertDoesNotThrow(() -> s3.deleteBucketEncryption(bucketName));
   }
 
 }
