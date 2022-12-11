@@ -53,35 +53,33 @@ class AccessControlPolicyTest {
 
   @Test
   void deserialization() throws JsonProcessingException {
-    String xml = """
-        <AccessControlPolicy xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
-        	<Owner>
-        		<ID>001</ID>
-        		<DisplayName>LocalS3</DisplayName>
-        	</Owner>
-        	
-        	<AccessControlList>
-        		<Grant>
-        			<Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CanonicalUser">
-        				<ID>123</ID>
-        			</Grantee>
-        			<Permission>FULL_CONTROL</Permission>
-        		</Grant>
-        		<Grant>
-        			<Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="CanonicalUser">
-        				<ID>001</ID>
-        			</Grantee>
-        			<Permission>FULL_CONTROL</Permission>
-        		</Grant>
-        		<Grant>
-        			<Grantee xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="Group">
-        				<URI>http://acs.amazonaws.com/groups/global/AllUsers</URI>
-        			</Grantee>
-        			<Permission>READ</Permission>
-        		</Grant>
-        	</AccessControlList>
-        </AccessControlPolicy>
-        """;
+    String xml = "<AccessControlPolicy xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\">\n" +
+                 "	<Owner>\n" +
+                 "		<ID>001</ID>\n" +
+                 "		<DisplayName>LocalS3</DisplayName>\n" +
+                 "	</Owner>\n" +
+                 "\n" +
+                 "	<AccessControlList>\n" +
+                 "		<Grant>\n" +
+                 "			<Grantee xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"CanonicalUser\">\n" +
+                 "				<ID>123</ID>\n" +
+                 "			</Grantee>\n" +
+                 "			<Permission>FULL_CONTROL</Permission>\n" +
+                 "		</Grant>\n" +
+                 "		<Grant>\n" +
+                 "			<Grantee xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"CanonicalUser\">\n" +
+                 "				<ID>001</ID>\n" +
+                 "			</Grantee>\n" +
+                 "			<Permission>FULL_CONTROL</Permission>\n" +
+                 "		</Grant>\n" +
+                 "		<Grant>\n" +
+                 "			<Grantee xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"Group\">\n" +
+                 "				<URI>http://acs.amazonaws.com/groups/global/AllUsers</URI>\n" +
+                 "			</Grantee>\n" +
+                 "			<Permission>READ</Permission>\n" +
+                 "		</Grant>\n" +
+                 "	</AccessControlList>\n" +
+                 "</AccessControlPolicy>\n";
 
     XmlMapper xmlMapper = new XmlMapper();
     AccessControlPolicy acl = xmlMapper.readValue(xml, AccessControlPolicy.class);

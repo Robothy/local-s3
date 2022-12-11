@@ -7,6 +7,7 @@ import com.robothy.s3.core.model.answers.DeleteObjectAns;
 import com.robothy.s3.core.model.internal.BucketMetadata;
 import com.robothy.s3.core.model.internal.ObjectMetadata;
 import com.robothy.s3.core.model.internal.VersionedObjectMetadata;
+import com.robothy.s3.core.storage.Storage;
 import com.robothy.s3.core.util.IdUtils;
 import java.util.Objects;
 import java.util.Optional;
@@ -24,26 +25,27 @@ public interface DeleteObjectService extends LocalS3MetadataApplicable, StorageA
   @BucketChanged
   default DeleteObjectAns deleteObject(String bucketName, String key, String versionId) {
     BucketMetadata bucketMetadata = BucketAssertions.assertBucketExists(localS3Metadata(), bucketName);
-    return Objects.isNull(versionId) ? deleteWithoutVersionId(bucketMetadata, key)
-        : deleteWithVersionId(bucketMetadata, key, versionId);
+    return Objects.isNull(versionId) ? deleteWithoutVersionId(storage(), bucketMetadata, key)
+        : deleteWithVersionId(storage(), bucketMetadata, key, versionId);
   }
 
   /**
    * Delete without version ID.
    * <ul>
-   *   <li>If the key exists</li>
-   *   <ul>
+   *   <li><b>If the key exists</b></li>
+   *
    *     <li>If bucket versioning enabled, create a delete marker with version ID.</li>
    *     <li>If bucket versioning disabled, create a delete marker with virtual version.</li>
-   *   </ul>
-   *   <li>If the key not exists.</li>
-   *   <ul>
+   *
+   *   <li><b>If the key not exists.</b></li>
+   *
    *     <li>If bucket versioning enabled, create the object with a deleted marker with version ID.</li>
    *     <li>If bucket versioning suspended, create the object with a deleted marker with virtual version ID.</li>
-   *   </ul>
+   *
    * </ul>
    */
-  private DeleteObjectAns deleteWithoutVersionId(BucketMetadata bucketMetadata, String key) {
+  // Using static to make the target compatible with Java8
+   static DeleteObjectAns deleteWithoutVersionId(Storage storage, BucketMetadata bucketMetadata, String key) {
     Optional<ObjectMetadata> objectMetadataOpt = bucketMetadata.getObjectMetadata(key);
     String returnedVersionId;
     if (objectMetadataOpt.isPresent()) { // key exists
@@ -59,7 +61,7 @@ public interface DeleteObjectService extends LocalS3MetadataApplicable, StorageA
           VersionedObjectMetadata removed =
               objectMetadata.getVersionedObjectMap().remove(objectMetadata.getVirtualVersion().get());
           if (!removed.isDeleted()) {
-            storage().delete(removed.getFileId());
+            storage.delete(removed.getFileId());
           }
         }
         objectMetadata.setVirtualVersion(versionId);
@@ -82,7 +84,8 @@ public interface DeleteObjectService extends LocalS3MetadataApplicable, StorageA
         .build();
   }
 
-  private VersionedObjectMetadata createDeleteMarker() {
+  // Java8 doesn't support private method in interfaces. Using static to make the target compatible with Java8
+  static VersionedObjectMetadata createDeleteMarker() {
     VersionedObjectMetadata versionedObjectMetadata = new VersionedObjectMetadata();
     versionedObjectMetadata.setDeleted(true);
     versionedObjectMetadata.setCreationDate(System.currentTimeMillis());
@@ -98,7 +101,8 @@ public interface DeleteObjectService extends LocalS3MetadataApplicable, StorageA
    *    <li>If the version ID is not exists, do nothing and return the given version ID.</li>
    * </ul>
    */
-  private DeleteObjectAns deleteWithVersionId(BucketMetadata bucketMetadata, String key, String versionId) {
+  // Java8 doesn't support private method in interfaces. Using static to make the target compatible with Java8
+  static DeleteObjectAns deleteWithVersionId(Storage storage, BucketMetadata bucketMetadata, String key, String versionId) {
     ObjectMetadata objectMetadata = ObjectAssertions.assertObjectExists(bucketMetadata, key);
     boolean isDeleteMarker = false;
     if (ObjectMetadata.NULL_VERSION.equals(versionId)) {
@@ -107,7 +111,7 @@ public interface DeleteObjectService extends LocalS3MetadataApplicable, StorageA
         VersionedObjectMetadata toRemove = objectMetadata.getVersionedObjectMap().remove(virtualVersionOpt.get());
         isDeleteMarker = toRemove.isDeleted();
         if (!isDeleteMarker) {
-          storage().delete(toRemove.getFileId());
+          storage.delete(toRemove.getFileId());
         }
         objectMetadata.setVirtualVersion(null);
       }
@@ -118,7 +122,7 @@ public interface DeleteObjectService extends LocalS3MetadataApplicable, StorageA
         VersionedObjectMetadata removed = objectMetadata.getVersionedObjectMap().remove(versionId);
         isDeleteMarker = removed.isDeleted();
         if (!isDeleteMarker) {
-          storage().delete(removed.getFileId());
+          storage.delete(removed.getFileId());
         }
       }
     }

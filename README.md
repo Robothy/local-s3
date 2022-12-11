@@ -9,6 +9,39 @@
 LocalS3 is an Amazon S3 mock service for testing and local development. LocalS3 is based on Netty
 and without heavy dependencies, it starts up quickly and handles requests efficiently.
 
+<details>
+<summary><b>Supported Amazon S3 APIs</b></summary>
+
++ CopyObject
++ CreateBucket
++ CreateMultipartUpload
++ CompleteMultipartUpload
++ DeleteBucket
++ DeleteBucketPolicy
++ DeleteBucketReplication
++ DeleteBucketTagging
++ DeleteObject
++ GetObject
++ GetBucketAcl
++ GetBucketPolicy
++ GetBucketReplication
++ GetBucketVersioning
++ GetBucketTagging
++ HeadBucket
++ HeadObject
++ ListObjects
++ ListObjectVersions
++ PutObject
++ PutBucketAcl
++ PutBucketPolicy
++ PutBucketReplication
++ PutBucketVersioning
++ PutBucketTagging
++ UploadPart
+
+</details>
+
+
 ## Features
 
 + Support S3 object versioning.
@@ -159,34 +192,6 @@ public class AppTest {
 }
 ```
 
-## Supported S3 APIs
-
-+ CopyObject
-+ CreateBucket
-+ CreateMultipartUpload
-+ CompleteMultipartUpload
-+ DeleteBucket
-+ DeleteBucketPolicy
-+ DeleteBucketTagging
-+ DeleteObject
-+ GetObject
-+ GetBucketAcl
-+ GetBucketPolicy
-+ GetBucketVersioning
-+ GetBucketTagging
-+ HeadBucket
-+ HeadObject
-+ ListObjects
-+ ListObjectVersions
-+ PutObject
-+ PutBucketAcl
-+ PutBucketPolicy
-+ PutBucketVersioning
-+ PutBucketTagging
-+ UploadPart
-
 ## Incoming features
 
-+ Replication configuration.
-+ Enabled encryption.
 + Set default expiration for multipart uploads.

@@ -41,8 +41,8 @@ class LocalFileSystemStorage implements Storage {
   @SneakyThrows
   public Long put(Long id, InputStream data) {
     Path objectPath = Paths.get(directory.toString(), String.valueOf(id));
-    try (data; OutputStream out = Files.newOutputStream(objectPath, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)) {
-      IOUtils.copy(data, out);
+    try (InputStream _data = data; OutputStream out = Files.newOutputStream(objectPath, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE)) {
+      IOUtils.copy(_data, out);
     }
     return id;
   }

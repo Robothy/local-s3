@@ -46,7 +46,7 @@ public interface CompleteMultipartUploadService extends LocalS3MetadataApplicabl
 
     int pre = -1;
     // Check part numbers.
-    for (var partOption : completeParts) {
+    for (CompleteMultipartUploadPartOption partOption : completeParts) {
       if (partOption.getPartNumber() <= pre) {
         throw new InvalidPartOrderException();
       }

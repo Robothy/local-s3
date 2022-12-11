@@ -6,9 +6,11 @@ import com.robothy.s3.core.asserionts.VersionedObjectAssertions;
 import com.robothy.s3.core.exception.VersionedObjectNotExistException;
 import com.robothy.s3.core.model.answers.GetObjectAns;
 import com.robothy.s3.core.model.internal.BucketMetadata;
+import com.robothy.s3.core.model.internal.LocalS3Metadata;
 import com.robothy.s3.core.model.internal.ObjectMetadata;
 import com.robothy.s3.core.model.internal.VersionedObjectMetadata;
 import com.robothy.s3.core.model.request.GetObjectOptions;
+import com.robothy.s3.core.storage.Storage;
 import java.util.Optional;
 
 public interface GetObjectService extends StorageApplicable, LocalS3MetadataApplicable {
@@ -17,11 +19,13 @@ public interface GetObjectService extends StorageApplicable, LocalS3MetadataAppl
    * Get object.
    */
   default GetObjectAns getObject(String bucketName, String key, GetObjectOptions options) {
-    return getObject(bucketName, key, false, options);
+    return getObject(localS3Metadata(), storage(), bucketName, key, false, options);
   }
 
-  private GetObjectAns getObject(String bucketName, String key, boolean metadataOnly, GetObjectOptions options) {
-    BucketMetadata bucketMetadata = BucketAssertions.assertBucketExists(localS3Metadata(), bucketName);
+  // Using static to make the target compatible with Java8
+  static GetObjectAns getObject(LocalS3Metadata localS3Metadata, Storage storage,
+                                String bucketName, String key, boolean metadataOnly, GetObjectOptions options) {
+    BucketMetadata bucketMetadata = BucketAssertions.assertBucketExists(localS3Metadata, bucketName);
     ObjectMetadata objectMetadata = ObjectAssertions.assertObjectExists(bucketMetadata, key);
     Optional<String> versionIdOpt = options.getVersionId();
     VersionedObjectMetadata versionedObjectMetadata;
@@ -67,7 +71,7 @@ public interface GetObjectService extends StorageApplicable, LocalS3MetadataAppl
           .contentType(versionedObjectMetadata.getContentType())
           .lastModified(versionedObjectMetadata.getCreationDate())
           .size(versionedObjectMetadata.getSize())
-          .content(metadataOnly ? null : storage().getInputStream(versionedObjectMetadata.getFileId()))
+          .content(metadataOnly ? null : storage.getInputStream(versionedObjectMetadata.getFileId()))
           .etag(versionedObjectMetadata.getEtag())
           .build();
     }
@@ -82,7 +86,7 @@ public interface GetObjectService extends StorageApplicable, LocalS3MetadataAppl
    * @return versioned object with metadata only.
    */
   default GetObjectAns headObject(String bucketName, String key, GetObjectOptions options) {
-    return getObject(bucketName, key, true, options);
+    return getObject(localS3Metadata(), storage(), bucketName, key, true, options);
   }
 
 }
