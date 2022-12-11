@@ -11,7 +11,7 @@ repositories {
 
 task mergeReports(type: JacocoReport) {
     executionData.from(project.fileTree(dir: '.', include: '**/build/jacoco/test.exec'))
-    sourceDirectories.from(project.fileTree(dir: '.', include: '**/src/main/java/**'))
+    sourceDirectories.from(project.fileTree(dir: '.', include: '**/src/main/java/**', exclude: 'local-s3-docker/src/main/java/**'))
     classDirectories.from(project.fileTree(dir: '.', include: '**/build/classes/java/main/**'))
     reports {
         xml.required.set(true)
