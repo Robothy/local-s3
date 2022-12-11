@@ -19,6 +19,7 @@ class ErrorTest {
         .requestId("123")
         .argumentName("Name")
         .argumentValue("Robothy")
+        .bucketName("my-bucket")
         .build();
 
     String xml = xmlMapper.writeValueAsString(error);
