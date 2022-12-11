@@ -89,12 +89,12 @@ public interface ListObjectsService extends LocalS3MetadataApplicable {
   }
 
 
-  private Object fetchLatestObject(String key, ObjectMetadata objectMetadata) {
+  static Object fetchLatestObject(String key, ObjectMetadata objectMetadata) {
     VersionedObjectMetadata latest = objectMetadata.getLatest();
     Object object = new Object();
     object.setKey(key);
     object.setSize(latest.getSize());
-    object.setLastModified(new Date(latest.getModificationDate()));
+    object.setLastModified(new Date(latest.getCreationDate()));
     object.setEtag(latest.getEtag());
     object.setOwner(Owner.DEFAULT_OWNER);
     object.setStorageClass(StorageClass.STANDARD);

@@ -125,14 +125,14 @@ public interface ListObjectVersionsService extends LocalS3MetadataApplicable {
    * @param maxKeys max keys.
    * @return last visited version ID.
    */
-  private String fetchVersions(List<VersionItem> versionItems, List<String> commonPrefixes, String key,
+  static String fetchVersions(List<VersionItem> versionItems, List<String> commonPrefixes, String key,
                                Map<String, VersionedObjectMetadata> versions, boolean firstItemIsLatest,
                                int maxKeys, String virtualVersion) {
 
     String lastVisitedVersion = null;
     int keyCount = versionItems.size() + commonPrefixes.size();
     boolean isLatest = firstItemIsLatest;
-    for (var entry : versions.entrySet()) {
+    for (Map.Entry<String, VersionedObjectMetadata> entry : versions.entrySet()) {
       if (keyCount == maxKeys) {
         break;
       }

@@ -69,7 +69,9 @@ tasks.compileTestJava {
 }
 
 java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(15)
-    }
+//    toolchain {
+//        languageVersion = JavaLanguageVersion.of(8)
+//    }
+    sourceCompatibility(8)
+    targetCompatibility(8)
 }

@@ -19,10 +19,10 @@ public class ByteBufUtils {
    */
   public static ByteBuf fromInputStream(InputStream inputStream) {
     ByteBuf buffer = Unpooled.buffer();
-    try (inputStream) {
+    try (InputStream in = inputStream) {
       byte[] buf = new byte[8192];
       int len;
-      while ((len = inputStream.read(buf)) != -1) {
+      while ((len = in.read(buf)) != -1) {
         buffer.writeBytes(buf, 0, len);
       }
     } catch (IOException e) {
