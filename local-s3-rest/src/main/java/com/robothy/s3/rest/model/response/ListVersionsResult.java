@@ -81,6 +81,7 @@ public class ListVersionsResult {
         xmlGenerator.writeStartObject();
         Field[] fields = ListVersionsResult.class.getDeclaredFields();
         for (Field field : fields) {
+          field.setAccessible(true);
           java.lang.Object fieldValue = field.get(value);
           if (fieldValue instanceof List) {
             for (java.lang.Object version : (List) fieldValue) {
@@ -90,6 +91,10 @@ public class ListVersionsResult {
               xmlGenerator.writeObject(version);
             }
           } else {
+            if ("$jacocoData".equals(field.getName())) {
+              continue;
+            }
+
             JacksonXmlProperty jacksonXmlProperty = field.getAnnotation(JacksonXmlProperty.class);
             Objects.requireNonNull(jacksonXmlProperty, "Must add @JacksonXmlProperty to " + value.getClass() + "#" + field.getName());
             xmlGenerator.writeFieldName(jacksonXmlProperty.localName());
