@@ -15,6 +15,9 @@ import lombok.Data;
 @Data
 public class BucketMetadata {
 
+  /**
+   * Create a {@linkplain BucketMetadata} instance.
+   */
   public BucketMetadata() {
 
   }
@@ -47,20 +50,28 @@ public class BucketMetadata {
 
   private String replication;
 
+  private String encryption;
+
+  /**
+   * Get metadata of the specified object.
+   *
+   * @param key the object key.
+   * @return the object metadata of the specified object key.
+   */
   public Optional<ObjectMetadata> getObjectMetadata(String key) {
     return Optional.ofNullable(objectMap.get(key));
   }
 
-
   /**
-   * Add an {@linkplain ObjectMetadata} instance.
+   * Put an {@linkplain ObjectMetadata} instance.
    *
+   * @param key the object key.
    * @param objectMetadata object metadata.
    * @return added object metadata.
    */
-  public ObjectMetadata addObjectMetadata(ObjectMetadata objectMetadata) {
-    ObjectAssertions.assertObjectKeyIsValid(objectMetadata.getKey());
-    objectMap.put(objectMetadata.getKey(), objectMetadata);
+  public ObjectMetadata putObjectMetadata(String key, ObjectMetadata objectMetadata) {
+    ObjectAssertions.assertObjectKeyIsValid(key);
+    objectMap.put(key, objectMetadata);
     return objectMetadata;
   }
 
@@ -129,6 +140,24 @@ public class BucketMetadata {
    */
   public void setReplication(String replication) {
     this.replication = replication;
+  }
+
+  /**
+   * Get the bucket encryption.
+   *
+   * @return the bucket encryption.
+   */
+  public Optional<String> getEncryption() {
+    return Optional.ofNullable(encryption);
+  }
+
+  /**
+   * Set bucket encryption.
+   *
+   * @param encryption the bucket encryption.
+   */
+  public void setEncryption(String encryption) {
+    this.encryption = encryption;
   }
 
 }

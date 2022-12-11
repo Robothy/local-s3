@@ -45,8 +45,8 @@ public interface PutObjectService extends LocalS3MetadataApplicable, StorageAppl
       objectMetadata = bucketMetadata.getObjectMetadata(key).get();
       objectMetadata.putVersionedObjectMetadata(versionId, versionedObjectMetadata);
     } else {
-      objectMetadata = new ObjectMetadata(key, versionId, versionedObjectMetadata);
-      bucketMetadata.addObjectMetadata(objectMetadata);
+      objectMetadata = new ObjectMetadata(versionId, versionedObjectMetadata);
+      bucketMetadata.putObjectMetadata(key, objectMetadata);
     }
 
     String returnedVersionId = versionId;

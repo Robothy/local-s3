@@ -17,12 +17,14 @@ and without heavy dependencies, it starts up quickly and handles requests effici
 + CreateMultipartUpload
 + CompleteMultipartUpload
 + DeleteBucket
++ DeleteBucketEncryption
 + DeleteBucketPolicy
 + DeleteBucketReplication
 + DeleteBucketTagging
 + DeleteObject
 + GetObject
 + GetBucketAcl
++ GetBucketEncryption
 + GetBucketPolicy
 + GetBucketReplication
 + GetBucketVersioning
@@ -33,6 +35,7 @@ and without heavy dependencies, it starts up quickly and handles requests effici
 + ListObjectVersions
 + PutObject
 + PutBucketAcl
++ PutBucketEncryption
 + PutBucketPolicy
 + PutBucketReplication
 + PutBucketVersioning

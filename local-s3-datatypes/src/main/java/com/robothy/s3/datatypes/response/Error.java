@@ -32,4 +32,7 @@ public class Error {
 
   @JacksonXmlProperty(localName = "ArgumentValue")
   private String argumentValue;
+
+  @JacksonXmlProperty(localName = "BucketName")
+  private String bucketName;
 }

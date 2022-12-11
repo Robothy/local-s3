@@ -9,11 +9,9 @@ class ObjectMetadataTest {
 
   @Test
   void getLatest() {
-    String key = "a.txt";
     String versionId = IdUtils.defaultGenerator().nextStrId();
     VersionedObjectMetadata versionedObjectMetadata = new VersionedObjectMetadata();
-    ObjectMetadata objectMetadata = new ObjectMetadata(key, versionId, versionedObjectMetadata);
-    assertEquals(key, objectMetadata.getKey());
+    ObjectMetadata objectMetadata = new ObjectMetadata(versionId, versionedObjectMetadata);
     assertSame(versionedObjectMetadata, objectMetadata.getLatest());
     assertEquals(versionId, objectMetadata.getLatestVersion());
 
@@ -26,10 +24,9 @@ class ObjectMetadataTest {
 
   @Test
   void serialize() {
-    String key = "a.txt";
     String versionId = IdUtils.defaultGenerator().nextStrId();
     VersionedObjectMetadata versionedObjectMetadata = new VersionedObjectMetadata();
-    ObjectMetadata objectMetadata = new ObjectMetadata(key, versionId, versionedObjectMetadata);
+    ObjectMetadata objectMetadata = new ObjectMetadata(versionId, versionedObjectMetadata);
     String json = JsonUtils.toJson(objectMetadata);
     ObjectMetadata serialized = JsonUtils.fromJson(json, ObjectMetadata.class);
     assertEquals(objectMetadata, serialized);

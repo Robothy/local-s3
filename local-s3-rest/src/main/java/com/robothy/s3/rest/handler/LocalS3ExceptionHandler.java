@@ -34,6 +34,7 @@ class LocalS3ExceptionHandler implements ExceptionHandler<LocalS3Exception> {
         .code(s3ErrorCode.code())
         .message(Optional.ofNullable(e.getMessage()).orElse(s3ErrorCode.description()))
         .requestId(IdUtils.defaultGenerator().nextStrId())
+        .bucketName(e.getBucketName())
         .build();
 
     try {
