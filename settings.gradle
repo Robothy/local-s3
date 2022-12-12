@@ -1,23 +1,7 @@
 pluginManagement {
 
-    resolutionStrategy {
-        eachPlugin {
-            if (requested.id.id.equals('robothy-platform-release')) {
-                useModule("com.robothy:platform-release-gradle-plugin:${robothyPlatformReleaseGradlePluginVersion}")
-            }
-        }
-    }
-
     repositories {
         mavenLocal()
-
-        maven {
-            url = 'https://maven.pkg.github.com/robothy-platform/maven'
-            credentials {
-                username = "${GITHUB_USERNAME}"
-                password = "${GITHUB_TOKEN}"
-            }
-        }
 
 //        maven {
 //            url = 'https://maven.aliyun.com/repository/gradle-plugin'

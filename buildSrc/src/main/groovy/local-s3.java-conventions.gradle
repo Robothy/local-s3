@@ -8,13 +8,13 @@ repositories {
     mavenCentral()
     jcenter()
 
-    maven {
-        url 'https://maven.pkg.github.com/robothy-platform/maven'
-        credentials {
-            username = "${GITHUB_USERNAME}"
-            password = "${GITHUB_TOKEN}"
-        }
-    }
+//    maven {
+//        url 'https://maven.pkg.github.com/robothy-platform/maven'
+//        credentials {
+//            username = "${GITHUB_USERNAME}"
+//            password = "${GITHUB_TOKEN}"
+//        }
+//    }
 
 
 //    maven { url 'https://maven.aliyun.com/repository/google/' }
