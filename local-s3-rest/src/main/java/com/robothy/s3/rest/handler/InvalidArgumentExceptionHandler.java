@@ -5,7 +5,7 @@ import com.robothy.netty.http.HttpResponse;
 import com.robothy.netty.router.ExceptionHandler;
 import com.robothy.s3.core.exception.InvalidArgumentException;
 import com.robothy.s3.core.util.IdUtils;
-import com.robothy.s3.datatypes.response.Error;
+import com.robothy.s3.datatypes.response.S3Error;
 import com.robothy.s3.rest.utils.XmlUtils;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaderValues;
@@ -15,7 +15,7 @@ public class InvalidArgumentExceptionHandler implements ExceptionHandler<Invalid
 
   @Override
   public void handle(InvalidArgumentException e, HttpRequest request, HttpResponse response) {
-    Error error = Error.builder()
+    S3Error error = S3Error.builder()
         .requestId(IdUtils.defaultGenerator().nextStrId())
         .code(e.getS3ErrorCode().code())
         .message(e.getMessage() == null ? e.getS3ErrorCode().description() : e.getMessage())

@@ -32,7 +32,7 @@ class GetBucketController implements HttpRequestHandler {
     Bucket bucket = bucketService.getBucket(bucketName);
     GetBucketResult getBucketResult = GetBucketResult.builder()
         .bucket(bucket.getName())
-        .creationDate(Date.from(Instant.ofEpochMilli(bucket.getCreationDate())))
+        .creationDate(Instant.ofEpochMilli(bucket.getCreationDate()))
         .publicAccessBlockEnabled(false)
         .build();
     response.write(xmlMapper.writeValueAsString(getBucketResult));

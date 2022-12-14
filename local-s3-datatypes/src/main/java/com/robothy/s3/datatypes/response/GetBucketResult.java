@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-import com.robothy.s3.datatypes.converter.AmazonDateConverter;
-import java.util.Date;
+import com.robothy.s3.datatypes.converter.AmazonInstantConverter;
+import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,7 +25,7 @@ public class GetBucketResult {
   private boolean publicAccessBlockEnabled;
 
   @JsonProperty("CreationDate")
-  @JsonSerialize(converter = AmazonDateConverter.class)
-  private Date creationDate;
+  @JsonSerialize(converter = AmazonInstantConverter.class)
+  private Instant creationDate;
 
 }

@@ -21,9 +21,9 @@ public class LocalS3Extension implements BeforeAllCallback, AfterAllCallback, Be
 
   private static final Logger logger = LoggerFactory.getLogger(LocalS3Extension.class);
 
-  private final ThreadLocal<com.robothy.s3.rest.LocalS3> localS3ForAll = new ThreadLocal<>();
+  private static final ThreadLocal<com.robothy.s3.rest.LocalS3> localS3ForAll = new ThreadLocal<>();
 
-  private final ThreadLocal<com.robothy.s3.rest.LocalS3> localS3ForEach = new ThreadLocal<>();
+  private static final ThreadLocal<com.robothy.s3.rest.LocalS3> localS3ForEach = new ThreadLocal<>();
 
   public static final String LOCAL_S3_PORT_STORE_SUFFIX = ".LocalS3.Port";
 

@@ -8,7 +8,8 @@ import com.robothy.s3.core.model.internal.ObjectMetadata;
 import com.robothy.s3.core.model.internal.VersionedObjectMetadata;
 import com.robothy.s3.datatypes.Owner;
 import com.robothy.s3.datatypes.enums.StorageClass;
-import com.robothy.s3.datatypes.response.Object;
+import com.robothy.s3.datatypes.response.S3Object;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
@@ -50,7 +51,7 @@ public interface ListObjectsService extends LocalS3MetadataApplicable {
       return EMPTY_RESULT;
     }
 
-    List<Object> objects = new LinkedList<>();
+    List<S3Object> objects = new LinkedList<>();
     Set<String> commonPrefixes = new TreeSet<>();
     int prefixLen = Objects.isNull(prefix) ? 0 : prefix.length();
     boolean hasMore = false;
@@ -89,12 +90,12 @@ public interface ListObjectsService extends LocalS3MetadataApplicable {
   }
 
 
-  static Object fetchLatestObject(String key, ObjectMetadata objectMetadata) {
+  static S3Object fetchLatestObject(String key, ObjectMetadata objectMetadata) {
     VersionedObjectMetadata latest = objectMetadata.getLatest();
-    Object object = new Object();
+    S3Object object = new S3Object();
     object.setKey(key);
     object.setSize(latest.getSize());
-    object.setLastModified(new Date(latest.getCreationDate()));
+    object.setLastModified(Instant.ofEpochMilli(latest.getCreationDate()));
     object.setEtag(latest.getEtag());
     object.setOwner(Owner.DEFAULT_OWNER);
     object.setStorageClass(StorageClass.STANDARD);

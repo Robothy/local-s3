@@ -17,6 +17,7 @@ import com.robothy.s3.rest.utils.ResponseUtils;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import java.time.Instant;
 import java.util.Date;
 import java.util.stream.Stream;
 
@@ -41,7 +42,7 @@ class CopyObjectController implements HttpRequestHandler {
     CopyObjectOptions copyObjectOptions = parseCopyOptions(request);
     CopyObjectAns copyObjectAns = objectService.copyObject(bucket, key, copyObjectOptions);
     CopyObjectResult result = CopyObjectResult.builder()
-        .lastModified(new Date(copyObjectAns.getLastModified()))
+        .lastModified(Instant.ofEpochMilli(copyObjectAns.getLastModified()))
         .etag(copyObjectAns.getEtag())
         .build();
 

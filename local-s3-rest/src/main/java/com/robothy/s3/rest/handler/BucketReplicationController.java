@@ -12,6 +12,7 @@ import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 public class BucketReplicationController {
 
@@ -27,7 +28,7 @@ public class BucketReplicationController {
   public void put(HttpRequest request, HttpResponse response) throws Exception {
     String bucketName = RequestAssertions.assertBucketNameProvided(request);
     try(InputStream in = new ByteBufInputStream(request.getBody())) {
-      String replication = new String(in.readAllBytes());
+      String replication = new String(in.readAllBytes(), StandardCharsets.UTF_8);
       replicationService.putBucketReplication(bucketName, replication);
     }
 

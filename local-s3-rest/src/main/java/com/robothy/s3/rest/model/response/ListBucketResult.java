@@ -3,7 +3,7 @@ package com.robothy.s3.rest.model.response;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import com.robothy.s3.datatypes.response.Object;
+import com.robothy.s3.datatypes.response.S3Object;
 import java.util.List;
 import lombok.Builder;
 
@@ -37,7 +37,7 @@ public class ListBucketResult {
 
   @JacksonXmlProperty(localName = "Contents")
   @JacksonXmlElementWrapper(useWrapping = false)
-  private List<Object> contents;
+  private List<S3Object> contents;
 
   @JacksonXmlProperty(localName = "CommonPrefixes")
   @JacksonXmlElementWrapper(useWrapping = false)

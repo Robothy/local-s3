@@ -78,14 +78,19 @@ jobs:
       - name: Release(Info)
         if: ${{inputs.gradleLogLevel == 'Info'}}
         run: .|
-          ./gradlew check release
+          ./gradlew check release --info
+
+      - name: Release(Warn)
+        if: ${{inputs.gradleLogLevel == 'Warn'}}
+        run: .|
+          ./gradlew check release --warn
 
       - name: Release(Debug)
         if: ${{inputs.gradleLogLevel == 'Debug'}}
         run: |
-          ./gradlew check release
+          ./gradlew check release --debug
 
       - name: Release(Stacktrace)
         if: ${{inputs.gradleLogLevel == 'Stacktrace'}}
         run: |
-          ./gradlew check release
+          ./gradlew check release --stacktrace

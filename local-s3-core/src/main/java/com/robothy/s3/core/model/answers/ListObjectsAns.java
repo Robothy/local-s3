@@ -1,6 +1,6 @@
 package com.robothy.s3.core.model.answers;
 
-import com.robothy.s3.datatypes.response.Object;
+import com.robothy.s3.datatypes.response.S3Object;
 import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
@@ -23,7 +23,7 @@ public class ListObjectsAns {
    */
   private String nextMarker;
 
-  private List<Object> objects;
+  private List<S3Object> objects;
 
   private List<String> commonPrefixes;
 

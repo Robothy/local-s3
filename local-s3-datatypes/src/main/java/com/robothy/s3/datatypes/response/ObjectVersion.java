@@ -4,10 +4,10 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.robothy.s3.datatypes.Owner;
-import com.robothy.s3.datatypes.converter.AmazonDateConverter;
+import com.robothy.s3.datatypes.converter.AmazonInstantConverter;
 import com.robothy.s3.datatypes.enums.CheckSumAlgorithm;
 import com.robothy.s3.datatypes.enums.StorageClass;
-import java.util.Date;
+import java.time.Instant;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -24,9 +24,9 @@ public class ObjectVersion implements VersionItem {
   @JacksonXmlProperty(localName = "Key")
   protected String key;
 
-  @JsonSerialize(converter = AmazonDateConverter.class)
+  @JsonSerialize(converter = AmazonInstantConverter.class)
   @JacksonXmlProperty(localName = "LastModified")
-  protected Date lastModified;
+  protected Instant lastModified;
 
   @JacksonXmlProperty(localName = "Owner")
   protected Owner owner;

@@ -16,7 +16,7 @@ import lombok.Setter;
 @Builder
 @JacksonXmlRootElement(localName = "Error")
 @EqualsAndHashCode
-public class Error {
+public class S3Error {
 
   @JacksonXmlProperty(localName = "Code")
   private String code;

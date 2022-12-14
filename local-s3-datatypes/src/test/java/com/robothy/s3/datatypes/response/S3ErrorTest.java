@@ -6,14 +6,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.junit.jupiter.api.Test;
 
-class ErrorTest {
+class S3ErrorTest {
 
   @Test
   public void test() throws JsonProcessingException {
     XmlMapper xmlMapper = new XmlMapper();
     xmlMapper.configure(JsonParser.Feature.IGNORE_UNDEFINED, true);
 
-    Error error = Error.builder()
+    S3Error error = S3Error.builder()
         .code("InternalServerError")
         .message("Internal Server Error")
         .requestId("123")
@@ -23,7 +23,7 @@ class ErrorTest {
         .build();
 
     String xml = xmlMapper.writeValueAsString(error);
-    Error deserialized = xmlMapper.readValue(xml, Error.class);
+    S3Error deserialized = xmlMapper.readValue(xml, S3Error.class);
     assertEquals(error, deserialized);
   }
 

@@ -4,7 +4,7 @@ import com.robothy.netty.http.HttpRequest;
 import com.robothy.netty.http.HttpRequestHandler;
 import com.robothy.netty.http.HttpResponse;
 import com.robothy.s3.core.util.IdUtils;
-import com.robothy.s3.datatypes.response.Error;
+import com.robothy.s3.datatypes.response.S3Error;
 import com.robothy.s3.rest.utils.XmlUtils;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaderValues;
@@ -18,7 +18,7 @@ class NotFoundHandler implements HttpRequestHandler {
   @Override
   public void handle(HttpRequest request, HttpResponse response) throws Exception {
 
-    Error error = Error.builder()
+    S3Error error = S3Error.builder()
         .code("NotFound")
         .message("LocalS3 cannot found resource " + request.getUri())
         .requestId(IdUtils.nextUuid())

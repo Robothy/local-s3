@@ -12,6 +12,7 @@ import com.robothy.s3.datatypes.enums.StorageClass;
 import com.robothy.s3.datatypes.response.DeleteMarkerEntry;
 import com.robothy.s3.datatypes.response.ObjectVersion;
 import com.robothy.s3.datatypes.response.VersionItem;
+import java.time.Instant;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -144,14 +145,14 @@ public interface ListObjectVersionsService extends LocalS3MetadataApplicable {
             .latest(isLatest)
             .versionId(entry.getKey().equals(virtualVersion) ? ObjectMetadata.NULL_VERSION : entry.getKey())
             .key(key)
-            .lastModified(new Date(versionedObjectMetadata.getCreationDate()))
+            .lastModified(Instant.ofEpochMilli(versionedObjectMetadata.getCreationDate()))
             .build());
       } else {
         versionItems.add(ObjectVersion.builder()
             .latest(isLatest)
             .versionId(entry.getKey().equals(virtualVersion) ? ObjectMetadata.NULL_VERSION : entry.getKey())
             .key(key)
-            .lastModified(new Date(versionedObjectMetadata.getCreationDate()))
+            .lastModified(Instant.ofEpochMilli(versionedObjectMetadata.getCreationDate()))
             .size(versionedObjectMetadata.getSize())
             .etag(versionedObjectMetadata.getEtag())
             .storageClass(StorageClass.STANDARD)

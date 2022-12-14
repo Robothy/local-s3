@@ -12,6 +12,7 @@ import io.netty.buffer.ByteBufInputStream;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 class BucketPolicyController {
 
@@ -40,7 +41,7 @@ class BucketPolicyController {
   void put(HttpRequest request, HttpResponse response) throws IOException {
     String bucketName = RequestAssertions.assertBucketNameProvided(request);
     try(InputStream in = new ByteBufInputStream(request.getBody()) ){
-      bucketPolicyService.putBucketPolicy(bucketName, new String(in.readAllBytes()));
+      bucketPolicyService.putBucketPolicy(bucketName, new String(in.readAllBytes(), StandardCharsets.UTF_8));
     }
     ResponseUtils.addDateHeader(response);
     ResponseUtils.addServerHeader(response);

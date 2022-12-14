@@ -1,9 +1,8 @@
 package com.robothy.s3.rest.model.response;
 
-import static org.junit.jupiter.api.Assertions.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.robothy.s3.datatypes.response.Object;
+import com.robothy.s3.datatypes.response.S3Object;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -16,7 +15,7 @@ class ListBucketResultTest {
         .maxKeys(100)
         .encodingType("url")
         .prefix("dir")
-        .contents(List.of(new Object(), new Object()))
+        .contents(List.of(new S3Object(), new S3Object()))
         .commonPrefixes(List.of(new CommonPrefix("a/"), new CommonPrefix("b/")))
         .build();
 

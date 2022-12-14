@@ -6,9 +6,7 @@ import com.robothy.s3.core.converters.deserializer.VersionedObjectMetadataMapCon
 import java.util.Comparator;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentSkipListMap;
-import lombok.AccessLevel;
 import lombok.Data;
-import lombok.Setter;
 
 /**
  * Represents local-s3 Object metadata.
@@ -24,7 +22,6 @@ public class ObjectMetadata {
   /**
    * The most recent instance on the top.
    */
-  @Setter(AccessLevel.PRIVATE)
   @JsonDeserialize(converter = VersionedObjectMetadataMapConverter.class)
   private ConcurrentSkipListMap<String, VersionedObjectMetadata> versionedObjectMap =
       new ConcurrentSkipListMap<>(Comparator.reverseOrder());

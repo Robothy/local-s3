@@ -17,6 +17,7 @@ import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -47,7 +48,7 @@ class ListObjectsController implements HttpRequestHandler {
     ListObjectsAns listObjectsAns = listObjectsService.listObjects(bucket, delimiter, marker, maxKeys, prefix);
     if ("url".equalsIgnoreCase(encodingType)) {
       listObjectsAns.getObjects().forEach(object -> object.setKey(URLEncoder.encode(object.getKey(), StandardCharsets.UTF_8)));
-      List<String> encodedPrefixes = new LinkedList<>();
+      List<String> encodedPrefixes = new ArrayList<>();
       listObjectsAns.getCommonPrefixes().forEach(commonPrefix -> encodedPrefixes.add(URLEncoder.encode(commonPrefix, StandardCharsets.UTF_8)));
       listObjectsAns.setCommonPrefixes(encodedPrefixes);
     }
