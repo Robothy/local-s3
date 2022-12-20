@@ -40,11 +40,17 @@ task dockerPush(type: Exec, dependsOn: 'test') {
     doFirst {
         var cmd = new ArrayList(executor)
         cmd.add("docker push luofuxiang/local-s3:${project.version}")
-        cmd.add("&& docker push luofuxiang/local-s3:latest")
+        commandLine(cmd)
+    }
+}
+
+task dockerPushLatest(type: Exec, dependsOn: 'test') {
+    doFirst {
+        var cmd = new ArrayList(executor)
+        cmd.add("docker push luofuxiang/local-s3:latest")
         commandLine(cmd)
     }
 }
 
 
-
-rootProject.tasks.release.dependsOn(dockerPush)
+rootProject.tasks.release.dependsOn(dockerPush, dockerPushLatest)
