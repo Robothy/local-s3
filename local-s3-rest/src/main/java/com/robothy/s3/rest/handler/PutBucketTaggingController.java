@@ -29,12 +29,12 @@ class PutBucketTaggingController implements HttpRequestHandler {
   @Override
   public void handle(HttpRequest request, HttpResponse response) throws Exception {
     String bucketName = RequestAssertions.assertBucketNameProvided(request);
-    try(InputStream inputStream = RequestUtils.getInputStream(request)) {
+
+    try(InputStream inputStream = RequestUtils.getBody(request).getDecodedBody()) {
       Tagging tagging = xmlMapper.readValue(inputStream, Tagging.class);
       bucketService.putTagging(bucketName, tagging.toCollection());
     }
-    ResponseUtils.addAmzRequestId(response);
-    ResponseUtils.addDateHeader(response);
+    ResponseUtils.addCommonHeaders(response);
   }
 
 }

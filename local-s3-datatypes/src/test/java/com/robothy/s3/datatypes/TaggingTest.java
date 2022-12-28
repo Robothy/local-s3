@@ -1,5 +1,6 @@
 package com.robothy.s3.datatypes;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
@@ -47,6 +48,28 @@ class TaggingTest {
     assertEquals(2, parsedTagging.getTagSets().size());
     assertTrue(parsedTagging.getTagSets().contains(tagSet1));
     assertTrue(parsedTagging.getTagSets().contains(tagSet2));
+  }
+
+  @Test
+  void toArray() {
+    String[][] tags = new String[][]{{"K1", "V1"}, {"K2", "V2"}};
+    Tagging tagging = Tagging.fromArrays(tags);
+    assertEquals(1, tagging.getTagSets().size());
+    Tagging.TagSet tagSet = tagging.getTagSets().iterator().next();
+    assertEquals(2, tagSet.getTags().size());
+
+    Tagging.Tag tag1 = tagSet.getTags().get(0);
+    assertEquals("K1", tag1.getKey());
+    assertEquals("V1", tag1.getValue());
+
+    Tagging.Tag tag2 = tagSet.getTags().get(1);
+    assertEquals("K2", tag2.getKey());
+    assertEquals("V2", tag2.getValue());
+
+    String[][] parsedTags = tagging.toArrays();
+    assertEquals(2, parsedTags.length);
+    assertArrayEquals(new String[]{"K1", "V1"}, parsedTags[0]);
+    assertArrayEquals(new String[]{"K2", "V2"}, parsedTags[1]);
   }
 
 }
