@@ -1,5 +1,6 @@
 package com.robothy.s3.core.model.internal;
 
+import java.util.Optional;
 import lombok.Data;
 
 @Data
@@ -25,5 +26,14 @@ public class VersionedObjectMetadata {
    * File ID in {@linkplain com.robothy.s3.core.storage.Storage}.
    */
   private Long fileId;
+
+  private String[][] tagging;
+
+  /**
+   * Get object tagging.
+   */
+  public Optional<String[][]> getTagging() {
+    return Optional.ofNullable(tagging);
+  }
 
 }

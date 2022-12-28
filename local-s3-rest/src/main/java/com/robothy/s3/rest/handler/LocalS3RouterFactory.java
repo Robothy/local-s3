@@ -18,6 +18,7 @@ public class LocalS3RouterFactory {
     BucketPolicyController bucketPolicy = new BucketPolicyController(serviceFactory);
     BucketReplicationController bucketReplicationController = new BucketReplicationController(serviceFactory);
     BucketEncryptionController bucketEncryptionController = new BucketEncryptionController(serviceFactory);
+    ObjectTaggingController objectTaggingController = new ObjectTaggingController(serviceFactory);
 
     Route CopyObject = Route.builder()
         .method(HttpMethod.PUT)
@@ -67,6 +68,13 @@ public class LocalS3RouterFactory {
         .method(HttpMethod.POST)
         .path("/{bucket}/{*key}")
         .handler(new CompleteMultipartUploadController(serviceFactory))
+        .build();
+
+    Route PutObjectTagging = Route.builder()
+        .method(HttpMethod.PUT)
+        .path("/{bucket}/{*key}")
+        .paramMatcher(params -> params.containsKey("tagging"))
+        .handler(objectTaggingController::put)
         .build();
 
     Route DeleteBucket = Route.builder()
@@ -135,6 +143,13 @@ public class LocalS3RouterFactory {
         .method(HttpMethod.DELETE)
         .path("/{bucket}/{*key}")
         .handler(new DeleteObjectController(serviceFactory))
+        .build();
+
+    Route DeleteObjectTagging = Route.builder()
+        .method(HttpMethod.DELETE)
+        .path("/{bucket}/{*key}")
+        .paramMatcher(params -> params.containsKey("tagging"))
+        .handler(objectTaggingController::delete)
         .build();
 
     Route GetBucket = Route.builder()
@@ -231,6 +246,13 @@ public class LocalS3RouterFactory {
         .method(HttpMethod.GET)
         .path("/{bucket}/{*key}")
         .handler(new GetObjectController(serviceFactory))
+        .build();
+
+    Route GetObjectTagging = Route.builder()
+        .method(HttpMethod.GET)
+        .path("/{bucket}/{*key}")
+        .paramMatcher(params -> params.containsKey("tagging"))
+        .handler(objectTaggingController::get)
         .build();
 
     Route HeadBucket = Route.builder()
@@ -355,6 +377,7 @@ public class LocalS3RouterFactory {
         .route(DeleteBucketTagging)
         .route(DeleteBucketTagging_)
         .route(DeleteObject)
+        .route(DeleteObjectTagging)
         .route(GetBucket)
         .route(GetObject)
         .route(GetBucketAcl)
@@ -369,6 +392,7 @@ public class LocalS3RouterFactory {
         .route(GetBucketVersioning_)
         .route(GetBucketTagging)
         .route(GetBucketTagging_)
+        .route(GetObjectTagging)
         .route(HeadBucket)
         .route(HeadObject)
         .route(ListObjects)
@@ -388,6 +412,7 @@ public class LocalS3RouterFactory {
         .route(PutBucketVersioning_)
         .route(PutBucketTagging)
         .route(PutBucketTagging_)
+        .route(PutObjectTagging)
         .route(UploadPart)
 
         .notFound(new NotFoundHandler())

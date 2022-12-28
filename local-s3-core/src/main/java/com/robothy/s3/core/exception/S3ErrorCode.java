@@ -58,7 +58,7 @@ public enum S3ErrorCode {
   NoLoggingStatusForKey("NoLoggingStatusForKey", 400, "There is no such thing as a logging status subresource for a key."),
   NoSuchBucket("NoSuchBucket", 404, "The specified bucket does not exist."),
   NoSuchBucketPolicy("NoSuchBucketPolicy", 404, "The specified bucket does not have a bucket policy."),
-  NoSuchTagSet("NoSuchBucketPolicy", 404, "The TagSet does not exist."),
+  NoSuchTagSet("NoSuchTagSet", 404, "The TagSet does not exist."),
   NoSuchKey("NoSuchKey", 404, "The specified key does not exist."),
   NoSuchLifecycleConfiguration("NoSuchLifecycleConfiguration", 404, "The lifecycle configuration does not exist."),
   NoSuchUpload("NoSuchUpload", 404, "The specified multipart upload does not exist. The upload ID might be invalid, or the multipart upload might have been aborted or completed."),

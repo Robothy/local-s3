@@ -1,6 +1,7 @@
 package com.robothy.s3.test;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -14,14 +15,21 @@ import com.amazonaws.services.s3.model.Bucket;
 import com.amazonaws.services.s3.model.BucketVersioningConfiguration;
 import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.CopyObjectResult;
+import com.amazonaws.services.s3.model.DeleteObjectTaggingRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
+import com.amazonaws.services.s3.model.GetObjectTaggingRequest;
+import com.amazonaws.services.s3.model.GetObjectTaggingResult;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.ObjectTagging;
 import com.amazonaws.services.s3.model.PutObjectResult;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3VersionSummary;
 import com.amazonaws.services.s3.model.SetBucketVersioningConfigurationRequest;
+import com.amazonaws.services.s3.model.SetObjectTaggingRequest;
+import com.amazonaws.services.s3.model.SetObjectTaggingResult;
+import com.amazonaws.services.s3.model.Tag;
 import com.amazonaws.services.s3.model.VersionListing;
 import com.robothy.s3.jupiter.LocalS3;
 import java.io.IOException;
@@ -266,6 +274,43 @@ public class ObjectIntegrationTest {
     S3Object object4 = s3.getObject(bucket1, key1);
     assertEquals(text2.length(), object4.getObjectMetadata().getContentLength());
     assertEquals(text2, new String(object4.getObjectContent().readAllBytes()));
+  }
+
+  @LocalS3
+  @Test
+  void testObjectTagging(AmazonS3 s3) {
+    String bucketName = "my-bucket";
+    String key = "key1";
+
+    s3.createBucket(bucketName);
+    s3.putObject(bucketName, key, "Hello");
+
+    assertDoesNotThrow(() -> s3.getObjectTagging(new GetObjectTaggingRequest(bucketName, key)));
+    SetObjectTaggingResult setObjectTaggingResult = s3.setObjectTagging(
+        new SetObjectTaggingRequest(bucketName, key, new ObjectTagging(List.of(new Tag("K1", "V1"), new Tag("K2", "V2")))));
+    assertEquals("null", setObjectTaggingResult.getVersionId());
+
+    GetObjectTaggingResult objectTagging1 = s3.getObjectTagging(new GetObjectTaggingRequest(bucketName, key));
+    assertEquals(2, objectTagging1.getTagSet().size());
+    Tag tag1 = objectTagging1.getTagSet().get(0);
+    Tag tag2 = objectTagging1.getTagSet().get(1);
+    assertEquals("K1", tag1.getKey());
+    assertEquals("V1", tag1.getValue());
+    assertEquals("K2", tag2.getKey());
+    assertEquals("V2", tag2.getValue());
+
+    s3.setBucketVersioningConfiguration(new SetBucketVersioningConfigurationRequest(bucketName,
+        new BucketVersioningConfiguration(BucketVersioningConfiguration.ENABLED)));
+
+    PutObjectResult putObjectResult1 = s3.putObject(bucketName, key, "World");
+    assertDoesNotThrow(() -> s3.getObjectTagging(new GetObjectTaggingRequest(bucketName, key)));
+
+    SetObjectTaggingResult setObjectTaggingResult1 = s3.setObjectTagging(
+        new SetObjectTaggingRequest(bucketName, key, putObjectResult1.getVersionId(),
+            new ObjectTagging(List.of(new Tag("K3", "V3")))));
+    assertEquals(putObjectResult1.getVersionId(), setObjectTaggingResult1.getVersionId());
+
+    assertDoesNotThrow(() -> s3.deleteObjectTagging(new DeleteObjectTaggingRequest(bucketName, key)));
   }
 
 }

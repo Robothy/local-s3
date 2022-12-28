@@ -97,6 +97,16 @@ class DeleteObjectServiceTest extends LocalS3ServiceTestBase {
     assertEquals(ObjectMetadata.NULL_VERSION, deleteObjectAns6.getVersionId());
     assertEquals(2, objectMetadata.getVersionedObjectMap().size());
 
+    DeleteObjectAns deleteObjectAns9 = objectService.deleteObject(bucketName, key, ObjectMetadata.NULL_VERSION);
+    assertTrue(deleteObjectAns9.isDeleteMarker());
+    assertEquals(ObjectMetadata.NULL_VERSION, deleteObjectAns9.getVersionId());
+    assertEquals(1, objectMetadata.getVersionedObjectMap().size());
+
+    DeleteObjectAns deleteObjectAns10 = objectService.deleteObject(bucketName, key, deleteObjectAns1.getVersionId());
+    assertTrue(deleteObjectAns10.isDeleteMarker());
+    assertEquals(deleteObjectAns1.getVersionId(), deleteObjectAns10.getVersionId());
+    BucketAssertions.assertBucketIsEmpty(bucketMetadata);
+
     String key1 = "key1";
     DeleteObjectAns deleteObjectAns7 = objectService.deleteObject(bucketName, key1);
     assertTrue(deleteObjectAns7.isDeleteMarker());
@@ -110,6 +120,5 @@ class DeleteObjectServiceTest extends LocalS3ServiceTestBase {
     DeleteObjectAns deleteObjectAns8 = objectService.deleteObject(bucketName, key1, putObjectAns.getVersionId());
     assertFalse(deleteObjectAns8.isDeleteMarker());
     assertEquals(putObjectAns.getVersionId(), deleteObjectAns8.getVersionId());
-
   }
 }

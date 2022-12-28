@@ -5,7 +5,8 @@ package com.robothy.s3.core.service;
  */
 public interface ObjectService extends LocalS3MetadataApplicable, StorageApplicable,
     PutObjectService, GetObjectService, DeleteObjectService, ListObjectsService, ListObjectVersionsService,
-    CreateMultipartUploadService, UploadPartService, CompleteMultipartUploadService, CopyObjectService {
+    CreateMultipartUploadService, UploadPartService, CompleteMultipartUploadService, CopyObjectService,
+    ObjectTaggingService {
 
 
 }

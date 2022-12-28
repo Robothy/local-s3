@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -82,6 +84,31 @@ public class Tagging {
       tagMap.forEach((k, v) -> tagSet.tags.add(new Tag(k, v)));
       tagging.tagSets.add(tagSet);
     });
+    return tagging;
+  }
+
+  /**
+   * Convert tagging to a 2-D string array.
+   *
+   * @return a (n x 2) array.
+   */
+  public String[][] toArrays() {
+    return this.tagSets.stream().flatMap(it -> it.tags.stream()).map(tag -> new String[]{tag.key, tag.value})
+        .toArray(String[][]::new);
+  }
+
+  /**
+   * Construct a {@linkplain Tagging} instance from an array.
+   *
+   * @return a {@linkplain Tagging} instance.
+   */
+  public static Tagging fromArrays(String[][] tags) {
+    Tagging tagging = new Tagging();
+    tagging.tagSets = new ArrayList<>(1);
+    TagSet tagSet = new TagSet();
+    tagging.tagSets.add(tagSet);
+    tagSet.tags = Stream.of(tags).map(tag -> new Tag(tag[0], tag[1]))
+        .collect(Collectors.toList());
     return tagging;
   }
 

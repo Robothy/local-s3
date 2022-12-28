@@ -22,7 +22,9 @@ and without heavy dependencies, it starts up quickly and handles requests effici
 + DeleteBucketReplication
 + DeleteBucketTagging
 + DeleteObject
++ DeleteObjectTagging
 + GetObject
++ GetObjectTagging
 + GetBucketAcl
 + GetBucketEncryption
 + GetBucketPolicy
@@ -33,13 +35,14 @@ and without heavy dependencies, it starts up quickly and handles requests effici
 + HeadObject
 + ListObjects
 + ListObjectVersions
-+ PutObject
 + PutBucketAcl
 + PutBucketEncryption
 + PutBucketPolicy
 + PutBucketReplication
 + PutBucketVersioning
 + PutBucketTagging
++ PutObject
++ PutObjectTagging
 + UploadPart
 
 </details>
