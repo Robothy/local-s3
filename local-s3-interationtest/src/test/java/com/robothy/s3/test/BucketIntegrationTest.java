@@ -2,6 +2,7 @@ package com.robothy.s3.test;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -46,11 +47,15 @@ public class BucketIntegrationTest {
   @LocalS3
   void testCreateBucket(AmazonS3 s3) {
     CreateBucketRequest bucketRequest = new CreateBucketRequest("my-bucket", "local");
+    assertFalse(s3.doesBucketExistV2("my-bucket"));
     Bucket bucket = s3.createBucket(bucketRequest);
     assertEquals("my-bucket", bucket.getName());
+    assertTrue(s3.doesBucketExistV2("my-bucket"));
 
+    assertFalse(s3.doesBucketExistV2("bucket2"));
     Bucket bucket2 = s3.createBucket("bucket2");
     assertEquals("bucket2", bucket2.getName());
+    assertTrue(s3.doesBucketExistV2("bucket2"));
 
     HeadBucketResult headBucketResult = s3.headBucket(new HeadBucketRequest("my-bucket"));
     assertEquals("local", headBucketResult.getBucketRegion());

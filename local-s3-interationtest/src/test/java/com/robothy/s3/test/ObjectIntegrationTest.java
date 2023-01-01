@@ -16,10 +16,13 @@ import com.amazonaws.services.s3.model.BucketVersioningConfiguration;
 import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.CopyObjectResult;
 import com.amazonaws.services.s3.model.DeleteObjectTaggingRequest;
+import com.amazonaws.services.s3.model.DeleteObjectsRequest;
+import com.amazonaws.services.s3.model.DeleteObjectsResult;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.GetObjectTaggingRequest;
 import com.amazonaws.services.s3.model.GetObjectTaggingResult;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
+import com.amazonaws.services.s3.model.MultiObjectDeleteException;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.ObjectTagging;
@@ -46,7 +49,9 @@ public class ObjectIntegrationTest {
   @LocalS3
   void testPutObject(AmazonS3 s3) throws IOException {
     Bucket bucket1 = s3.createBucket("bucket1");
+    assertFalse(s3.doesObjectExist("bucket1", "hello.txt"));
     s3.putObject(bucket1.getName(), "hello.txt", "Hello");
+    assertTrue(s3.doesObjectExist("bucket1", "hello.txt"));
     S3Object object = s3.getObject(bucket1.getName(), "hello.txt");
     assertArrayEquals("Hello".getBytes(), object.getObjectContent().readAllBytes());
   }
@@ -311,6 +316,29 @@ public class ObjectIntegrationTest {
     assertEquals(putObjectResult1.getVersionId(), setObjectTaggingResult1.getVersionId());
 
     assertDoesNotThrow(() -> s3.deleteObjectTagging(new DeleteObjectTaggingRequest(bucketName, key)));
+  }
+
+  @LocalS3
+  @Test
+  void testDeleteObjects(AmazonS3 s3) {
+    String bucketName = "my-bucket";
+    s3.createBucket(bucketName);
+    assertDoesNotThrow(() -> s3.deleteObjects(new DeleteObjectsRequest(bucketName)));
+
+    DeleteObjectsRequest deleteObjectsRequest = new DeleteObjectsRequest(bucketName);
+    deleteObjectsRequest.setKeys(List.of(
+        new DeleteObjectsRequest.KeyVersion("a.txt"),
+        new DeleteObjectsRequest.KeyVersion("b.txt", "123")));
+
+    assertThrows(MultiObjectDeleteException.class, () -> s3.deleteObjects(deleteObjectsRequest));
+
+    s3.putObject(bucketName, "a.txt", "Hello");
+    s3.putObject(bucketName, "b.txt", "World");
+    DeleteObjectsRequest deleteObjectsRequest1 = new DeleteObjectsRequest(bucketName);
+    deleteObjectsRequest1.setKeys(List.of(new DeleteObjectsRequest.KeyVersion("a.txt"),
+        new DeleteObjectsRequest.KeyVersion("b.txt")));
+    DeleteObjectsResult deleteObjectsResult1 = s3.deleteObjects(deleteObjectsRequest1);
+    assertEquals(2, deleteObjectsResult1.getDeletedObjects().size());
   }
 
 }

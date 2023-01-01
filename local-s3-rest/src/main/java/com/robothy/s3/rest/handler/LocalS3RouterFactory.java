@@ -70,6 +70,20 @@ public class LocalS3RouterFactory {
         .handler(new CompleteMultipartUploadController(serviceFactory))
         .build();
 
+    Route DeleteObjects = Route.builder()
+        .method(HttpMethod.POST)
+        .path("/{bucket}")
+        .paramMatcher(params -> params.containsKey("delete"))
+        .handler(new DeleteObjectsController(serviceFactory))
+        .build();
+
+    Route DeleteObjects_ = Route.builder()
+        .method(HttpMethod.POST)
+        .path("/{bucket}/")
+        .paramMatcher(params -> params.containsKey("delete"))
+        .handler(new DeleteObjectsController(serviceFactory))
+        .build();
+
     Route PutObjectTagging = Route.builder()
         .method(HttpMethod.PUT)
         .path("/{bucket}/{*key}")
@@ -377,6 +391,8 @@ public class LocalS3RouterFactory {
         .route(DeleteBucketTagging)
         .route(DeleteBucketTagging_)
         .route(DeleteObject)
+        .route(DeleteObjects)
+        .route(DeleteObjects_)
         .route(DeleteObjectTagging)
         .route(GetBucket)
         .route(GetObject)
