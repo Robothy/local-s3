@@ -35,4 +35,10 @@ public class S3Error {
 
   @JacksonXmlProperty(localName = "BucketName")
   private String bucketName;
+
+  @JacksonXmlProperty(localName = "Key")
+  private String key;
+
+  @JacksonXmlProperty(localName = "VersionId")
+  private String versionId;
 }
