@@ -20,6 +20,8 @@ class S3ErrorTest {
         .argumentName("Name")
         .argumentValue("Robothy")
         .bucketName("my-bucket")
+        .versionId("123")
+        .key("a.txt")
         .build();
 
     String xml = xmlMapper.writeValueAsString(error);
