@@ -39,7 +39,8 @@ class DeleteObjectServiceTest extends LocalS3ServiceTestBase {
     DeleteObjectAns deleteObjectAns = objectService.deleteObject(bucketName, key);
     assertTrue(deleteObjectAns.isDeleteMarker());
     assertEquals(ObjectMetadata.NULL_VERSION, deleteObjectAns.getVersionId());
-    GetObjectAns getObjectAns = objectService.getObject(bucketName, key, GetObjectOptions.builder().build());
+    GetObjectAns getObjectAns = objectService.getObject(bucketName, key, GetObjectOptions.builder()
+        .versionId(deleteObjectAns.getVersionId()).build());
     assertTrue(getObjectAns.isDeleteMarker());
     assertEquals(ObjectMetadata.NULL_VERSION, getObjectAns.getVersionId());
     BucketMetadata bucketMetadata = BucketAssertions.assertBucketExists(bucketService.localS3Metadata(), bucketName);
@@ -58,14 +59,16 @@ class DeleteObjectServiceTest extends LocalS3ServiceTestBase {
     objectMetadata = ObjectAssertions.assertObjectExists(bucketMetadata, key);
     assertTrue(deleteObjectAns1.isDeleteMarker());
     assertNotEquals(ObjectMetadata.NULL_VERSION, deleteObjectAns1.getVersionId());
-    GetObjectAns getObjectAns1 = objectService.getObject(bucketName, key, GetObjectOptions.builder().build());
+    GetObjectAns getObjectAns1 = objectService.getObject(bucketName, key, GetObjectOptions.builder()
+        .versionId(deleteObjectAns1.getVersionId()).build());
     assertTrue(getObjectAns1.isDeleteMarker());
     assertEquals(deleteObjectAns1.getVersionId(), getObjectAns1.getVersionId());
 
     DeleteObjectAns deleteObjectAns2 = objectService.deleteObject(bucketName, key);
     assertTrue(deleteObjectAns2.isDeleteMarker());
     assertNotEquals(ObjectMetadata.NULL_VERSION, deleteObjectAns2.getVersionId());
-    GetObjectAns getObjectAns2 = objectService.getObject(bucketName, key, GetObjectOptions.builder().build());
+    GetObjectAns getObjectAns2 = objectService.getObject(bucketName, key, GetObjectOptions.builder()
+        .versionId(deleteObjectAns2.getVersionId()).build());
     assertTrue(getObjectAns2.isDeleteMarker());
     assertEquals(deleteObjectAns2.getVersionId(), getObjectAns2.getVersionId());
 

@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.robothy.s3.core.exception.BucketNotExistException;
 import com.robothy.s3.core.model.Bucket;
+import com.robothy.s3.core.model.answers.DeleteObjectAns;
 import com.robothy.s3.core.model.answers.GetObjectAns;
 import com.robothy.s3.core.model.request.GetObjectOptions;
 import com.robothy.s3.core.model.request.PutObjectOptions;
@@ -61,8 +62,9 @@ class InMemoryLocalS3ManagerTest {
     assertEquals("plain/text", object.getContentType());
     assertEquals(7L, object.getSize());
 
-    inMemoObjectService.deleteObject(bucket, key);
-    GetObjectAns deletedObject = inMemoObjectService.getObject(bucket, key, GetObjectOptions.builder().build());
+    DeleteObjectAns deleteObjectAns = inMemoObjectService.deleteObject(bucket, key);
+    GetObjectAns deletedObject = inMemoObjectService.getObject(bucket, key, GetObjectOptions.builder()
+        .versionId(deleteObjectAns.getVersionId()).build());
     assertTrue(deletedObject.isDeleteMarker());
     inMemoBucketService.createBucket("your-bucket");
 
