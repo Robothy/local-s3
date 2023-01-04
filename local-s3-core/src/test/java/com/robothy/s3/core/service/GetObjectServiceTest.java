@@ -9,6 +9,7 @@ import com.robothy.s3.core.asserionts.BucketAssertions;
 import com.robothy.s3.core.asserionts.ObjectAssertions;
 import com.robothy.s3.core.exception.ObjectNotExistException;
 import com.robothy.s3.core.exception.VersionedObjectNotExistException;
+import com.robothy.s3.core.model.answers.DeleteObjectAns;
 import com.robothy.s3.core.model.answers.GetObjectAns;
 import com.robothy.s3.core.model.answers.PutObjectAns;
 import com.robothy.s3.core.model.internal.BucketMetadata;
@@ -118,13 +119,21 @@ class GetObjectServiceTest extends LocalS3ServiceTestBase {
     assertEquals(putObjectAns.getVersionId(), getObjectAns6.getVersionId());
 
     // Get delete marker
-    objectService.deleteObject(bucketName, key1, null);
-    GetObjectAns getObjectAns7 = objectService.getObject(bucketName, key1, GetObjectOptions.builder().build());
+    DeleteObjectAns deleteObjectAns = objectService.deleteObject(bucketName, key1, null);
+    GetObjectAns getObjectAns7 = objectService.getObject(bucketName, key1, GetObjectOptions.builder()
+        .versionId(deleteObjectAns.getVersionId()).build());
     assertTrue(getObjectAns7.isDeleteMarker());
     assertNull(getObjectAns7.getContentType());
     assertEquals(ObjectMetadata.NULL_VERSION, getObjectAns7.getVersionId());
-    GetObjectAns getObjectAns8 = objectService.headObject(bucketName, key1, GetObjectOptions.builder().build());
+
+    GetObjectAns getObjectAns8 = objectService.headObject(bucketName, key1, GetObjectOptions.builder()
+        .versionId(deleteObjectAns.getVersionId()).build());
     assertNull(getObjectAns8.getContent());
+
+    assertThrows(ObjectNotExistException.class, () ->
+        objectService.getObject(bucketName, key1, GetObjectOptions.builder().build()));
+    assertThrows(ObjectNotExistException.class, () ->
+        objectService.headObject(bucketName, key1, GetObjectOptions.builder().build()));
   }
 
 }

@@ -76,9 +76,9 @@ public class FileSystemLocalS3Proxy implements LocalS3Manager {
       if (Objects.nonNull(bucketChanged)) {
         String bucketName = (String) args[0];
         switch (bucketChanged.type()) {
-          case UPDATE : bucketMetaStore.store(bucketName, s3Metadata.getBucketMetadata(bucketName).get());
-          break;
-          case CREATE : bucketMetaStore.store(bucketName, s3Metadata.getBucketMetadata(bucketName).get());
+          case UPDATE :
+          case CREATE :
+            bucketMetaStore.store(bucketName, s3Metadata.getBucketMetadata(bucketName).get());
           break;
           case DELETE : bucketMetaStore.delete(bucketName);
         }

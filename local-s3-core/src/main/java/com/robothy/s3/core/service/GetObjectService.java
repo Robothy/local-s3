@@ -3,6 +3,7 @@ package com.robothy.s3.core.service;
 import com.robothy.s3.core.asserionts.BucketAssertions;
 import com.robothy.s3.core.asserionts.ObjectAssertions;
 import com.robothy.s3.core.asserionts.VersionedObjectAssertions;
+import com.robothy.s3.core.exception.ObjectNotExistException;
 import com.robothy.s3.core.exception.VersionedObjectNotExistException;
 import com.robothy.s3.core.model.answers.GetObjectAns;
 import com.robothy.s3.core.model.internal.BucketMetadata;
@@ -56,6 +57,12 @@ public interface GetObjectService extends StorageApplicable, LocalS3MetadataAppl
     }
 
     if (versionedObjectMetadata.isDeleted()) {
+
+      // The version ID is not specified and the latest version is a delete-marker.
+      if (!versionIdOpt.isPresent()) {
+        throw new ObjectNotExistException(key);
+      }
+
       return GetObjectAns.builder()
           .bucketName(bucketName)
           .key(key)

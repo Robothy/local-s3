@@ -339,6 +339,27 @@ public class ObjectIntegrationTest {
         new DeleteObjectsRequest.KeyVersion("b.txt")));
     DeleteObjectsResult deleteObjectsResult1 = s3.deleteObjects(deleteObjectsRequest1);
     assertEquals(2, deleteObjectsResult1.getDeletedObjects().size());
+
+    VersionListing versionListing1 = s3.listVersions(bucketName, "a.txt");
+    assertEquals(1, versionListing1.getVersionSummaries().size());
+    assertTrue(versionListing1.getVersionSummaries().get(0).isDeleteMarker());
+
+    VersionListing versionListing2 = s3.listVersions(bucketName, "b.txt");
+    assertEquals(1, versionListing2.getVersionSummaries().size());
+    assertTrue(versionListing2.getVersionSummaries().get(0).isDeleteMarker());
+
+    DeleteObjectsRequest deleteObjectsRequest2 = new DeleteObjectsRequest(bucketName);
+    deleteObjectsRequest2.setKeys(List.of(new DeleteObjectsRequest.KeyVersion("a.txt", "null"),
+        new DeleteObjectsRequest.KeyVersion("b.txt", "null")));
+    DeleteObjectsResult deleteObjectsResult2 = s3.deleteObjects(deleteObjectsRequest2);
+    assertEquals(2, deleteObjectsResult2.getDeletedObjects().size());
+    assertTrue(deleteObjectsResult2.getDeletedObjects().get(0).isDeleteMarker());
+    assertTrue(deleteObjectsResult2.getDeletedObjects().get(1).isDeleteMarker());
+
+    VersionListing versionListing3 = s3.listVersions(bucketName, "a.txt");
+    assertEquals(0, versionListing3.getVersionSummaries().size());
+    VersionListing versionListing4 = s3.listVersions(bucketName, "b.txt");
+    assertEquals(0, versionListing4.getVersionSummaries().size());
   }
 
 }
