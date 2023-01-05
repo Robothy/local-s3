@@ -12,9 +12,6 @@ public class VersionedObjectMetadata {
 
   private long creationDate;
 
-  @Deprecated
-  private long modificationDate;
-
   private long size;
 
   /**

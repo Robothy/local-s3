@@ -17,6 +17,7 @@ class ObjectTaggingServiceTest extends LocalS3ServiceTestBase {
   void testObjectTagging(BucketService bucketService, ObjectService objectService) {
     String bucketName = "my-bucket";
     bucketService.createBucket(bucketName);
+    bucketService.setVersioningEnabled(bucketName, Boolean.FALSE); // suspend bucket versioning.
     String key1 = "key1";
     objectService.putObject(bucketName, key1, PutObjectOptions.builder()
         .content(new ByteArrayInputStream("Hello".getBytes()))

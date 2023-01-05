@@ -55,7 +55,6 @@ class BucketMetadataTest {
     VersionedObjectMetadata versionedObj1 = new VersionedObjectMetadata();
     versionedObj1.setFileId(111L);
     versionedObj1.setContentType("application/json");
-    versionedObj1.setModificationDate(1L);
     versionedObj1.setCreationDate(2L);
     ObjectMetadata obj1 = new ObjectMetadata("12", versionedObj1);
     ObjectMetadata obj2 = new ObjectMetadata("11", versionedObj1);

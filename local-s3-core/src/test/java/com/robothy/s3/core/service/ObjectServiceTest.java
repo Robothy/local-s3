@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import com.robothy.s3.core.model.answers.GetObjectAns;
 import com.robothy.s3.core.model.answers.PutObjectAns;
 import com.robothy.s3.core.model.request.GetObjectOptions;
@@ -54,7 +55,7 @@ class ObjectServiceTest extends LocalS3ServiceTestBase {
     PutObjectAns putAbcTxtAns = objectService.putObject(bucketName, key, putAbcTxt);
     assertNotNull(putAbcTxtAns);
     assertEquals(key, putAbcTxtAns.getKey());
-    assertNotNull(putAbcTxtAns.getVersionId());
+    assertNull(putAbcTxtAns.getVersionId());
 
     GetObjectOptions getObjectOptions = GetObjectOptions.builder()
         .bucketName(bucketName)

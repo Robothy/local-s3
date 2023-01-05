@@ -46,6 +46,7 @@ class InMemoryLocalS3ManagerTest {
     String bucket = "my-bucket";
     String key = "a.txt";
     fsBucketService.createBucket(bucket);
+    fsBucketService.setVersioningEnabled(bucket, false);
     fsObjectService.putObject(bucket, key, PutObjectOptions.builder()
         .content(new ByteArrayInputStream("Robothy".getBytes()))
         .contentType("plain/text")

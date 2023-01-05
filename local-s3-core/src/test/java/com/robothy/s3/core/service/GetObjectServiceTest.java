@@ -2,11 +2,13 @@ package com.robothy.s3.core.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.robothy.s3.core.asserionts.BucketAssertions;
 import com.robothy.s3.core.asserionts.ObjectAssertions;
+import com.robothy.s3.core.exception.InvalidArgumentException;
 import com.robothy.s3.core.exception.ObjectNotExistException;
 import com.robothy.s3.core.exception.VersionedObjectNotExistException;
 import com.robothy.s3.core.model.answers.DeleteObjectAns;
@@ -33,7 +35,9 @@ class GetObjectServiceTest extends LocalS3ServiceTestBase {
     assertThrows(ObjectNotExistException.class, () -> objectService.getObject(bucketName, "not-exists-key",
         GetObjectOptions.builder().build()));
 
-    /*-- Bucket versioning not enabled. --*/
+    bucketService.setVersioningEnabled(bucketName, Boolean.FALSE);
+
+    /*-- Bucket versioning is suspended. --*/
     String key1 = "key1";
     // Put first version of key1
     objectService.putObject(bucketName, key1, PutObjectOptions.builder()
@@ -134,6 +138,53 @@ class GetObjectServiceTest extends LocalS3ServiceTestBase {
         objectService.getObject(bucketName, key1, GetObjectOptions.builder().build()));
     assertThrows(ObjectNotExistException.class, () ->
         objectService.headObject(bucketName, key1, GetObjectOptions.builder().build()));
+  }
+
+  @MethodSource("localS3Services")
+  @ParameterizedTest
+  void testGetObjectFromUnVersionedBucket(BucketService bucketService, ObjectService objectService) throws IOException {
+    String bucketName = "my-bucket";
+    bucketService.createBucket(bucketName);
+    assertThrows(ObjectNotExistException.class, () -> objectService.getObject(bucketName, "a.txt", GetObjectOptions.builder().build()));
+    PutObjectAns putObjectAns = objectService.putObject(bucketName, "a.txt", PutObjectOptions.builder()
+        .contentType("plain/text")
+        .content(new ByteArrayInputStream("Hello".getBytes()))
+        .size(5)
+        .build());
+    assertNull(putObjectAns.getVersionId());
+
+    GetObjectAns getObjectAns = objectService.getObject(bucketName, "a.txt", GetObjectOptions.builder()
+        .build());
+    assertEquals(bucketName, getObjectAns.getBucketName());
+    assertEquals("a.txt", getObjectAns.getKey());
+    assertEquals(5, getObjectAns.getSize());
+    assertEquals("plain/text", getObjectAns.getContentType());
+    assertTrue(System.currentTimeMillis() - getObjectAns.getLastModified() < 1000);
+    assertFalse(getObjectAns.isDeleteMarker());
+    assertEquals("Hello", new String(getObjectAns.getContent().readAllBytes()));
+
+    assertThrows(InvalidArgumentException.class, () -> objectService.getObject(bucketName, "a.txt", GetObjectOptions.builder()
+        .versionId("123").build()));
+
+    GetObjectAns getObjectAns1 = objectService.getObject(bucketName, "a.txt", GetObjectOptions.builder()
+        .versionId(ObjectMetadata.NULL_VERSION).build());
+    assertEquals(bucketName, getObjectAns1.getBucketName());
+    assertEquals("a.txt", getObjectAns1.getKey());
+    assertEquals(5, getObjectAns1.getSize());
+    assertEquals("plain/text", getObjectAns1.getContentType());
+    assertTrue(System.currentTimeMillis() - getObjectAns1.getLastModified() < 1000);
+    assertFalse(getObjectAns1.isDeleteMarker());
+    assertEquals("Hello", new String(getObjectAns1.getContent().readAllBytes()));
+
+    GetObjectAns getObjectAns2 = objectService.headObject(bucketName, "a.txt", GetObjectOptions.builder().build());
+    assertEquals(bucketName, getObjectAns2.getBucketName());
+    assertEquals("a.txt", getObjectAns2.getKey());
+    assertEquals(5, getObjectAns2.getSize());
+    assertEquals("plain/text", getObjectAns2.getContentType());
+    assertTrue(System.currentTimeMillis() - getObjectAns2.getLastModified() < 1000);
+    assertFalse(getObjectAns2.isDeleteMarker());
+    assertNull(getObjectAns2.getContent());
+
   }
 
 }

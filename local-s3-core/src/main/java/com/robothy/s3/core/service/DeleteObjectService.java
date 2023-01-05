@@ -3,6 +3,7 @@ package com.robothy.s3.core.service;
 import com.robothy.s3.core.annotations.BucketChanged;
 import com.robothy.s3.core.asserionts.BucketAssertions;
 import com.robothy.s3.core.asserionts.ObjectAssertions;
+import com.robothy.s3.core.exception.InvalidArgumentException;
 import com.robothy.s3.core.model.answers.DeleteObjectAns;
 import com.robothy.s3.core.model.internal.BucketMetadata;
 import com.robothy.s3.core.model.internal.ObjectMetadata;
@@ -25,8 +26,21 @@ public interface DeleteObjectService extends LocalS3MetadataApplicable, StorageA
   @BucketChanged
   default DeleteObjectAns deleteObject(String bucketName, String key, String versionId) {
     BucketMetadata bucketMetadata = BucketAssertions.assertBucketExists(localS3Metadata(), bucketName);
+    if (Objects.isNull(bucketMetadata.getVersioningEnabled())) {
+      return deleteObjectFromUnVersionedBucket(bucketMetadata, key, versionId);
+    }
+
     return Objects.isNull(versionId) ? deleteWithoutVersionId(storage(), bucketMetadata, key)
         : deleteWithVersionId(storage(), bucketMetadata, key, versionId);
+  }
+
+  static DeleteObjectAns deleteObjectFromUnVersionedBucket(BucketMetadata bucketMetadata, String key, String versionId) {
+    if (Objects.nonNull(versionId) && !ObjectMetadata.NULL_VERSION.equals(versionId)) {
+      throw new InvalidArgumentException("versionId", versionId);
+    }
+
+    bucketMetadata.getObjectMap().remove(key);
+    return DeleteObjectAns.builder().build();
   }
 
   /**

@@ -51,7 +51,7 @@ class CompleteMultipartUploadServiceTest extends LocalS3ServiceTestBase {
             CompleteMultipartUploadPartOption.builder().partNumber(1).build(),
             CompleteMultipartUploadPartOption.builder().partNumber(2).build()));
     assertEquals("/" + bucket + "/" + key, completeAns.getLocation());
-    assertEquals(ObjectMetadata.NULL_VERSION, completeAns.getVersionId());
+    assertNull(completeAns.getVersionId());
 
     GetObjectAns object = objectService.getObject(bucket, key, GetObjectOptions.builder().build());
     assertEquals("plain/text", object.getContentType());

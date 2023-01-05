@@ -8,6 +8,7 @@ import com.robothy.s3.core.model.internal.ObjectMetadata;
 import com.robothy.s3.core.model.internal.VersionedObjectMetadata;
 import com.robothy.s3.core.model.request.PutObjectOptions;
 import com.robothy.s3.core.util.IdUtils;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -34,7 +35,6 @@ public interface PutObjectService extends LocalS3MetadataApplicable, StorageAppl
     String versionId = IdUtils.defaultGenerator().nextStrId();
     VersionedObjectMetadata versionedObjectMetadata = new VersionedObjectMetadata();
     versionedObjectMetadata.setCreationDate(System.currentTimeMillis());
-    versionedObjectMetadata.setModificationDate(versionedObjectMetadata.getCreationDate());
     versionedObjectMetadata.setContentType(options.getContentType());
     versionedObjectMetadata.setSize(options.getSize());
     Long fileId = storage().put(options.getContent());
@@ -61,6 +61,10 @@ public interface PutObjectService extends LocalS3MetadataApplicable, StorageAppl
       } else {
         objectMetadata.setVirtualVersion(versionId);
       }
+    }
+
+    if (Objects.isNull(bucketMetadata.getVersioningEnabled())) {
+      returnedVersionId = null;
     }
 
     return PutObjectAns.builder()

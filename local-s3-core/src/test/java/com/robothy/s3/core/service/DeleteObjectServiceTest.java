@@ -4,10 +4,13 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.robothy.s3.core.asserionts.BucketAssertions;
 import com.robothy.s3.core.asserionts.ObjectAssertions;
+import com.robothy.s3.core.exception.InvalidArgumentException;
 import com.robothy.s3.core.exception.ObjectNotExistException;
 import com.robothy.s3.core.model.answers.DeleteObjectAns;
 import com.robothy.s3.core.model.answers.GetObjectAns;
@@ -34,7 +37,9 @@ class DeleteObjectServiceTest extends LocalS3ServiceTestBase {
         .size(5)
         .build());
 
-    /*-- bucket versioning is disabled --*/
+    /*-- bucket versioning is suspended --*/
+    bucketService.setVersioningEnabled(bucketName, false);
+
     // delete without version ID
     DeleteObjectAns deleteObjectAns = objectService.deleteObject(bucketName, key);
     assertTrue(deleteObjectAns.isDeleteMarker());
@@ -124,4 +129,40 @@ class DeleteObjectServiceTest extends LocalS3ServiceTestBase {
     assertFalse(deleteObjectAns8.isDeleteMarker());
     assertEquals(putObjectAns.getVersionId(), deleteObjectAns8.getVersionId());
   }
+
+  @MethodSource("localS3Services")
+  @ParameterizedTest
+  void deleteObjectFromUnVersionedBucket(BucketService bucketService, ObjectService objectService) {
+    String bucketName = "my-bucket";
+    bucketService.createBucket(bucketName);
+    PutObjectAns putObjectAns = objectService.putObject(bucketName, "a.txt", PutObjectOptions.builder()
+        .content(new ByteArrayInputStream("Hello".getBytes()))
+        .size(5)
+        .contentType("plain/text")
+        .build());
+    assertNotNull(putObjectAns);
+
+    // Delete with versionId
+    assertThrows(InvalidArgumentException.class, () -> objectService.deleteObject(bucketName, "a.txt", "123"));
+    DeleteObjectAns deleteObjectAns = objectService.deleteObject(bucketName, "a.txt", ObjectMetadata.NULL_VERSION);
+    assertNotNull(deleteObjectAns);
+    assertFalse(deleteObjectAns.isDeleteMarker());
+    assertNull(deleteObjectAns.getVersionId());
+    assertThrows(ObjectNotExistException.class, () -> objectService.getObject(bucketName, "a.txt", GetObjectOptions.builder().build()));
+
+    // Delete without versionId
+    objectService.putObject(bucketName, "b.txt", PutObjectOptions.builder()
+        .content(new ByteArrayInputStream("Hello".getBytes()))
+        .size(5)
+        .contentType("plain/text")
+        .build());
+    DeleteObjectAns deleteObjectAns1 = objectService.deleteObject(bucketName, "b.txt", null);
+    assertNotNull(deleteObjectAns1);
+    assertFalse(deleteObjectAns1.isDeleteMarker());
+    assertNull(deleteObjectAns1.getVersionId());
+
+    // Delete a not exists object
+    assertDoesNotThrow(() -> objectService.deleteObject(bucketName, "c.txt", null));
+  }
+
 }
