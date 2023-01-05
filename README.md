@@ -22,6 +22,7 @@ and without heavy dependencies, it starts up quickly and handles requests effici
 + DeleteBucketReplication
 + DeleteBucketTagging
 + DeleteObject
++ DeleteObjects
 + DeleteObjectTagging
 + GetObject
 + GetObjectTagging
