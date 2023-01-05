@@ -28,7 +28,8 @@ class PutObjectServiceTest extends LocalS3ServiceTestBase {
 
     bucketService.createBucket(bucketName);
 
-    /*-- Bucket versioning not enabled. --*/
+    /*-- Bucket versioning suspended. --*/
+    bucketService.setVersioningEnabled(bucketName, false);
     assertNotEquals(Boolean.TRUE, bucketService.getVersioningEnabled(bucketName));
 
     String key1 = "key1";

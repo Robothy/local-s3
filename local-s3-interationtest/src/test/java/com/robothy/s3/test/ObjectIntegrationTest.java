@@ -323,6 +323,8 @@ public class ObjectIntegrationTest {
   void testDeleteObjects(AmazonS3 s3) {
     String bucketName = "my-bucket";
     s3.createBucket(bucketName);
+    s3.setBucketVersioningConfiguration(new SetBucketVersioningConfigurationRequest(bucketName,
+        new BucketVersioningConfiguration(BucketVersioningConfiguration.SUSPENDED)));
     assertDoesNotThrow(() -> s3.deleteObjects(new DeleteObjectsRequest(bucketName)));
 
     DeleteObjectsRequest deleteObjectsRequest = new DeleteObjectsRequest(bucketName);

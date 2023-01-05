@@ -25,7 +25,9 @@ class CopyObjectServiceTest extends LocalS3ServiceTestBase {
     String key2 = "key2";
 
     bucketService.createBucket(bucket1);
+    bucketService.setVersioningEnabled(bucket1, false);
     bucketService.createBucket(bucket2);
+    bucketService.setVersioningEnabled(bucket2, false);
     String text1 = "Hello";
     objectService.putObject(bucket1, key1, PutObjectOptions.builder()
         .size(text1.length())
@@ -56,7 +58,7 @@ class CopyObjectServiceTest extends LocalS3ServiceTestBase {
     assertEquals(ObjectMetadata.NULL_VERSION, ((ObjectVersion)versions1.getVersions().get(1)).getVersionId());
 
     // Cannot copy a delete marker
-    DeleteObjectAns deleteObjectAns = objectService.deleteObject(bucket1, key1);
+    DeleteObjectAns deleteObjectAns = objectService.deleteObject(bucket1, key1, null);
     assertThrows(IllegalArgumentException.class, () -> objectService.copyObject(bucket2, key2, CopyObjectOptions.builder()
         .sourceBucket(bucket1)
         .sourceKey(key1)
