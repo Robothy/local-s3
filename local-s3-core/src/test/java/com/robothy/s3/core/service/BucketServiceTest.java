@@ -62,10 +62,11 @@ class BucketServiceTest extends LocalS3ServiceTestBase {
 
   @MethodSource("bucketServices")
   @ParameterizedTest
-  void listBuckets(BucketService bucketService) {
+  void listBuckets(BucketService bucketService) throws InterruptedException {
     String bucketName1 = "bucket1";
     String bucketName2 = "bucket2";
     bucketService.createBucket(bucketName1);
+    Thread.sleep(1L); // Makes sure bucket1 and bucket2 are created in different time.
     bucketService.createBucket(bucketName2);
     List<Bucket> buckets = bucketService.listBuckets();
     assertEquals(2, buckets.size());
