@@ -3,9 +3,11 @@ package com.robothy.s3.rest.handler;
 import com.robothy.netty.http.HttpRequest;
 import com.robothy.netty.http.HttpRequestHandler;
 import com.robothy.netty.http.HttpResponse;
+import com.robothy.s3.core.exception.InvalidArgumentException;
 import com.robothy.s3.core.model.answers.PutObjectAns;
 import com.robothy.s3.core.model.request.PutObjectOptions;
 import com.robothy.s3.core.service.ObjectService;
+import com.robothy.s3.datatypes.Tagging;
 import com.robothy.s3.rest.assertions.RequestAssertions;
 import com.robothy.s3.rest.constants.AmzHeaderNames;
 import com.robothy.s3.rest.model.request.DecodedAmzRequestBody;
@@ -15,6 +17,8 @@ import com.robothy.s3.rest.utils.ResponseUtils;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import java.util.Objects;
+import java.util.Optional;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Handle <a href="https://docs.aws.amazon.com/AmazonS3/latest/API/API_PutObject.html">PutObject<a/>.
@@ -38,6 +42,7 @@ class PutObjectController implements HttpRequestHandler {
         .contentType(request.header(HttpHeaderNames.CONTENT_TYPE).orElse(null))
         .size(decodedBody.getDecodedContentLength())
         .content(decodedBody.getDecodedBody())
+        .tagging(extractTagging(request))
         .build();
 
     PutObjectAns ans = objectService.putObject(bucketName, key, options);
@@ -51,6 +56,29 @@ class PutObjectController implements HttpRequestHandler {
     ResponseUtils.addServerHeader(response);
     ResponseUtils.addDateHeader(response);
     ResponseUtils.addAmzRequestId(response);
+  }
+
+  // parse tagging from x-amz-tagging header in the put object request.
+  String[][] extractTagging(HttpRequest request) {
+    Optional<String> taggingOpt = request.header(AmzHeaderNames.X_AMZ_TAGGING);
+    String tagging;
+    if (taggingOpt.isEmpty() || StringUtils.isBlank(tagging = taggingOpt.get())) {
+      return null;
+    }
+
+    String[] tags = tagging.split("&");
+    String[][] tagSet = new String[tags.length][2];
+    for (int i = 0; i < tags.length; i++) {
+      String[] kv = tags[i].split("=");
+      if (kv.length != 2) {
+        throw new InvalidArgumentException(AmzHeaderNames.X_AMZ_TAGGING, "Invalid tagging format.");
+      }
+
+      tagSet[i][0] = kv[0];
+      tagSet[i][1] = kv[1];
+    }
+
+    return tagSet;
   }
 
 }

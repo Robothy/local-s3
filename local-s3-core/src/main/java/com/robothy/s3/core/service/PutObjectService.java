@@ -39,6 +39,7 @@ public interface PutObjectService extends LocalS3MetadataApplicable, StorageAppl
     versionedObjectMetadata.setSize(options.getSize());
     Long fileId = storage().put(options.getContent());
     versionedObjectMetadata.setFileId(fileId);
+    options.getTagging().ifPresent(versionedObjectMetadata::setTagging);
 
     ObjectMetadata objectMetadata;
     if (bucketMetadata.getObjectMetadata(key).isPresent()) {

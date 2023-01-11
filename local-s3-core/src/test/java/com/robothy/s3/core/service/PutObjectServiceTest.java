@@ -37,6 +37,7 @@ class PutObjectServiceTest extends LocalS3ServiceTestBase {
         .content(new ByteArrayInputStream("Hello".getBytes()))
         .contentType("plain/text")
         .size(5)
+        .tagging(new String[][]{{"key1", "value1"}, {"key2", "value2"}})
         .build());
     assertEquals(key1, putObjectAns1.getKey());
     assertEquals(ObjectMetadata.NULL_VERSION, putObjectAns1.getVersionId());
@@ -59,11 +60,14 @@ class PutObjectServiceTest extends LocalS3ServiceTestBase {
     VersionedObjectMetadata versionedObjectMetadata1 = versionedObjectMetadata1Opt.get();
     assertEquals("plain/text", versionedObjectMetadata1.getContentType());
     assertEquals(5, versionedObjectMetadata1.getSize());
+    assertTrue(versionedObjectMetadata1.getTagging().isPresent());
+    assertEquals(2, versionedObjectMetadata1.getTagging().get().length);
 
     PutObjectAns putObjectAns2 = objectService.putObject(bucketName, key1, PutObjectOptions.builder()
         .contentType("application/json")
         .size(10)
         .content(new ByteArrayInputStream("{\"length\": 12}".getBytes()))
+        .tagging(new String[][]{{"key1", "value1"}, {"key2", "value2"}})
         .build());
     assertEquals(key1, putObjectAns2.getKey());
     assertEquals(ObjectMetadata.NULL_VERSION, putObjectAns2.getVersionId());
@@ -72,7 +76,6 @@ class PutObjectServiceTest extends LocalS3ServiceTestBase {
     String virtualVersion2 = virtualVersion2Opt.get();
     assertEquals(virtualVersion2, objectMetadata1.getLatestVersion());
     assertEquals(1, objectMetadata1.getVersionedObjectMap().size());
-
 
     /*-- Enable bucket versioning. --*/
     bucketService.setVersioningEnabled(bucketName, true);
