@@ -40,8 +40,10 @@ public interface DeleteObjectService extends LocalS3MetadataApplicable, StorageA
     }
 
     ObjectMetadata removedObject = bucketMetadata.getObjectMap().remove(key);
-    VersionedObjectMetadata removedVersion = removedObject.getVersionedObjectMap().firstEntry().getValue();
-    storage.delete(removedVersion.getFileId());
+    if (Objects.nonNull(removedObject)) { // the object exists
+      VersionedObjectMetadata removedVersion = removedObject.getVersionedObjectMap().firstEntry().getValue();
+      storage.delete(removedVersion.getFileId());
+    }
     return DeleteObjectAns.builder().build();
   }
 
