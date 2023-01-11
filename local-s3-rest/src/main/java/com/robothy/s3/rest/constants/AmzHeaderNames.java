@@ -17,6 +17,8 @@ public class AmzHeaderNames {
 
   public static final String X_AMZ_DELETE_MARKER = "x-amz-delete-marker";
 
+  public static final String X_AMZ_TAGGING = "x-amz-tagging";
+
   /**
    * Specifies the source object for the copy operation.
    */
