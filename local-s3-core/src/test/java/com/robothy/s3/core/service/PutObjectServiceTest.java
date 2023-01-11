@@ -1,6 +1,7 @@
 package com.robothy.s3.core.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -62,6 +63,7 @@ class PutObjectServiceTest extends LocalS3ServiceTestBase {
     assertEquals(5, versionedObjectMetadata1.getSize());
     assertTrue(versionedObjectMetadata1.getTagging().isPresent());
     assertEquals(2, versionedObjectMetadata1.getTagging().get().length);
+    assertTrue(objectService.storage().isExist(versionedObjectMetadata1.getFileId()));
 
     PutObjectAns putObjectAns2 = objectService.putObject(bucketName, key1, PutObjectOptions.builder()
         .contentType("application/json")
@@ -76,6 +78,7 @@ class PutObjectServiceTest extends LocalS3ServiceTestBase {
     String virtualVersion2 = virtualVersion2Opt.get();
     assertEquals(virtualVersion2, objectMetadata1.getLatestVersion());
     assertEquals(1, objectMetadata1.getVersionedObjectMap().size());
+    assertFalse(objectService.storage().isExist(versionedObjectMetadata1.getFileId())); // The previous file should be deleted.
 
     /*-- Enable bucket versioning. --*/
     bucketService.setVersioningEnabled(bucketName, true);
@@ -97,7 +100,7 @@ class PutObjectServiceTest extends LocalS3ServiceTestBase {
     assertEquals(2, objectMetadata1.getVersionedObjectMap().size());
 
 
-    /*-- Disable bucket versioning --*/
+    /*-- Suspend bucket versioning --*/
     bucketService.setVersioningEnabled(bucketName, false);
     PutObjectAns putObjectAns4 = objectService.putObject(bucketName, key1, PutObjectOptions.builder()
         .content(new ByteArrayInputStream("World".getBytes()))
