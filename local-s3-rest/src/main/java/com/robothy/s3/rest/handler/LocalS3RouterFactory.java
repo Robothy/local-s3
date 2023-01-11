@@ -166,6 +166,12 @@ public class LocalS3RouterFactory {
         .handler(objectTaggingController::delete)
         .build();
 
+    Route ListBuckets = Route.builder()
+        .method(HttpMethod.GET)
+        .path("/")
+        .handler(new ListBucketsController(serviceFactory))
+        .build();
+
     Route GetBucket = Route.builder()
         .method(HttpMethod.GET)
         .path("/v20180820/bucket/{bucket}")
@@ -394,6 +400,7 @@ public class LocalS3RouterFactory {
         .route(DeleteObjects)
         .route(DeleteObjects_)
         .route(DeleteObjectTagging)
+        .route(ListBuckets)
         .route(GetBucket)
         .route(GetObject)
         .route(GetBucketAcl)

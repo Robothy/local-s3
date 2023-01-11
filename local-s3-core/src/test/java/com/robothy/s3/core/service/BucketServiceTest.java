@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.robothy.s3.core.exception.BucketAlreadyExistsException;
 import com.robothy.s3.core.exception.BucketNotExistException;
 import com.robothy.s3.core.model.Bucket;
+import java.util.List;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -57,6 +58,27 @@ class BucketServiceTest extends LocalS3ServiceTestBase {
     bucketService.setVersioningEnabled(bucketName, false);
     bucket = bucketService.getBucket(bucketName);
     assertFalse(bucket.getVersioningEnabled());
+  }
+
+  @MethodSource("bucketServices")
+  @ParameterizedTest
+  void listBuckets(BucketService bucketService) {
+    String bucketName1 = "bucket1";
+    String bucketName2 = "bucket2";
+    bucketService.createBucket(bucketName1);
+    bucketService.createBucket(bucketName2);
+    List<Bucket> buckets = bucketService.listBuckets();
+    assertEquals(2, buckets.size());
+    assertEquals(bucketName1, buckets.get(0).getName());
+    assertTrue(System.currentTimeMillis() - buckets.get(0).getCreationDate() < 2000);
+    assertEquals(bucketName2, buckets.get(1).getName());
+    assertTrue(System.currentTimeMillis() - buckets.get(1).getCreationDate() < 2000);
+
+    bucketService.deleteBucket(bucketName1);
+    buckets = bucketService.listBuckets();
+    assertEquals(1, buckets.size());
+    assertEquals(bucketName2, buckets.get(0).getName());
+    assertTrue(System.currentTimeMillis() - buckets.get(0).getCreationDate() < 2000);
   }
 
 }
