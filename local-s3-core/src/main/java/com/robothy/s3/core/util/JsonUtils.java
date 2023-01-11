@@ -1,5 +1,6 @@
 package com.robothy.s3.core.util;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.json.JsonMapper;
@@ -16,6 +17,7 @@ public class JsonUtils {
 
   static {
     jsonMapper.registerModule(new Jdk8Module());
+    jsonMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
   }
 
   private static final ObjectReader jsonReader = jsonMapper.reader();

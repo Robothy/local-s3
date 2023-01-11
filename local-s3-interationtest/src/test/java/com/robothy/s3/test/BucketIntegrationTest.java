@@ -35,6 +35,7 @@ import com.amazonaws.services.s3.model.SetBucketVersioningConfigurationRequest;
 import com.amazonaws.services.s3.model.TagSet;
 import com.robothy.s3.core.exception.S3ErrorCode;
 import com.robothy.s3.jupiter.LocalS3;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -205,6 +206,24 @@ public class BucketIntegrationTest {
     assertEquals("arn:aws:kms:us-east-1:1234/5678example", rule.getApplyServerSideEncryptionByDefault().getKMSMasterKeyID());
 
     assertDoesNotThrow(() -> s3.deleteBucketEncryption(bucketName));
+  }
+
+  @Test
+  @LocalS3
+  void testListBuckets(AmazonS3 s3) {
+    s3.createBucket("test-bucket1");
+    s3.createBucket("test-bucket2");
+    List<Bucket> buckets = s3.listBuckets();
+    assertEquals(2, buckets.size());
+    assertEquals("test-bucket1", buckets.get(0).getName());
+    assertTrue(buckets.get(0).getCreationDate().before(new Date()));
+    assertEquals("test-bucket2", buckets.get(1).getName());
+    assertTrue(buckets.get(1).getCreationDate().before(new Date()));
+
+    s3.deleteBucket("test-bucket1");
+    List<Bucket> buckets1 = s3.listBuckets();
+    assertEquals(1, buckets1.size());
+    assertEquals("test-bucket2", buckets1.get(0).getName());
   }
 
 }
