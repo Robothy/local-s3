@@ -26,9 +26,9 @@ public class App {
     log.info("Starting LocalS3 in {} mode.", mode);
 
     LocalS3.builder()
-        .port(180)
+        .port(80)
         .mode(LocalS3Mode.valueOf(mode.toUpperCase()))
-        .dataPath("C:\\snb-s3")
+        .dataPath("/data")
         .build()
         .start();
   }
