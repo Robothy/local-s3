@@ -52,20 +52,20 @@ public interface PutObjectService extends LocalS3MetadataApplicable, StorageAppl
 
     String returnedVersionId = versionId;
     if (!Boolean.TRUE.equals(bucketMetadata.getVersioningEnabled())) {
-      returnedVersionId = ObjectMetadata.NULL_VERSION;
+      returnedVersionId = Objects.isNull(bucketMetadata.getVersioningEnabled()) ? null : ObjectMetadata.NULL_VERSION;
 
       Optional<String> virtualVersionOpt = objectMetadata.getVirtualVersion();
       if (virtualVersionOpt.isPresent()) {
         String lastVirtualVersion = virtualVersionOpt.get();
-        objectMetadata.getVersionedObjectMap().remove(lastVirtualVersion);
+        VersionedObjectMetadata previousVersion = objectMetadata.getVersionedObjectMap().remove(lastVirtualVersion);
+        if (Objects.nonNull(previousVersion.getFileId())) { // Not a delete marker.
+          storage().delete(previousVersion.getFileId());
+        }
+
         objectMetadata.setVirtualVersion(versionId);
       } else {
         objectMetadata.setVirtualVersion(versionId);
       }
-    }
-
-    if (Objects.isNull(bucketMetadata.getVersioningEnabled())) {
-      returnedVersionId = null;
     }
 
     return PutObjectAns.builder()

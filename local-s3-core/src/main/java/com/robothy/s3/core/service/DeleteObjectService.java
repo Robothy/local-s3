@@ -27,19 +27,21 @@ public interface DeleteObjectService extends LocalS3MetadataApplicable, StorageA
   default DeleteObjectAns deleteObject(String bucketName, String key, String versionId) {
     BucketMetadata bucketMetadata = BucketAssertions.assertBucketExists(localS3Metadata(), bucketName);
     if (Objects.isNull(bucketMetadata.getVersioningEnabled())) {
-      return deleteObjectFromUnVersionedBucket(bucketMetadata, key, versionId);
+      return deleteObjectFromUnVersionedBucket(bucketMetadata, storage(), key, versionId);
     }
 
     return Objects.isNull(versionId) ? deleteWithoutVersionId(storage(), bucketMetadata, key)
         : deleteWithVersionId(storage(), bucketMetadata, key, versionId);
   }
 
-  static DeleteObjectAns deleteObjectFromUnVersionedBucket(BucketMetadata bucketMetadata, String key, String versionId) {
+  static DeleteObjectAns deleteObjectFromUnVersionedBucket(BucketMetadata bucketMetadata, Storage storage, String key, String versionId) {
     if (Objects.nonNull(versionId) && !ObjectMetadata.NULL_VERSION.equals(versionId)) {
       throw new InvalidArgumentException("versionId", versionId);
     }
 
-    bucketMetadata.getObjectMap().remove(key);
+    ObjectMetadata removedObject = bucketMetadata.getObjectMap().remove(key);
+    VersionedObjectMetadata removedVersion = removedObject.getVersionedObjectMap().firstEntry().getValue();
+    storage.delete(removedVersion.getFileId());
     return DeleteObjectAns.builder().build();
   }
 

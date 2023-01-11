@@ -34,6 +34,7 @@ and without heavy dependencies, it starts up quickly and handles requests effici
 + GetBucketTagging
 + HeadBucket
 + HeadObject
++ ListBuckets
 + ListObjects
 + ListObjectVersions
 + PutBucketAcl
