@@ -2,6 +2,7 @@ pluginManagement {
 
     repositories {
         mavenLocal()
+        mavenCentral()
 
 //        maven {
 //            url = 'https://maven.aliyun.com/repository/gradle-plugin'

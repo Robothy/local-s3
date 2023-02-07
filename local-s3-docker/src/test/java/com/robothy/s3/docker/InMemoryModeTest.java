@@ -20,9 +20,11 @@ public class InMemoryModeTest {
       .withMode(LocalS3Container.Mode.IN_MEMORY)
       .withRandomHttpPort();
 
+
   @Test
   void testInMemoryMode() {
     assertTrue(container.isRunning());
+   // assertTrue(container.isHealthy());
     int port = container.getPort();
     AmazonS3 s3 = AmazonS3ClientBuilder.standard()
         .enablePathStyleAccess()

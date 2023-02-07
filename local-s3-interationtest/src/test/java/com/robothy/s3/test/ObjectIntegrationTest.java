@@ -289,7 +289,7 @@ public class ObjectIntegrationTest {
     PutObjectResult putObjectResult1 = s3.putObject(bucket2, key2, text2);
     CopyObjectResult copyObjectResult3 = s3.copyObject(bucket2, key2, bucket1, key1);
     assertEquals("null", copyObjectResult3.getVersionId());
-    assertTrue(copyObjectResult3.getLastModifiedDate().before(new Date()));
+    assertTrue(copyObjectResult3.getLastModifiedDate().compareTo(new Date()) <= 0);
     S3Object object3 = s3.getObject(bucket1, key1);
     assertEquals(text2.length(), object3.getObjectMetadata().getContentLength());
     assertEquals(text2, new String(object3.getObjectContent().readAllBytes()));

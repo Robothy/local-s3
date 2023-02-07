@@ -81,8 +81,8 @@ class DeleteObjectsServiceTest extends LocalS3ServiceTestBase {
 
     objectService.putObject(bucketName, "a.txt", PutObjectOptions.builder()
         .content(new ByteArrayInputStream("Hello".getBytes()))
-            .contentType("plain.text")
-            .size(5)
+        .contentType("plain.text")
+        .size(5)
         .build());
     List<Object> results1 = objectService.deleteObjects(bucketName, new DeleteObjectsRequest(List.of(
         new ObjectIdentifier("a.txt", null)

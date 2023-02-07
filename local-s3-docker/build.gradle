@@ -26,7 +26,74 @@ jar {
 def os = DefaultNativePlatform.getCurrentOperatingSystem()
 def executor = os.isWindows() ? Arrays.asList("cmd", "/c") : Arrays.asList("sh", "-c")
 
-task dockerBuild(type: Exec, dependsOn: jar) {
+tasks.register('collectReachabilityMetadata', JavaExec) {
+    group('native-image')
+    dependsOn('jar')
+
+    outputs.cacheIf { true }
+
+    inputs.file("${buildDir}/libs/s3.jar")
+            .withPropertyName("jar")
+            .withPathSensitivity(PathSensitivity.RELATIVE)
+
+    outputs.dir(file("${buildDir}/reachability-metadata"))
+            .withPropertyName("reachability-metadata")
+
+    mainClass.set('com.robothy.s3.docker.ReachabilityMetadataGenerator')
+    classpath = sourceSets.test.runtimeClasspath + sourceSets.main.runtimeClasspath
+}
+
+tasks.register('buildGraalVMNativeImage', Exec) {
+    group('native-image')
+    dependsOn('collectReachabilityMetadata')
+
+    outputs.cacheIf { true }
+    inputs.dir(file("${buildDir}/reachability-metadata"))
+            .withPropertyName("reachability-metadata")
+            .withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.file("${buildDir}/libs/s3.jar")
+            .withPropertyName("jar")
+            .withPathSensitivity(PathSensitivity.RELATIVE)
+    outputs.file("${buildDir}/bin/s3")
+            .withPropertyName("s3-native-image")
+
+    doFirst {
+        var cmd = new ArrayList(executor)
+        var buildCmd = """docker run --rm \
+-v ${project.projectDir}:/project \
+-v ${project.buildDir}/bin:/app \
+ghcr.io/graalvm/native-image:ol9-java17-22.3.0 \
+-jar /project/build/libs/s3.jar \
+--initialize-at-build-time=ch.qos.logback,org.slf4j \
+--install-exit-handlers \
+--class-path /project/build/reachability-metadata
+"""
+        cmd.add(buildCmd)
+        commandLine(cmd)
+    }
+}
+
+tasks.register('buildGraalVMNativeBasedDockerImage', Exec) {
+    group("docker-image")
+    dependsOn('buildGraalVMNativeImage')
+
+    outputs.cacheIf { true }
+
+    inputs.file("${buildDir}/bin/s3")
+            .withPropertyName("s3-native-image")
+            .withPathSensitivity(PathSensitivity.RELATIVE)
+
+    doFirst {
+        var cmd = new ArrayList(executor)
+        cmd.add("docker build -t luofuxiang/local-s3:native-${project.version} -f GraalVMNativeImage.dockerfile .")
+        commandLine(cmd)
+    }
+}
+
+tasks.register('buildJava17BasedDockerImage', Exec) {
+    group("docker-image")
+    dependsOn('jar')
+
     doFirst {
         var cmd = new ArrayList(executor)
         cmd.add("docker build -t luofuxiang/local-s3:latest -t luofuxiang/local-s3:${project.version} .")
@@ -34,9 +101,18 @@ task dockerBuild(type: Exec, dependsOn: jar) {
     }
 }
 
-tasks.test.dependsOn(dockerBuild)
 
-task dockerPush(type: Exec, dependsOn: 'test') {
+tasks.register('buildDockerImages') {
+    group("docker-image")
+    dependsOn ('buildGraalVMNativeBasedDockerImage', 'buildJava17BasedDockerImage')
+    description = "Builds the docker images"
+}
+
+tasks.test.dependsOn(buildDockerImages)
+
+tasks.register('pushJava17BasedDockerImage', Exec) {
+    dependsOn 'test'
+    group("docker-image")
     doFirst {
         var cmd = new ArrayList(executor)
         cmd.add("docker push luofuxiang/local-s3:${project.version}")
@@ -44,7 +120,19 @@ task dockerPush(type: Exec, dependsOn: 'test') {
     }
 }
 
-task dockerPushLatest(type: Exec, dependsOn: 'test') {
+tasks.register('pushGraalVMNativeBasedDockerImage', Exec) {
+    dependsOn 'test'
+    group("docker-image")
+    doFirst {
+        var cmd = new ArrayList(executor)
+        cmd.add("docker push luofuxiang/local-s3:native-${project.version}")
+        commandLine(cmd)
+    }
+}
+
+tasks.register('pushLatestImage', Exec) {
+    dependsOn 'test'
+    group("docker-image")
     doFirst {
         var cmd = new ArrayList(executor)
         cmd.add("docker push luofuxiang/local-s3:latest")
@@ -53,4 +141,4 @@ task dockerPushLatest(type: Exec, dependsOn: 'test') {
 }
 
 
-rootProject.tasks.release.dependsOn(dockerPush, dockerPushLatest)
+rootProject.tasks.release.dependsOn(pushLatestImage, pushJava17BasedDockerImage, pushGraalVMNativeBasedDockerImage)

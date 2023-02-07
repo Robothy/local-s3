@@ -1,0 +1,8 @@
+[
+  {
+    "interfaces":["com.robothy.s3.core.service.BucketService"]
+  },
+  {
+    "interfaces":["com.robothy.s3.core.service.ObjectService"]
+  }
+]
