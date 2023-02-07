@@ -211,19 +211,22 @@ public class BucketIntegrationTest {
   @Test
   @LocalS3
   void testListBuckets(AmazonS3 s3) {
+    List<Bucket> buckets = s3.listBuckets();
+    assertEquals(0, buckets.size());
+
     s3.createBucket("test-bucket1");
     s3.createBucket("test-bucket2");
-    List<Bucket> buckets = s3.listBuckets();
-    assertEquals(2, buckets.size());
-    assertEquals("test-bucket1", buckets.get(0).getName());
-    assertTrue(buckets.get(0).getCreationDate().before(new Date()));
-    assertEquals("test-bucket2", buckets.get(1).getName());
-    assertTrue(buckets.get(1).getCreationDate().before(new Date()));
+    List<Bucket> buckets1 = s3.listBuckets();
+    assertEquals(2, buckets1.size());
+    assertEquals("test-bucket1", buckets1.get(0).getName());
+    assertTrue(buckets1.get(0).getCreationDate().before(new Date()));
+    assertEquals("test-bucket2", buckets1.get(1).getName());
+    assertTrue(buckets1.get(1).getCreationDate().before(new Date()));
 
     s3.deleteBucket("test-bucket1");
-    List<Bucket> buckets1 = s3.listBuckets();
-    assertEquals(1, buckets1.size());
-    assertEquals("test-bucket2", buckets1.get(0).getName());
+    List<Bucket> buckets2 = s3.listBuckets();
+    assertEquals(1, buckets2.size());
+    assertEquals("test-bucket2", buckets2.get(0).getName());
   }
 
 }

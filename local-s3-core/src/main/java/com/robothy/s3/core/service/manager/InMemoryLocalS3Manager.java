@@ -33,7 +33,7 @@ class InMemoryLocalS3Manager implements LocalS3Manager {
    * @param initialDataPath initial data path.
    */
   InMemoryLocalS3Manager(Path initialDataPath, boolean enableInitialDataCache) {
-    if (Objects.isNull(initialDataPath)) {
+    if (Objects.isNull(initialDataPath) || !Files.exists(initialDataPath)) {
       this.storage = Storage.createInMemory();
       this.s3Metadata = new LocalS3Metadata();
     } else {
