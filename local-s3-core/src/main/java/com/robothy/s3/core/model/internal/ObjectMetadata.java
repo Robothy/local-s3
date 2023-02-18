@@ -26,10 +26,6 @@ public class ObjectMetadata {
   private ConcurrentSkipListMap<String, VersionedObjectMetadata> versionedObjectMap =
       new ConcurrentSkipListMap<>(Comparator.reverseOrder());
 
-
-  @Deprecated
-  private String key;
-
   /**
    * Represents a virtual version when bucket versioning is not enabled.
    * The virtual version is an internal field, which is used for sorting
@@ -53,7 +49,6 @@ public class ObjectMetadata {
   /**
    * No args constructor for jackson. Do not use this constructor.
    */
-  @Deprecated
   public ObjectMetadata() {
 
   }

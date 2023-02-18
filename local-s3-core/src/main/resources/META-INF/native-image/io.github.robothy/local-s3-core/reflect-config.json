@@ -1,0 +1,215 @@
+[
+  {
+    "name":"com.robothy.s3.core.converters.deserializer.ObjectMetadataMapConverter",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"com.robothy.s3.core.converters.deserializer.UploadMetadataMapConverter",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"com.robothy.s3.core.converters.deserializer.UploadPartMetadataMapConverter",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"com.robothy.s3.core.converters.deserializer.VersionedObjectMetadataMapConverter",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"com.robothy.s3.core.model.internal.BucketMetadata",
+    "allDeclaredFields":true,
+    "queryAllDeclaredMethods":true,
+    "queryAllDeclaredConstructors":true,
+    "methods":[
+      {"name":"<init>","parameterTypes":[] },
+      {"name":"getAcl","parameterTypes":[] },
+      {"name":"getBucketName","parameterTypes":[] },
+      {"name":"getCreationDate","parameterTypes":[] },
+      {"name":"getEncryption","parameterTypes":[] },
+      {"name":"getObjectMap","parameterTypes":[] },
+      {"name":"getPolicy","parameterTypes":[] },
+      {"name":"getReplication","parameterTypes":[] },
+      {"name":"getTagging","parameterTypes":[] },
+      {"name":"getUploads","parameterTypes":[] },
+      {"name":"getVersioningEnabled","parameterTypes":[] },
+      {"name":"setAcl","parameterTypes":["com.robothy.s3.datatypes.AccessControlPolicy"] },
+      {"name":"setBucketName","parameterTypes":["java.lang.String"] },
+      {"name":"setCreationDate","parameterTypes":["long"] },
+      {"name":"setEncryption","parameterTypes":["java.lang.String"] },
+      {"name":"setObjectMap","parameterTypes":["java.util.concurrent.ConcurrentSkipListMap"] },
+      {"name":"setPolicy","parameterTypes":["java.lang.String"] },
+      {"name":"setReplication","parameterTypes":["java.lang.String"] },
+      {"name":"setTagging","parameterTypes":["java.util.Collection"] },
+      {"name":"setUploads","parameterTypes":["java.util.NavigableMap"] },
+      {"name":"setVersioningEnabled","parameterTypes":["java.lang.Boolean"] }
+    ]
+  },
+  {
+    "name":"com.robothy.s3.core.model.internal.LocalS3Metadata",
+    "allDeclaredFields":true,
+    "queryAllDeclaredMethods":true,
+    "queryAllDeclaredConstructors":true,
+    "methods":[
+      {"name":"<init>","parameterTypes":[] },
+      {"name":"getBucketMetadataMap","parameterTypes":[] }
+    ]
+  },
+  {
+    "name":"com.robothy.s3.core.model.internal.ObjectMetadata",
+    "allDeclaredFields":true,
+    "queryAllDeclaredMethods":true,
+    "queryAllDeclaredConstructors":true,
+    "methods":[
+      {"name":"<init>","parameterTypes":[] },
+      {"name":"getKey","parameterTypes":[] },
+      {"name":"getVersionedObjectMap","parameterTypes":[] },
+      {"name":"getVirtualVersion","parameterTypes":[] },
+      {"name":"setKey","parameterTypes":["java.lang.String"] },
+      {"name":"setVersionedObjectMap","parameterTypes":["java.util.concurrent.ConcurrentSkipListMap"] },
+      {"name":"setVirtualVersion","parameterTypes":["java.lang.String"] }
+    ]
+  },
+  {
+    "name":"com.robothy.s3.core.model.internal.UploadMetadata",
+    "allDeclaredFields":true,
+    "queryAllDeclaredMethods":true,
+    "queryAllDeclaredConstructors":true,
+    "methods":[
+      {"name":"<init>","parameterTypes":[] },
+      {"name":"getContentType","parameterTypes":[] },
+      {"name":"getCreateDate","parameterTypes":[] },
+      {"name":"getParts","parameterTypes":[] },
+      {"name":"setContentType","parameterTypes":["java.lang.String"] },
+      {"name":"setCreateDate","parameterTypes":["long"] },
+      {"name":"setParts","parameterTypes":["java.util.NavigableMap"] }
+    ]
+  },
+  {
+    "name":"com.robothy.s3.core.model.internal.UploadPartMetadata",
+    "allDeclaredFields":true,
+    "queryAllDeclaredMethods":true,
+    "queryAllDeclaredConstructors":true,
+    "methods":[
+      {"name":"<init>","parameterTypes":[] },
+      {"name":"getEtag","parameterTypes":[] },
+      {"name":"getFileId","parameterTypes":[] },
+      {"name":"getLastModified","parameterTypes":[] },
+      {"name":"getSize","parameterTypes":[] },
+      {"name":"setEtag","parameterTypes":["java.lang.String"] },
+      {"name":"setFileId","parameterTypes":["long"] },
+      {"name":"setLastModified","parameterTypes":["long"] },
+      {"name":"setSize","parameterTypes":["long"] }
+    ]
+  },
+  {
+    "name":"com.robothy.s3.core.model.internal.VersionedObjectMetadata",
+    "allDeclaredFields":true,
+    "queryAllDeclaredMethods":true,
+    "queryAllDeclaredConstructors":true,
+    "methods":[
+      {"name":"<init>","parameterTypes":[] },
+      {"name":"getContentType","parameterTypes":[] },
+      {"name":"getCreationDate","parameterTypes":[] },
+      {"name":"getEtag","parameterTypes":[] },
+      {"name":"getFileId","parameterTypes":[] },
+      {"name":"getSize","parameterTypes":[] },
+      {"name":"getTagging","parameterTypes":[] },
+      {"name":"isDeleted","parameterTypes":[] },
+      {"name":"setContentType","parameterTypes":["java.lang.String"] },
+      {"name":"setCreationDate","parameterTypes":["long"] },
+      {"name":"setDeleted","parameterTypes":["boolean"] },
+      {"name":"setEtag","parameterTypes":["java.lang.String"] },
+      {"name":"setFileId","parameterTypes":["java.lang.Long"] },
+      {"name":"setSize","parameterTypes":["long"] },
+      {"name":"setTagging","parameterTypes":["java.lang.String[][]"] }
+    ]
+  },
+  {
+    "name":"com.robothy.s3.core.service.BucketEncryptionService",
+    "methods":[
+      {"name":"deleteBucketEncryption","parameterTypes":["java.lang.String"] },
+      {"name":"getBucketEncryption","parameterTypes":["java.lang.String"] },
+      {"name":"putBucketEncryption","parameterTypes":["java.lang.String","java.lang.String"] }
+    ]
+  },
+  {
+    "name":"com.robothy.s3.core.service.BucketPolicyService",
+    "methods":[
+      {"name":"deleteBucketPolicy","parameterTypes":["java.lang.String"] },
+      {"name":"getBucketPolicy","parameterTypes":["java.lang.String"] },
+      {"name":"putBucketPolicy","parameterTypes":["java.lang.String","java.lang.String"] }
+    ]
+  },
+  {
+    "name":"com.robothy.s3.core.service.BucketReplicationService",
+    "methods":[
+      {"name":"deleteBucketReplication","parameterTypes":["java.lang.String"] },
+      {"name":"getBucketReplication","parameterTypes":["java.lang.String"] },
+      {"name":"putBucketReplication","parameterTypes":["java.lang.String","java.lang.String"] }
+    ]
+  },
+  {
+    "name":"com.robothy.s3.core.service.BucketService",
+    "methods":[
+      {"name":"createBucket","parameterTypes":["java.lang.String"] },
+      {"name":"deleteBucket","parameterTypes":["java.lang.String"] },
+      {"name":"getBucket","parameterTypes":["java.lang.String"] },
+      {"name":"listBuckets","parameterTypes":[] }
+    ]
+  },
+  {
+    "name":"com.robothy.s3.core.service.BucketTaggingService",
+    "methods":[
+      {"name":"deleteTagging","parameterTypes":["java.lang.String"] },
+      {"name":"getTagging","parameterTypes":["java.lang.String"] },
+      {"name":"putTagging","parameterTypes":["java.lang.String","java.util.Collection"] }
+    ]
+  },
+  {
+    "name":"com.robothy.s3.core.service.BucketVersioningService",
+    "methods":[{"name":"setVersioningEnabled","parameterTypes":["java.lang.String","boolean"] }]
+  },
+  {
+    "name":"com.robothy.s3.core.service.CompleteMultipartUploadService",
+    "methods":[{"name":"completeMultipartUpload","parameterTypes":["java.lang.String","java.lang.String","java.lang.String","java.util.List"] }]
+  },
+  {
+    "name":"com.robothy.s3.core.service.CopyObjectService",
+    "methods":[{"name":"copyObject","parameterTypes":["java.lang.String","java.lang.String","com.robothy.s3.core.model.request.CopyObjectOptions"] }]
+  },
+  {
+    "name":"com.robothy.s3.core.service.CreateMultipartUploadService",
+    "methods":[{"name":"createMultipartUpload","parameterTypes":["java.lang.String","java.lang.String","com.robothy.s3.core.model.request.CreateMultipartUploadOptions"] }]
+  },
+  {
+    "name":"com.robothy.s3.core.service.DeleteObjectService",
+    "methods":[{"name":"deleteObject","parameterTypes":["java.lang.String","java.lang.String","java.lang.String"] }]
+  },
+  {
+    "name":"com.robothy.s3.core.service.DeleteObjectsService",
+    "methods":[{"name":"deleteObjects","parameterTypes":["java.lang.String","com.robothy.s3.datatypes.request.DeleteObjectsRequest"] }]
+  },
+  {
+    "name":"com.robothy.s3.core.service.GetObjectService",
+    "methods":[
+      {"name":"getObject","parameterTypes":["java.lang.String","java.lang.String","com.robothy.s3.core.model.request.GetObjectOptions"] },
+      {"name":"headObject","parameterTypes":["java.lang.String","java.lang.String","com.robothy.s3.core.model.request.GetObjectOptions"] }
+    ]
+  },
+  {
+    "name":"com.robothy.s3.core.service.ListObjectVersionsService",
+    "methods":[{"name":"listObjectVersions","parameterTypes":["java.lang.String","java.lang.Character","java.lang.String","int","java.lang.String","java.lang.String"] }]
+  },
+  {
+    "name":"com.robothy.s3.core.service.ListObjectsService",
+    "methods":[{"name":"listObjects","parameterTypes":["java.lang.String","java.lang.Character","java.lang.String","int","java.lang.String"] }]
+  },
+  {
+    "name":"com.robothy.s3.core.service.PutObjectService",
+    "methods":[{"name":"putObject","parameterTypes":["java.lang.String","java.lang.String","com.robothy.s3.core.model.request.PutObjectOptions"] }]
+  },
+  {
+    "name":"com.robothy.s3.core.service.UploadPartService",
+    "methods":[{"name":"uploadPart","parameterTypes":["java.lang.String","java.lang.String","java.lang.String","java.lang.Integer","com.robothy.s3.core.model.request.UploadPartOptions"] }]
+  }
+]

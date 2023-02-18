@@ -1,0 +1,202 @@
+[
+  {
+    "name":"com.robothy.s3.datatypes.AccessControlPolicy",
+    "allDeclaredFields":true,
+    "queryAllDeclaredMethods":true,
+    "queryAllDeclaredConstructors":true
+  },
+  {
+    "name":"com.robothy.s3.datatypes.Grant",
+    "allDeclaredFields":true,
+    "queryAllDeclaredMethods":true,
+    "queryAllDeclaredConstructors":true
+  },
+  {
+    "name":"com.robothy.s3.datatypes.Grantee",
+    "allDeclaredFields":true,
+    "queryAllDeclaredMethods":true,
+    "queryAllDeclaredConstructors":true
+  },
+  {
+    "name":"com.robothy.s3.datatypes.ObjectIdentifier",
+    "allDeclaredFields":true,
+    "queryAllDeclaredMethods":true,
+    "queryAllDeclaredConstructors":true,
+    "methods":[
+      {"name":"<init>","parameterTypes":[] },
+      {"name":"setKey","parameterTypes":["java.lang.String"] },
+      {"name":"setVersionId","parameterTypes":["java.lang.String"] }
+    ]
+  },
+  {
+    "name":"com.robothy.s3.datatypes.Owner",
+    "allDeclaredFields":true,
+    "queryAllDeclaredMethods":true,
+    "queryAllDeclaredConstructors":true,
+    "methods":[
+      {"name":"getDisplayName","parameterTypes":[] },
+      {"name":"getId","parameterTypes":[] }
+    ]
+  },
+  {
+    "name":"com.robothy.s3.datatypes.Tagging",
+    "allDeclaredFields":true,
+    "queryAllDeclaredMethods":true,
+    "queryAllDeclaredConstructors":true,
+    "methods":[
+      {"name":"<init>","parameterTypes":[] },
+      {"name":"getTagSets","parameterTypes":[] },
+      {"name":"setTagSets","parameterTypes":["java.util.Collection"] }
+    ]
+  },
+  {
+    "name":"com.robothy.s3.datatypes.Tagging$Tag",
+    "allDeclaredFields":true,
+    "queryAllDeclaredMethods":true,
+    "queryAllDeclaredConstructors":true,
+    "methods":[
+      {"name":"<init>","parameterTypes":[] },
+      {"name":"getKey","parameterTypes":[] },
+      {"name":"getValue","parameterTypes":[] },
+      {"name":"setKey","parameterTypes":["java.lang.String"] },
+      {"name":"setValue","parameterTypes":["java.lang.String"] }
+    ]
+  },
+  {
+    "name":"com.robothy.s3.datatypes.Tagging$TagSet",
+    "allDeclaredFields":true,
+    "queryAllDeclaredMethods":true,
+    "queryAllDeclaredConstructors":true,
+    "methods":[
+      {"name":"<init>","parameterTypes":[] },
+      {"name":"getTags","parameterTypes":[] },
+      {"name":"setTags","parameterTypes":["java.util.List"] }
+    ]
+  },
+  {
+    "name":"com.robothy.s3.datatypes.VersioningConfiguration",
+    "allDeclaredFields":true,
+    "queryAllDeclaredMethods":true,
+    "queryAllDeclaredConstructors":true,
+    "methods":[
+      {"name":"<init>","parameterTypes":[] },
+      {"name":"setStatus","parameterTypes":["java.lang.String"] }
+    ]
+  },
+  {
+    "name":"com.robothy.s3.datatypes.converter.AmazonInstantConverter",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"com.robothy.s3.datatypes.enums.CheckSumAlgorithm",
+    "allDeclaredFields":true,
+    "queryAllDeclaredMethods":true
+  },
+  {
+    "name":"com.robothy.s3.datatypes.enums.StorageClass",
+    "allDeclaredFields":true,
+    "queryAllDeclaredMethods":true
+  },
+  {
+    "name":"com.robothy.s3.datatypes.request.DeleteObjectsRequest",
+    "allDeclaredFields":true,
+    "queryAllDeclaredMethods":true,
+    "queryAllDeclaredConstructors":true,
+    "methods":[
+      {"name":"<init>","parameterTypes":[] },
+      {"name":"setObjects","parameterTypes":["java.util.List"] }
+    ]
+  },
+  {
+    "name":"com.robothy.s3.datatypes.response.CreateBucketResult",
+    "allDeclaredFields":true,
+    "queryAllDeclaredMethods":true,
+    "queryAllDeclaredConstructors":true,
+    "methods":[{"name":"getBucketArn","parameterTypes":[] }]
+  },
+  {
+    "name":"com.robothy.s3.datatypes.response.DeleteMarkerEntry",
+    "allDeclaredFields":true,
+    "queryAllDeclaredMethods":true,
+    "queryAllDeclaredConstructors":true,
+    "methods":[
+      {"name":"getKey","parameterTypes":[] },
+      {"name":"getLastModified","parameterTypes":[] },
+      {"name":"getOwner","parameterTypes":[] },
+      {"name":"getVersionId","parameterTypes":[] },
+      {"name":"isLatest","parameterTypes":[] }
+    ]
+  },
+  {
+    "name":"com.robothy.s3.datatypes.response.DeleteResult",
+    "fields":[{"name":"deletedList"}]
+  },
+  {
+    "name":"com.robothy.s3.datatypes.response.DeleteResult$DeleteResultSerializer",
+    "methods":[{"name":"<init>","parameterTypes":[] }]
+  },
+  {
+    "name":"com.robothy.s3.datatypes.response.DeleteResult$Deleted",
+    "allDeclaredFields":true,
+    "queryAllDeclaredMethods":true,
+    "queryAllDeclaredConstructors":true,
+    "methods":[
+      {"name":"getDeleteMarkerVersionId","parameterTypes":[] },
+      {"name":"getKey","parameterTypes":[] },
+      {"name":"getVersionId","parameterTypes":[] },
+      {"name":"isDeleteMarker","parameterTypes":[] }
+    ]
+  },
+  {
+    "name":"com.robothy.s3.datatypes.response.ObjectVersion",
+    "allDeclaredFields":true,
+    "queryAllDeclaredMethods":true,
+    "queryAllDeclaredConstructors":true,
+    "methods":[
+      {"name":"getCheckSumAlgorithm","parameterTypes":[] },
+      {"name":"getEtag","parameterTypes":[] },
+      {"name":"getKey","parameterTypes":[] },
+      {"name":"getLastModified","parameterTypes":[] },
+      {"name":"getOwner","parameterTypes":[] },
+      {"name":"getSize","parameterTypes":[] },
+      {"name":"getStorageClass","parameterTypes":[] },
+      {"name":"getVersionId","parameterTypes":[] },
+      {"name":"isLatest","parameterTypes":[] }
+    ]
+  },
+  {
+    "name":"com.robothy.s3.datatypes.response.S3Error",
+    "allDeclaredFields":true,
+    "queryAllDeclaredMethods":true,
+    "queryAllDeclaredConstructors":true,
+    "methods":[
+      {"name":"getArgumentName","parameterTypes":[] },
+      {"name":"getArgumentValue","parameterTypes":[] },
+      {"name":"getBucketName","parameterTypes":[] },
+      {"name":"getCode","parameterTypes":[] },
+      {"name":"getKey","parameterTypes":[] },
+      {"name":"getMessage","parameterTypes":[] },
+      {"name":"getRequestId","parameterTypes":[] },
+      {"name":"getVersionId","parameterTypes":[] }
+    ]
+  },
+  {
+    "name":"com.robothy.s3.datatypes.response.S3Object",
+    "allDeclaredFields":true,
+    "queryAllDeclaredMethods":true,
+    "queryAllDeclaredConstructors":true,
+    "methods":[
+      {"name":"getCheckSumAlgorithm","parameterTypes":[] },
+      {"name":"getEtag","parameterTypes":[] },
+      {"name":"getKey","parameterTypes":[] },
+      {"name":"getLastModified","parameterTypes":[] },
+      {"name":"getOwner","parameterTypes":[] },
+      {"name":"getSize","parameterTypes":[] },
+      {"name":"getStorageClass","parameterTypes":[] }
+    ]
+  },
+  {
+    "name":"com.robothy.s3.datatypes.response.VersionItem",
+    "queryAllDeclaredMethods":true
+  }
+]
