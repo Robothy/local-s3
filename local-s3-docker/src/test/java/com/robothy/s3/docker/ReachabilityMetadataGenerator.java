@@ -176,7 +176,7 @@ public class ReachabilityMetadataGenerator {
     s3.headBucket(new HeadBucketRequest(bucketName));
     s3.getObjectMetadata(bucketName, "my-object");
 
-    s3.deleteObjects(new DeleteObjectsRequest(bucketName).withKeys("my-object"));
+    s3.deleteObjects(new DeleteObjectsRequest(bucketName).withKeys(List.of(new DeleteObjectsRequest.KeyVersion("my-object", "version"))));
 
     assertThrows(AmazonS3Exception.class, () -> s3.deleteBucket("not-exist-bucket"));
   }
