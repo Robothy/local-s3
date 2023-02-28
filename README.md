@@ -200,6 +200,8 @@ public class AppTest {
 }
 ```
 
-## Incoming features
+## Sponsors
 
-+ Set default expiration for multipart uploads.
+[![JetBrains](https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg)](https://jb.gg/OpenSourceSupport)
+
+
