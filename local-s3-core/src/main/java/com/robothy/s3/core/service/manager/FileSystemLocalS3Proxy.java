@@ -17,7 +17,10 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Semaphore;
 
 public class FileSystemLocalS3Proxy implements LocalS3Manager {
 
@@ -58,6 +61,8 @@ public class FileSystemLocalS3Proxy implements LocalS3Manager {
 
     private final LocalS3Metadata s3Metadata;
 
+    private final Map<String, Semaphore> bucketLocks = new ConcurrentHashMap<>();
+
     LocalS3ServiceInvocationHandler(Object proxy, LocalS3Metadata s3Metadata, MetadataStore<BucketMetadata> bucketMetaStore) {
       this.proxy = proxy;
       this.bucketMetaStore = bucketMetaStore;
@@ -78,7 +83,11 @@ public class FileSystemLocalS3Proxy implements LocalS3Manager {
         switch (bucketChanged.type()) {
           case UPDATE :
           case CREATE :
+            bucketLocks.computeIfAbsent(bucketName, k -> new Semaphore(1));
+            Semaphore semaphore = bucketLocks.get(bucketName);
+            semaphore.acquire();
             bucketMetaStore.store(bucketName, s3Metadata.getBucketMetadata(bucketName).get());
+            semaphore.release();
           break;
           case DELETE : bucketMetaStore.delete(bucketName);
         }

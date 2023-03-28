@@ -9,7 +9,7 @@
         </encoder>
     </appender>
 
-    <root level="info">
+    <root level="${LOCAL_S3_LOGGING_LEVEL:-INFO}">
         <appender-ref ref="STDOUT" />
     </root>
 </configuration>
