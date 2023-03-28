@@ -10,8 +10,10 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+@Slf4j
 public class FileSystemBucketMetadataStore implements MetadataStore<BucketMetadata> {
 
   private static final String BUCKET_METADATA_FILE_SUFFIX = ".bucket.meta";
@@ -36,6 +38,7 @@ public class FileSystemBucketMetadataStore implements MetadataStore<BucketMetada
   @SneakyThrows
   @Override
   public BucketMetadata fetch(String bucketName) {
+    log.debug("Fetching metadata of bucket {}.", bucketName);
     return JsonUtils.fromJson(new File(dataPath.toFile(), bucketName + BUCKET_METADATA_FILE_SUFFIX), BucketMetadata.class);
   }
 
