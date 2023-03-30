@@ -47,7 +47,8 @@ class ListObjectsController implements HttpRequestHandler {
 
     ListObjectsAns listObjectsAns = listObjectsService.listObjects(bucket, delimiter, marker, maxKeys, prefix);
     if ("url".equalsIgnoreCase(encodingType)) {
-      listObjectsAns.getObjects().forEach(object -> object.setKey(URLEncoder.encode(object.getKey(), StandardCharsets.UTF_8)));
+      listObjectsAns.getObjects()
+          .forEach(object -> object.setKey(URLEncoder.encode(object.getKey(), StandardCharsets.UTF_8)));
       List<String> encodedPrefixes = new ArrayList<>();
       listObjectsAns.getCommonPrefixes().forEach(commonPrefix -> encodedPrefixes.add(URLEncoder.encode(commonPrefix, StandardCharsets.UTF_8)));
       listObjectsAns.setCommonPrefixes(encodedPrefixes);
