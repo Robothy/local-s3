@@ -1,6 +1,8 @@
 package com.robothy.s3.core.model.answers;
 
 import com.robothy.s3.datatypes.response.S3Object;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -24,9 +26,9 @@ public class ListObjectsAns {
    */
   private String nextMarker;
 
-  private List<S3Object> objects = new LinkedList<>();
+  private List<S3Object> objects = Collections.emptyList();
 
-  private List<String> commonPrefixes = new LinkedList<>();
+  private List<String> commonPrefixes = Collections.emptyList();
 
   public Optional<String> getNextMarker() {
     return Optional.ofNullable(nextMarker);
