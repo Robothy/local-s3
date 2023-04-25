@@ -9,6 +9,7 @@ import com.robothy.s3.datatypes.response.S3Error;
 import com.robothy.s3.rest.utils.XmlUtils;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaderValues;
+import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponseStatus;
 
 /**
@@ -25,8 +26,11 @@ public class IllegalArgumentExceptionHandler implements ExceptionHandler<Illegal
         .build();
 
     response.status(HttpResponseStatus.valueOf(S3ErrorCode.InvalidArgument.httpStatus()))
-        .putHeader(HttpHeaderNames.CONTENT_TYPE.toString(), HttpHeaderValues.APPLICATION_XML)
-        .write(XmlUtils.toXml(error));
+        .putHeader(HttpHeaderNames.CONTENT_TYPE.toString(), HttpHeaderValues.APPLICATION_XML);
+
+    if (httpRequest.getMethod() != HttpMethod.HEAD) {
+      response.write(XmlUtils.toXml(error));
+    }
   }
 
 }
