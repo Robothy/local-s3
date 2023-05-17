@@ -42,6 +42,16 @@ public class ResponseUtils {
     response.putHeader(HttpHeaderNames.SERVER.toString(), LocalS3Constants.SERVER_NAME);
   }
 
+/**
+   * Add 'ETag' header.
+   *
+   * @param response the response to add 'ETag' header.
+   * @param etag the etag to add
+   */
+  public static void addETag(HttpResponse response, String etag) {
+    response.putHeader(HttpHeaderNames.ETAG.toString(), etag);
+  }
+
   /**
    * Add common headers to the give response.
    *

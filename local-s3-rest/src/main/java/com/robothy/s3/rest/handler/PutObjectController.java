@@ -53,6 +53,7 @@ class PutObjectController implements HttpRequestHandler {
       response.putHeader(AmzHeaderNames.X_AMZ_VERSION_ID, ans.getVersionId());
     }
 
+    ResponseUtils.addETag(response, ans.getEtag());
     ResponseUtils.addServerHeader(response);
     ResponseUtils.addDateHeader(response);
     ResponseUtils.addAmzRequestId(response);

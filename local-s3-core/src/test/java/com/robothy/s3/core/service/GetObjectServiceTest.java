@@ -22,6 +22,8 @@ import com.robothy.s3.core.model.request.PutObjectOptions;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Optional;
+
+import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -59,6 +61,7 @@ class GetObjectServiceTest extends LocalS3ServiceTestBase {
     assertEquals(ObjectMetadata.NULL_VERSION, getObjectAns.getVersionId());
     assertEquals("plain/text", getObjectAns.getContentType());
     assertEquals("Hello", new String(getObjectAns.getContent().readAllBytes()));
+    assertEquals(DigestUtils.md5Hex("Hello"), getObjectAns.getEtag());
     assertFalse(getObjectAns.isDeleteMarker());
 
     // Get first version of key1 without specify version ID.

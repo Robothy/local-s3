@@ -9,4 +9,5 @@ dependencies {
     implementation "com.fasterxml.jackson.core:jackson-databind:${libVersion['com.fasterxml.jackson.core.jackson-databind']}"
     implementation "org.apache.commons:commons-io:${libVersion['org.apache.commons.commons-io']}"
     implementation "org.apache.commons:commons-lang3:${libVersion['org.apache.commons.commons-lang3']}"
+    implementation "commons-codec:commons-codec:${libVersion['commons-codec.commons-codec']}"
 }

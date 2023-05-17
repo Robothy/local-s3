@@ -42,6 +42,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+
+import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.util.StringUtils;
 
@@ -56,6 +58,7 @@ public class ObjectIntegrationTest {
     assertTrue(s3.doesObjectExist("bucket1", "hello.txt"));
     S3Object object = s3.getObject(bucket1.getName(), "hello.txt");
     assertArrayEquals("Hello".getBytes(), object.getObjectContent().readAllBytes());
+    assertEquals(DigestUtils.md5Hex("Hello"), object.getObjectMetadata().getETag());
 
     // test put object with tagging
     ObjectMetadata metadata = new ObjectMetadata();
@@ -93,6 +96,7 @@ public class ObjectIntegrationTest {
     S3Object object = s3.getObject(bucket, key);
     assertEquals("null", object.getObjectMetadata().getVersionId());
     assertEquals("Text1", new String(object.getObjectContent().readAllBytes()));
+    assertEquals(DigestUtils.md5Hex("Text1"), object.getObjectMetadata().getETag());
 
     s3.putObject(bucket, key, "Text2");
     S3Object object1 = s3.getObject(bucket, key);
