@@ -26,8 +26,10 @@ public class ListObjectsAns {
    */
   private String nextMarker;
 
+  @Builder.Default
   private List<S3Object> objects = Collections.emptyList();
 
+  @Builder.Default
   private List<String> commonPrefixes = Collections.emptyList();
 
   public Optional<String> getNextMarker() {

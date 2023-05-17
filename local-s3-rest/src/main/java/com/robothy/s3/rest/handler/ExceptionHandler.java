@@ -26,7 +26,7 @@ class ExceptionHandler implements com.robothy.netty.router.ExceptionHandler<Exce
     response.status(HttpResponseStatus.INTERNAL_SERVER_ERROR)
         .putHeader(HttpHeaderNames.CONTENT_TYPE.toString(), HttpHeaderValues.APPLICATION_XML);
 
-    if (HttpMethod.HEAD.equals(request.getMethod())) {
+    if (!HttpMethod.HEAD.equals(request.getMethod())) {
       response.write(XmlUtils.toXml(error));
     }
   }

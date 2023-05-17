@@ -28,7 +28,7 @@ public class IllegalArgumentExceptionHandler implements ExceptionHandler<Illegal
     response.status(HttpResponseStatus.valueOf(S3ErrorCode.InvalidArgument.httpStatus()))
         .putHeader(HttpHeaderNames.CONTENT_TYPE.toString(), HttpHeaderValues.APPLICATION_XML);
 
-    if (HttpMethod.HEAD.equals(httpRequest.getMethod())) {
+    if (!HttpMethod.HEAD.equals(httpRequest.getMethod())) {
       response.write(XmlUtils.toXml(error));
     }
   }
