@@ -28,7 +28,7 @@ class NotFoundHandler implements HttpRequestHandler {
     response.status(HttpResponseStatus.INTERNAL_SERVER_ERROR)
         .putHeader(HttpHeaderNames.CONTENT_TYPE.toString(), HttpHeaderValues.APPLICATION_XML);
 
-    if (request.getMethod() != HttpMethod.HEAD) {
+    if (HttpMethod.HEAD.equals(request.getMethod())) {
       response.write(XmlUtils.toXml(error));
     }
   }

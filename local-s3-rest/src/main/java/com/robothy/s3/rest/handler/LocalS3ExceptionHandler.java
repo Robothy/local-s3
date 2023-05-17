@@ -42,7 +42,7 @@ class LocalS3ExceptionHandler implements ExceptionHandler<LocalS3Exception> {
       response.status(HttpResponseStatus.valueOf(s3ErrorCode.httpStatus()))
           .putHeader(HttpHeaderNames.CONNECTION.toString(), HttpHeaderValues.CLOSE);
 
-      if (request.getMethod() != HttpMethod.HEAD) {
+      if (HttpMethod.HEAD.equals(request.getMethod())) {
         response.write(xmlMapper.writeValueAsString(error));
       }
     } catch (JsonProcessingException ex) {
