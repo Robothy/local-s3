@@ -8,6 +8,7 @@ import com.amazonaws.services.s3.model.Bucket;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.robothy.s3.jupiter.LocalS3;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -43,7 +44,9 @@ public class ListObjectsIntegrationTest {
     assertEquals("my-bucket", objectListing.getBucketName());
     assertEquals(2, objectListing.getObjectSummaries().size());
     assertEquals("dir1/a.txt", objectListing.getObjectSummaries().get(0).getKey());
+    assertEquals(DigestUtils.md5Hex("Content A"), objectListing.getObjectSummaries().get(0).getETag());
     assertEquals("dir1/b.txt", objectListing.getObjectSummaries().get(1).getKey());
+    assertEquals(DigestUtils.md5Hex("Content B"), objectListing.getObjectSummaries().get(1).getETag());
     assertEquals(0, objectListing.getCommonPrefixes().size());
 
 

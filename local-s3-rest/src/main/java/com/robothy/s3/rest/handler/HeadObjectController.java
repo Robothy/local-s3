@@ -45,6 +45,7 @@ class HeadObjectController implements HttpRequestHandler {
           .putHeader(HttpHeaderNames.CONTENT_LENGTH.toString(), object.getSize())
           .putHeader(HttpHeaderNames.ETAG.toString(), object.getEtag())
           .putHeader(HttpHeaderNames.CONTENT_TYPE.toString(), object.getContentType());
+      ResponseUtils.addETag(response, object.getEtag());
       //.putHeader(HttpHeaderNames.CONTENT_ENCODING.toString(), )
     } else {
       response.status(HttpResponseStatus.METHOD_NOT_ALLOWED);

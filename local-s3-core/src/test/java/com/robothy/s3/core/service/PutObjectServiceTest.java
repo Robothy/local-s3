@@ -14,6 +14,8 @@ import com.robothy.s3.core.model.request.PutObjectOptions;
 import com.robothy.s3.core.service.manager.LocalS3Manager;
 import java.io.ByteArrayInputStream;
 import java.util.Optional;
+
+import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -42,6 +44,7 @@ class PutObjectServiceTest extends LocalS3ServiceTestBase {
         .build());
     assertEquals(key1, putObjectAns1.getKey());
     assertEquals(ObjectMetadata.NULL_VERSION, putObjectAns1.getVersionId());
+    assertEquals(DigestUtils.md5Hex("Hello"), putObjectAns1.getEtag());
 
     LocalS3Metadata s3Metadata = objectService.localS3Metadata();
     Optional<BucketMetadata> bucketMetadataOpt = s3Metadata.getBucketMetadata(bucketName);

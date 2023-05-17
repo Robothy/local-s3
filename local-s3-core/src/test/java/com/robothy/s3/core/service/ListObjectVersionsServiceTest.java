@@ -10,6 +10,8 @@ import com.robothy.s3.datatypes.response.DeleteMarkerEntry;
 import com.robothy.s3.datatypes.response.ObjectVersion;
 import java.io.ByteArrayInputStream;
 import java.util.stream.Stream;
+
+import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -26,16 +28,22 @@ class ListObjectVersionsServiceTest extends LocalS3ServiceTestBase {
     String key1 = "dir1/key1";
     String key2 = "dir2/key2";
 
+    ByteArrayInputStream data = new ByteArrayInputStream("Robothy".getBytes());
     PutObjectOptions putObjectOptions = PutObjectOptions.builder()
         .contentType("plain/text")
-        .content(new ByteArrayInputStream("Robothy".getBytes()))
+        .content(data)
         .size(7)
         .build();
-    PutObjectAns putObjectAns1 = objectService.putObject(bucket, key1, putObjectOptions);
-    PutObjectAns putObjectAns2 = objectService.putObject(bucket, key1, putObjectOptions);
-    DeleteObjectAns deleteObjectAns = objectService.deleteObject(bucket, key1);
-    PutObjectAns putObjectAns3 = objectService.putObject(bucket, key2, putObjectOptions);
-    PutObjectAns putObjectAns4 = objectService.putObject(bucket, key2, putObjectOptions);
+    PutObjectAns putObjectAns1 = objectService.putObject(bucket, key1, putObjectOptions); // key1 version 1
+    data.reset();
+    PutObjectAns putObjectAns2 = objectService.putObject(bucket, key1, putObjectOptions); // key1 version 2
+    DeleteObjectAns deleteObjectAns = objectService.deleteObject(bucket, key1); // key1 version 3
+
+    data.reset();
+    PutObjectAns putObjectAns3 = objectService.putObject(bucket, key2, putObjectOptions); // key2 version 1
+
+    data.reset();
+    PutObjectAns putObjectAns4 = objectService.putObject(bucket, key2, putObjectOptions); // key2 version 2
 
     /*-- List all versions. --*/
 
@@ -45,8 +53,11 @@ class ListObjectVersionsServiceTest extends LocalS3ServiceTestBase {
     assertEquals(0, listObjectVersionsAns.getCommonPrefixes().size());
     assertInstanceOf(DeleteMarkerEntry.class, listObjectVersionsAns.getVersions().get(0));
     assertInstanceOf(ObjectVersion.class, listObjectVersionsAns.getVersions().get(1));
+
     assertEquals(deleteObjectAns.getVersionId(), ((DeleteMarkerEntry)listObjectVersionsAns.getVersions().get(0)).getVersionId());
-    assertEquals(putObjectAns2.getVersionId(), ((ObjectVersion) listObjectVersionsAns.getVersions().get(1)).getVersionId());
+    ObjectVersion key1Version2 = (ObjectVersion) listObjectVersionsAns.getVersions().get(1);
+    assertEquals(putObjectAns2.getVersionId(), key1Version2.getVersionId());
+    assertEquals(DigestUtils.md5Hex("Robothy"), key1Version2.getEtag());
     assertTrue(listObjectVersionsAns.getNextKeyMarker().isPresent());
     assertEquals(key1, listObjectVersionsAns.getNextKeyMarker().get());
     assertTrue(listObjectVersionsAns.getNextVersionIdMarker().isPresent());

@@ -43,6 +43,8 @@ class GetObjectController implements HttpRequestHandler {
           .putHeader(AmzHeaderNames.X_AMZ_DELETE_MARKER, true);
     } else {
       ByteBuf content = ByteBufUtils.fromInputStream(getObjectAns.getContent());
+      ResponseUtils.addCommonHeaders(response);
+      ResponseUtils.addETag(response, getObjectAns.getEtag());
       response.status(HttpResponseStatus.OK)
           .write(content)
           .putHeader(HttpHeaderNames.CONTENT_TYPE.toString(), getObjectAns.getContentType())
