@@ -7,6 +7,7 @@ import com.robothy.s3.datatypes.response.S3Error;
 import com.robothy.s3.rest.utils.XmlUtils;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaderValues;
+import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponseStatus;
 
 /**
@@ -23,8 +24,11 @@ class ExceptionHandler implements com.robothy.netty.router.ExceptionHandler<Exce
         .build();
 
     response.status(HttpResponseStatus.INTERNAL_SERVER_ERROR)
-        .putHeader(HttpHeaderNames.CONTENT_TYPE.toString(), HttpHeaderValues.APPLICATION_XML)
-        .write(XmlUtils.toXml(error));
+        .putHeader(HttpHeaderNames.CONTENT_TYPE.toString(), HttpHeaderValues.APPLICATION_XML);
+
+    if (!HttpMethod.HEAD.equals(request.getMethod())) {
+      response.write(XmlUtils.toXml(error));
+    }
   }
 
 }
