@@ -172,13 +172,32 @@ public class ObjectIntegrationTest {
     s3.deleteObject(bucket, "dir1/key1");
     PutObjectResult putObjectResult3 = s3.putObject(bucket, "dir1/key1", "Text3");
 
+
     VersionListing versionListing1 = s3.listVersions(bucket, "dir1/key1");
     assertEquals(4, versionListing1.getVersionSummaries().size());
-    assertEquals(putObjectResult3.getVersionId(), versionListing1.getVersionSummaries().get(0).getVersionId());
+
+    assertEquals(DigestUtils.md5Hex("Text3"), versionListing1.getVersionSummaries().get(0).getETag());
     assertTrue(versionListing1.getVersionSummaries().get(0).isLatest());
+    assertEquals("dir1/key1", versionListing1.getVersionSummaries().get(0).getKey());
+    assertEquals(5, versionListing1.getVersionSummaries().get(0).getSize());
+    assertEquals(putObjectResult3.getVersionId(), versionListing1.getVersionSummaries().get(0).getVersionId());
+
     assertTrue(versionListing1.getVersionSummaries().get(1).isDeleteMarker());
+    assertEquals("dir1/key1", versionListing1.getVersionSummaries().get(1).getKey());
+    assertFalse(versionListing1.getVersionSummaries().get(1).isLatest());
+
+    assertEquals(DigestUtils.md5Hex("Text2"), versionListing1.getVersionSummaries().get(2).getETag());
+    assertFalse(versionListing1.getVersionSummaries().get(2).isLatest());
+    assertEquals("dir1/key1", versionListing1.getVersionSummaries().get(2).getKey());
+    assertEquals(5, versionListing1.getVersionSummaries().get(2).getSize());
     assertEquals(putObjectResult2.getVersionId(), versionListing1.getVersionSummaries().get(2).getVersionId());
+
+    assertEquals(DigestUtils.md5Hex("Text1"), versionListing1.getVersionSummaries().get(3).getETag());
+    assertFalse(versionListing1.getVersionSummaries().get(3).isLatest());
+    assertEquals("dir1/key1", versionListing1.getVersionSummaries().get(3).getKey());
+    assertEquals(5, versionListing1.getVersionSummaries().get(3).getSize());
     assertEquals(putObjectResult1.getVersionId(), versionListing1.getVersionSummaries().get(3).getVersionId());
+
     assertNull(versionListing1.getNextKeyMarker());
     assertTrue(StringUtils.isBlank(versionListing1.getNextVersionIdMarker()));
 
