@@ -40,14 +40,15 @@ public interface PutObjectService extends LocalS3MetadataApplicable, StorageAppl
     versionedObjectMetadata.setCreationDate(System.currentTimeMillis());
     versionedObjectMetadata.setContentType(options.getContentType());
     versionedObjectMetadata.setSize(options.getSize());
+    Long fileId = storage().put(options.getContent());
+    versionedObjectMetadata.setFileId(fileId);
+
     try {
-      versionedObjectMetadata.setEtag(DigestUtils.md5Hex(options.getContent()));
-      options.getContent().reset();
+      versionedObjectMetadata.setEtag(DigestUtils.md5Hex(storage().getInputStream(fileId)));
     } catch (IOException e) {
       throw new IllegalStateException(e);
     }
-    Long fileId = storage().put(options.getContent());
-    versionedObjectMetadata.setFileId(fileId);
+
     options.getTagging().ifPresent(versionedObjectMetadata::setTagging);
 
     ObjectMetadata objectMetadata;
