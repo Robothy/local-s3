@@ -11,6 +11,7 @@ import com.robothy.s3.core.model.request.GetObjectOptions;
 import com.robothy.s3.core.model.request.PutObjectOptions;
 import com.robothy.s3.datatypes.response.ObjectVersion;
 import java.io.ByteArrayInputStream;
+import java.util.Map;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -33,6 +34,7 @@ class CopyObjectServiceTest extends LocalS3ServiceTestBase {
         .size(text1.length())
         .contentType("plain/text")
         .content(new ByteArrayInputStream(text1.getBytes()))
+        .userMetadata(Map.of("key1", "value1", "key2", "value2"))
         .build());
 
     CopyObjectAns copyObjectAns1 = objectService.copyObject(bucket2, key2, CopyObjectOptions.builder()
@@ -46,6 +48,10 @@ class CopyObjectServiceTest extends LocalS3ServiceTestBase {
     assertEquals(text1.length(), object1.getSize());
     assertEquals("plain/text", object1.getContentType());
     assertEquals(copyObjectAns1.getVersionId(), object1.getVersionId());
+    assertEquals(copyObjectAns1.getEtag(), object1.getEtag());
+    assertEquals(2, object1.getUserMetadata().size());
+    assertEquals("value1", object1.getUserMetadata().get("key1"));
+    assertEquals("value2", object1.getUserMetadata().get("key2"));
 
     bucketService.setVersioningEnabled(bucket1, true);
     CopyObjectAns copyObjectAns2 = objectService.copyObject(bucket1, key1, CopyObjectOptions.builder()

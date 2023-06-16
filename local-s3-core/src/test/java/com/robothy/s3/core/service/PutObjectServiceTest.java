@@ -13,6 +13,7 @@ import com.robothy.s3.core.model.internal.VersionedObjectMetadata;
 import com.robothy.s3.core.model.request.PutObjectOptions;
 import com.robothy.s3.core.service.manager.LocalS3Manager;
 import java.io.ByteArrayInputStream;
+import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -41,6 +42,7 @@ class PutObjectServiceTest extends LocalS3ServiceTestBase {
         .contentType("plain/text")
         .size(5)
         .tagging(new String[][]{{"key1", "value1"}, {"key2", "value2"}})
+        .userMetadata(Map.of("key1", "value1", "key2", "value2"))
         .build());
     assertEquals(key1, putObjectAns1.getKey());
     assertEquals(ObjectMetadata.NULL_VERSION, putObjectAns1.getVersionId());
@@ -67,6 +69,9 @@ class PutObjectServiceTest extends LocalS3ServiceTestBase {
     assertTrue(versionedObjectMetadata1.getTagging().isPresent());
     assertEquals(2, versionedObjectMetadata1.getTagging().get().length);
     assertTrue(objectService.storage().isExist(versionedObjectMetadata1.getFileId()));
+    assertEquals(2, versionedObjectMetadata1.getUserMetadata().size());
+    assertEquals("value1", versionedObjectMetadata1.getUserMetadata().get("key1"));
+    assertEquals("value2", versionedObjectMetadata1.getUserMetadata().get("key2"));
 
     PutObjectAns putObjectAns2 = objectService.putObject(bucketName, key1, PutObjectOptions.builder()
         .contentType("application/json")

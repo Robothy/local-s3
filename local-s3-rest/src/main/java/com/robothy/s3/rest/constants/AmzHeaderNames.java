@@ -29,4 +29,9 @@ public class AmzHeaderNames {
    */
   public static final String X_AMZ_COPY_SOURCE_VERSION_ID = "x-amz-copy-source-version-id";
 
+  /**
+   * The prefix for <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingMetadata.html#UserMetadata">user-defined object metadata</a> keys.
+   *
+   */
+  public static final String X_AMZ_META_PREFIX = "x-amz-meta-";
 }
