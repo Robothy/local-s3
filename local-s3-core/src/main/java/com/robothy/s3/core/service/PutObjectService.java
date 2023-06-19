@@ -40,6 +40,9 @@ public interface PutObjectService extends LocalS3MetadataApplicable, StorageAppl
     versionedObjectMetadata.setCreationDate(System.currentTimeMillis());
     versionedObjectMetadata.setContentType(options.getContentType());
     versionedObjectMetadata.setSize(options.getSize());
+    if (Objects.nonNull(options.getUserMetadata())) {
+      versionedObjectMetadata.setUserMetadata(options.getUserMetadata());
+    }
     Long fileId = storage().put(options.getContent());
     versionedObjectMetadata.setFileId(fileId);
 

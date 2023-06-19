@@ -32,6 +32,7 @@ public interface CopyObjectService extends GetObjectService, PutObjectService, L
         .content(srcObjectAns.getContent())
         .contentType(srcObjectAns.getContentType())
         .size(srcObjectAns.getSize())
+        .userMetadata(srcObjectAns.getUserMetadata())
         .build());
 
     return CopyObjectAns.builder()

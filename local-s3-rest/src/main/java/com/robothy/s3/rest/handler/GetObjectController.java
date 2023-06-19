@@ -49,6 +49,7 @@ class GetObjectController implements HttpRequestHandler {
           .write(content)
           .putHeader(HttpHeaderNames.CONTENT_TYPE.toString(), getObjectAns.getContentType())
           .putHeader(HttpHeaderNames.CONTENT_LENGTH.toString(), getObjectAns.getSize());
+      getObjectAns.getUserMetadata().forEach((k, v) -> response.putHeader(AmzHeaderNames.X_AMZ_META_PREFIX + k, v));
     }
 
     response.putHeader(AmzHeaderNames.X_AMZ_VERSION_ID, getObjectAns.getVersionId());

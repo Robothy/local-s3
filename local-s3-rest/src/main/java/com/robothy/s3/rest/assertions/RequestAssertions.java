@@ -2,6 +2,7 @@ package com.robothy.s3.rest.assertions;
 
 
 import com.robothy.netty.http.HttpRequest;
+import com.robothy.s3.rest.constants.AmzHeaderNames;
 import java.util.Optional;
 
 /**
@@ -89,6 +90,20 @@ public class RequestAssertions {
   public static String assertUploadIdIsProvided(HttpRequest request) {
     return request.parameter("uploadId").orElseThrow(
         () -> new IllegalArgumentException("'uploadId' is required."));
+  }
+
+  /**
+   * Assert that the user-defined metadata header is valid.
+   *
+   * @param userMetaHeaderName the user-defined object metadata header name.
+   * @return the user-defined object metadata name without "x-amz-meta-" prefix.
+   */
+  public static String assertUserMetadataHeaderIsValid(String userMetaHeaderName) {
+    if (!userMetaHeaderName.startsWith(AmzHeaderNames.X_AMZ_META_PREFIX)
+        || userMetaHeaderName.length() == AmzHeaderNames.X_AMZ_META_PREFIX.length()) {
+      throw new IllegalArgumentException("Invalid user-defined object metadata key: " + userMetaHeaderName + ".");
+    }
+    return userMetaHeaderName.substring(AmzHeaderNames.X_AMZ_META_PREFIX.length()).toLowerCase();
   }
 
 }

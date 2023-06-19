@@ -45,6 +45,7 @@ public interface GetObjectService extends StorageApplicable, LocalS3MetadataAppl
         .size(latestObject.getSize())
         .content(metadataOnly ? null : storage.getInputStream(latestObject.getFileId()))
         .etag(latestObject.getEtag())
+        .userMetadata(latestObject.getUserMetadata())
         .build();
   }
 
@@ -105,6 +106,7 @@ public interface GetObjectService extends StorageApplicable, LocalS3MetadataAppl
           .size(versionedObjectMetadata.getSize())
           .content(metadataOnly ? null : storage.getInputStream(versionedObjectMetadata.getFileId()))
           .etag(versionedObjectMetadata.getEtag())
+          .userMetadata(versionedObjectMetadata.getUserMetadata())
           .build();
     }
   }

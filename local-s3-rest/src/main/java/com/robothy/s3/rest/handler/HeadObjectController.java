@@ -46,6 +46,7 @@ class HeadObjectController implements HttpRequestHandler {
           .putHeader(HttpHeaderNames.ETAG.toString(), object.getEtag())
           .putHeader(HttpHeaderNames.CONTENT_TYPE.toString(), object.getContentType());
       ResponseUtils.addETag(response, object.getEtag());
+      object.getUserMetadata().forEach((k, v) -> response.putHeader(AmzHeaderNames.X_AMZ_META_PREFIX + k, v));
       //.putHeader(HttpHeaderNames.CONTENT_ENCODING.toString(), )
     } else {
       response.status(HttpResponseStatus.METHOD_NOT_ALLOWED);

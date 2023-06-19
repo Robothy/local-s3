@@ -1,6 +1,7 @@
 package com.robothy.s3.core.model.answers;
 
 import java.io.InputStream;
+import java.util.Map;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -25,5 +26,7 @@ public class GetObjectAns {
   private String etag;
 
   private InputStream content;
+
+  private Map<String, String> userMetadata;
 
 }

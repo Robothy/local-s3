@@ -7,7 +7,6 @@ import com.robothy.s3.core.exception.InvalidArgumentException;
 import com.robothy.s3.core.model.answers.PutObjectAns;
 import com.robothy.s3.core.model.request.PutObjectOptions;
 import com.robothy.s3.core.service.ObjectService;
-import com.robothy.s3.datatypes.Tagging;
 import com.robothy.s3.rest.assertions.RequestAssertions;
 import com.robothy.s3.rest.constants.AmzHeaderNames;
 import com.robothy.s3.rest.model.request.DecodedAmzRequestBody;
@@ -16,6 +15,8 @@ import com.robothy.s3.rest.utils.RequestUtils;
 import com.robothy.s3.rest.utils.ResponseUtils;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
@@ -43,6 +44,7 @@ class PutObjectController implements HttpRequestHandler {
         .size(decodedBody.getDecodedContentLength())
         .content(decodedBody.getDecodedBody())
         .tagging(extractTagging(request))
+        .userMetadata(extractUserMetadata(request))
         .build();
 
     PutObjectAns ans = objectService.putObject(bucketName, key, options);
@@ -80,6 +82,18 @@ class PutObjectController implements HttpRequestHandler {
     }
 
     return tagSet;
+  }
+
+  Map<String, String> extractUserMetadata(HttpRequest request) {
+    Map<String, String> userMetadata = new HashMap<>();
+    request.getHeaders()
+        .forEach((k, v) -> {
+            if (k.toString().startsWith(AmzHeaderNames.X_AMZ_META_PREFIX)) {
+              String metaName = RequestAssertions.assertUserMetadataHeaderIsValid(k.toString());
+              userMetadata.put(metaName, v);
+            }
+        });
+    return userMetadata;
   }
 
 }

@@ -1,6 +1,8 @@
 package com.robothy.s3.core.model.request;
 
 import java.io.InputStream;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -18,6 +20,8 @@ public class PutObjectOptions {
   private InputStream content;
 
   private String[][] tagging;
+
+  private Map<String, String> userMetadata;
 
   /**
    * Get tagging in the put object request.
