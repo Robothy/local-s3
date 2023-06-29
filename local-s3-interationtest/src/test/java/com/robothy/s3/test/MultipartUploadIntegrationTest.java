@@ -2,12 +2,15 @@ package com.robothy.s3.test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.CompleteMultipartUploadRequest;
 import com.amazonaws.services.s3.model.CompleteMultipartUploadResult;
+import com.amazonaws.services.s3.model.CopyPartRequest;
 import com.amazonaws.services.s3.model.InitiateMultipartUploadRequest;
 import com.amazonaws.services.s3.model.InitiateMultipartUploadResult;
 import com.amazonaws.services.s3.model.ObjectMetadata;
@@ -79,6 +82,15 @@ public class MultipartUploadIntegrationTest {
 
     S3Object object = s3.getObject(bucket, key1);
     assertEquals("HelloWorld", new String(object.getObjectContent().readAllBytes()));
+
+    assertThrows(AmazonS3Exception.class, () -> {
+      s3.copyPart(new CopyPartRequest().withUploadId(initResult.getUploadId())
+          .withPartNumber(1)
+          .withSourceBucketName(bucket)
+          .withSourceKey(key1)
+          .withDestinationBucketName(bucket)
+          .withDestinationKey(key1));
+    });
   }
 
 }
