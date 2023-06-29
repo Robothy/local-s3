@@ -11,12 +11,16 @@ import com.amazonaws.services.s3.model.BucketReplicationConfiguration;
 import com.amazonaws.services.s3.model.BucketTaggingConfiguration;
 import com.amazonaws.services.s3.model.BucketVersioningConfiguration;
 import com.amazonaws.services.s3.model.CompleteMultipartUploadRequest;
+import com.amazonaws.services.s3.model.CopyPartRequest;
 import com.amazonaws.services.s3.model.DeleteMarkerReplication;
+import com.amazonaws.services.s3.model.DeleteObjectTaggingRequest;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest;
+import com.amazonaws.services.s3.model.GetObjectTaggingRequest;
 import com.amazonaws.services.s3.model.HeadBucketRequest;
 import com.amazonaws.services.s3.model.InitiateMultipartUploadRequest;
 import com.amazonaws.services.s3.model.InitiateMultipartUploadResult;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.ObjectTagging;
 import com.amazonaws.services.s3.model.PartETag;
 import com.amazonaws.services.s3.model.ReplicationDestinationConfig;
 import com.amazonaws.services.s3.model.ReplicationRule;
@@ -25,6 +29,8 @@ import com.amazonaws.services.s3.model.ServerSideEncryptionConfiguration;
 import com.amazonaws.services.s3.model.ServerSideEncryptionRule;
 import com.amazonaws.services.s3.model.SetBucketEncryptionRequest;
 import com.amazonaws.services.s3.model.SetBucketVersioningConfigurationRequest;
+import com.amazonaws.services.s3.model.SetObjectTaggingRequest;
+import com.amazonaws.services.s3.model.Tag;
 import com.amazonaws.services.s3.model.TagSet;
 import com.amazonaws.services.s3.model.UploadPartRequest;
 import com.github.dockerjava.api.command.StopContainerCmd;
@@ -112,6 +118,11 @@ public class ReachabilityMetadataGenerator {
     s3.putObject(bucketName, "my-object", "Hello World!");
     s3.listVersions(bucketName, "my-object");
     s3.copyObject(bucketName, "my-object", bucketName, "my-object-copy");
+    s3.setObjectTagging(new SetObjectTaggingRequest(bucketName, "my-object",
+        new ObjectTagging(List.of(new Tag("k1", "v1")))));
+    s3.getObjectTagging(new GetObjectTaggingRequest(bucketName, "my-object"));
+    s3.deleteObjectTagging(new DeleteObjectTaggingRequest(bucketName, "my-object"));
+
     s3.initiateMultipartUpload(new InitiateMultipartUploadRequest(bucketName, "my-object"));
 
     ObjectMetadata objectMetadata1 = new ObjectMetadata();
@@ -179,6 +190,15 @@ public class ReachabilityMetadataGenerator {
     s3.deleteObjects(new DeleteObjectsRequest(bucketName).withKeys(List.of(new DeleteObjectsRequest.KeyVersion("my-object", "version"))));
 
     assertThrows(AmazonS3Exception.class, () -> s3.deleteBucket("not-exist-bucket"));
+
+    assertThrows(AmazonS3Exception.class, () -> {
+      s3.copyPart(new CopyPartRequest().withUploadId(initResult.getUploadId())
+          .withPartNumber(1)
+          .withSourceBucketName(bucketName)
+          .withSourceKey("my-object")
+          .withDestinationBucketName(bucketName)
+          .withDestinationKey("my-object-copy"));
+    }); // not implemented yet
   }
 
   /**
