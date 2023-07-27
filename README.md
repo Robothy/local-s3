@@ -32,6 +32,7 @@ and without heavy dependencies, it starts up quickly and handles requests effici
 + GetBucketReplication
 + GetBucketVersioning
 + GetBucketTagging
++ GetBucketLocation
 + HeadBucket
 + HeadObject
 + ListBuckets

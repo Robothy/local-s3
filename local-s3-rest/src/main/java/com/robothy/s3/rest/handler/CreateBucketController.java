@@ -9,6 +9,7 @@ import com.robothy.s3.core.util.IdUtils;
 import com.robothy.s3.datatypes.request.CreateBucketConfiguration;
 import com.robothy.s3.datatypes.response.CreateBucketResult;
 import com.robothy.s3.rest.assertions.RequestAssertions;
+import com.robothy.s3.rest.constants.LocalS3Constants;
 import com.robothy.s3.rest.service.ServiceFactory;
 import com.robothy.s3.rest.utils.ResponseUtils;
 import io.netty.buffer.ByteBufInputStream;
@@ -36,13 +37,14 @@ class CreateBucketController implements HttpRequestHandler {
   public void handle(HttpRequest request, HttpResponse response) throws Exception {
     InputStream inputStream = new ByteBufInputStream(request.getBody());
 
+    String locationConstraint = LocalS3Constants.DEFAULT_LOCATION_CONSTRAINT;
     if (request.getBody().readableBytes() != 0) {
       CreateBucketConfiguration createBucketConfig = xmlMapper.readValue(inputStream, CreateBucketConfiguration.class);
-      log.warn("The region '{}' for bucket creation is ignored.", createBucketConfig.getLocationConstraint());
+      locationConstraint = createBucketConfig.getLocationConstraint();
     }
 
     String bucketName = RequestAssertions.assertBucketNameProvided(request);
-    bucketService.createBucket(bucketName);
+    bucketService.createBucket(bucketName, locationConstraint);
     CreateBucketResult createBucketResult = CreateBucketResult.builder()
         .bucketArn(IdUtils.nextUuid())
         .build();
