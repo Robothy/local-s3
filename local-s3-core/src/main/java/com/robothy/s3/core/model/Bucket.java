@@ -1,6 +1,7 @@
 package com.robothy.s3.core.model;
 
 import com.robothy.s3.core.model.internal.BucketMetadata;
+import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,7 +24,13 @@ public class Bucket {
    */
   private Boolean versioningEnabled;
 
+  private String region;
+
   private long creationDate;
+
+  public Optional<String> getRegion() {
+    return Optional.ofNullable(region);
+  }
 
   /**
    * Create a {@linkplain Bucket} instance from {@linkplain BucketMetadata}.
@@ -36,6 +43,7 @@ public class Bucket {
     return Bucket.builder()
         .name(bucketMetadata.getBucketName())
         .versioningEnabled(bucketMetadata.getVersioningEnabled())
+        .region(bucketMetadata.getRegion())
         .creationDate(bucketMetadata.getCreationDate())
         .build();
   }

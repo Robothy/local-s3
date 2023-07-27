@@ -5,15 +5,9 @@ import com.robothy.s3.core.model.Bucket;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public interface BucketService extends BucketVersioningService, BucketTaggingService,
+public interface BucketService extends CreateBucketService, BucketVersioningService, BucketTaggingService,
     BucketAclService, BucketPolicyService, BucketReplicationService,
     BucketEncryptionService {
-
-  /**
-   * Create a bucket.
-   */
-  @BucketChanged(type = BucketChanged.Type.CREATE)
-  Bucket createBucket(String bucketName);
 
   /**
    * Delete a bucket.

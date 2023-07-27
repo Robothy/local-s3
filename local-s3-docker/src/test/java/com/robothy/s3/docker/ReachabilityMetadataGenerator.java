@@ -12,6 +12,7 @@ import com.amazonaws.services.s3.model.BucketTaggingConfiguration;
 import com.amazonaws.services.s3.model.BucketVersioningConfiguration;
 import com.amazonaws.services.s3.model.CompleteMultipartUploadRequest;
 import com.amazonaws.services.s3.model.CopyPartRequest;
+import com.amazonaws.services.s3.model.CreateBucketRequest;
 import com.amazonaws.services.s3.model.DeleteMarkerReplication;
 import com.amazonaws.services.s3.model.DeleteObjectTaggingRequest;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest;
@@ -22,6 +23,7 @@ import com.amazonaws.services.s3.model.InitiateMultipartUploadResult;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.ObjectTagging;
 import com.amazonaws.services.s3.model.PartETag;
+import com.amazonaws.services.s3.model.Region;
 import com.amazonaws.services.s3.model.ReplicationDestinationConfig;
 import com.amazonaws.services.s3.model.ReplicationRule;
 import com.amazonaws.services.s3.model.ServerSideEncryptionByDefault;
@@ -105,8 +107,9 @@ public class ReachabilityMetadataGenerator {
    */
   static void run(AmazonS3 s3) {
     String bucketName = "my-bucket";
-    s3.createBucket(bucketName);
+    s3.createBucket(new CreateBucketRequest(bucketName, Region.AF_CapeTown));
     s3.listBuckets();
+    s3.getBucketLocation(bucketName);
     s3.putObject(bucketName, "my-object", "Hello World!");
     s3.getObject(bucketName, "my-object");
     s3.listObjects(bucketName);

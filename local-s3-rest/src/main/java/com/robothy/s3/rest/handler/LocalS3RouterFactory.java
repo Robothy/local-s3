@@ -243,7 +243,7 @@ public class LocalS3RouterFactory {
         .method(HttpMethod.GET)
         .path("/{bucket}")
         .paramMatcher(params -> params.containsKey("location"))
-        .handler(new NotImplementedOperationController(serviceFactory, "GetBucketLocation"))
+        .handler(new GetBucketLocationController(serviceFactory))
         .build();
 
     Route GetBucketLogging = Route.builder()

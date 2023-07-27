@@ -28,6 +28,11 @@ public class BucketMetadata {
   private long creationDate;
 
   /**
+   * The <a href="https://docs.aws.amazon.com/AmazonS3/latest/API/API_CreateBucket.html#AmazonS3-CreateBucket-request-LocationConstraint">region</a> where the bucket is located.
+   */
+  private String region;
+
+  /**
    * key - object key.
    */
   @JsonDeserialize(converter = UploadMetadataMapConverter.class)

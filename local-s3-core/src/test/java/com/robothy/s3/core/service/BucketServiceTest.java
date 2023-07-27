@@ -18,16 +18,6 @@ class BucketServiceTest extends LocalS3ServiceTestBase {
 
   @MethodSource("bucketServices")
   @ParameterizedTest
-  void createBucket(BucketService bucketService) {
-    Bucket bucket1 = bucketService.createBucket("bucket1");
-    assertNotNull(bucket1);
-    assertEquals("bucket1", bucket1.getName());
-    assertTrue(System.currentTimeMillis() - bucket1.getCreationDate() < 1000);
-    assertThrows(BucketAlreadyExistsException.class, () -> bucketService.createBucket("bucket1"));
-  }
-
-  @MethodSource("bucketServices")
-  @ParameterizedTest
   void deleteBucket(BucketService bucketService) {
     assertThrows(BucketNotExistException.class, () -> bucketService.deleteBucket("bucket"));
     Bucket bucket = bucketService.createBucket("bucket");
@@ -39,7 +29,7 @@ class BucketServiceTest extends LocalS3ServiceTestBase {
   @ParameterizedTest
   void getBucket(BucketService bucketService) {
     assertThrows(BucketNotExistException.class, () -> bucketService.getBucket("bucket"));
-    Bucket bucket = bucketService.createBucket("bucket");
+    Bucket bucket = bucketService.createBucket("bucket", "region");
     Bucket getBucket = bucketService.getBucket("bucket");
     assertEquals(bucket, getBucket);
   }
