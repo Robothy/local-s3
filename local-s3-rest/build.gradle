@@ -9,7 +9,7 @@ dependencies {
     implementation "io.netty:netty-all:${libVersion['io.netty.netty-all']}"
     implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${libVersion['com.fasterxml.jackson.dataformat.jackson-dataformat-xml']}"
     implementation "com.fasterxml.jackson.core:jackson-databind:${libVersion['com.fasterxml.jackson.core.jackson-databind']}"
-    implementation "org.apache.commons:commons-io:${libVersion['org.apache.commons.commons-io']}"
+    implementation "commons-io:commons-io:${libVersion['commons-io.commons-io']}"
     implementation "org.apache.commons:commons-lang3:${libVersion['org.apache.commons.commons-lang3']}"
     implementation "org.apache.commons:commons-collections4:${libVersion['org.apache.commons.commons-collections4']}"
     implementation ("io.github.robothy:netty-http-router:${libVersion['com.robothy.netty-http-router']}")
