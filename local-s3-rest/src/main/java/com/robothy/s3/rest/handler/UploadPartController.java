@@ -3,6 +3,7 @@ package com.robothy.s3.rest.handler;
 import com.robothy.netty.http.HttpRequest;
 import com.robothy.netty.http.HttpRequestHandler;
 import com.robothy.netty.http.HttpResponse;
+import com.robothy.s3.core.model.answers.UploadPartAns;
 import com.robothy.s3.core.model.request.UploadPartOptions;
 import com.robothy.s3.core.service.ObjectService;
 import com.robothy.s3.core.service.UploadPartService;
@@ -31,16 +32,15 @@ class UploadPartController implements HttpRequestHandler {
     String key = RequestAssertions.assertObjectKeyProvided(request);
     int partNumber = RequestAssertions.assertPartNumberIsValid(request);
     String uploadId = RequestAssertions.assertUploadIdIsProvided(request);
-
     DecodedAmzRequestBody decodedBody = RequestUtils.getBody(request);
-    uploadPartService.uploadPart(bucket, key, uploadId, partNumber, UploadPartOptions.builder()
+    UploadPartAns uploadPartAns = uploadPartService.uploadPart(bucket, key, uploadId, partNumber, UploadPartOptions.builder()
         .contentLength(decodedBody.getDecodedContentLength())
         .data(decodedBody.getDecodedBody())
+        .etag(RequestUtils.getETag(request).orElse(null))
         .build());
 
-    ResponseUtils.addAmzRequestId(response);
-    ResponseUtils.addServerHeader(response);
-    ResponseUtils.addDateHeader(response);
+    ResponseUtils.addCommonHeaders(response);
+    ResponseUtils.addETag(response, uploadPartAns.getEtag());
   }
 
 }
