@@ -7,6 +7,7 @@ import com.robothy.s3.rest.model.request.DecodedAmzRequestBody;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import java.io.InputStream;
+import java.util.Optional;
 
 /**
  * HTTP Request related utils.
@@ -49,6 +50,10 @@ public class RequestUtils {
           .orElseThrow(() -> new IllegalArgumentException("Content-Type is required.")));
     }
     return result;
+  }
+
+  public static Optional<String> getETag(HttpRequest request) {
+    return request.header(HttpHeaderNames.ETAG.toString());
   }
 
 }

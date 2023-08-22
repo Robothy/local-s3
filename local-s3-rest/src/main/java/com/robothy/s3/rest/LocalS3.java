@@ -5,6 +5,8 @@ import com.ctc.wstx.stax.WstxOutputFactory;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.dataformat.xml.XmlFactory;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.robothy.netty.initializer.HttpServerInitializer;
 import com.robothy.s3.core.service.BucketService;
 import com.robothy.s3.core.service.ObjectService;
@@ -119,6 +121,8 @@ public class LocalS3 {
     input.setProperty(XMLInputFactory.IS_NAMESPACE_AWARE, Boolean.FALSE);
     XmlMapper xmlMapper = new XmlMapper(new XmlFactory(input, new WstxOutputFactory()));
     xmlMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    xmlMapper.registerModule(new Jdk8Module());
+    xmlMapper.registerModule(new JavaTimeModule());
     serviceFactory.register(XmlMapper.class, () -> xmlMapper);
     return serviceFactory;
   }

@@ -3,6 +3,7 @@ package com.robothy.s3.rest.assertions;
 
 import com.robothy.netty.http.HttpRequest;
 import com.robothy.s3.rest.constants.AmzHeaderNames;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -106,4 +107,19 @@ public class RequestAssertions {
     return userMetaHeaderName.substring(AmzHeaderNames.X_AMZ_META_PREFIX.length()).toLowerCase();
   }
 
+  /**
+   * Assert that the HTTP request doesn't have the parameter, or the parameter is integer.
+   */
+  public static Integer assertIntegerParameterOrNull(HttpRequest request, String queryParam) {
+    List<String> values = request.getParams().get(queryParam);
+    if (null == values || values.isEmpty()) {
+      return null;
+    }
+
+    try {
+      return Integer.parseInt(values.get(0));
+    } catch (NumberFormatException e) {
+      throw new IllegalArgumentException("The value of " + queryParam + " must be an integer.");
+    }
+  }
 }

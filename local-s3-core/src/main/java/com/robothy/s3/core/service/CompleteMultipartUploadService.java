@@ -77,12 +77,12 @@ public interface CompleteMultipartUploadService extends LocalS3MetadataApplicabl
     }
 
     // Cleanup
-//    uploadedParts.values().forEach(part -> storage().delete(part.getFileId()));
-//    Map<String, NavigableMap<String, UploadMetadata>> uploads = bucketMetadata.getUploads();
-//    uploads.get(key).remove(uploadId);
-//    if (uploads.get(key).isEmpty()) {
-//      uploads.remove(key);
-//    }
+    uploadedParts.values().forEach(part -> storage().delete(part.getFileId()));
+    Map<String, NavigableMap<String, UploadMetadata>> uploads = bucketMetadata.getUploads();
+    uploads.get(key).remove(uploadId);
+    if (uploads.get(key).isEmpty()) {
+      uploads.remove(key);
+    }
 
     return CompleteMultipartUploadAns.builder()
         .location("/" + bucket + "/" + key)

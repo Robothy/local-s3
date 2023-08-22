@@ -6,6 +6,7 @@ import com.amazonaws.ClientConfiguration;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.AbortMultipartUploadRequest;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.BucketReplicationConfiguration;
 import com.amazonaws.services.s3.model.BucketTaggingConfiguration;
@@ -20,6 +21,7 @@ import com.amazonaws.services.s3.model.GetObjectTaggingRequest;
 import com.amazonaws.services.s3.model.HeadBucketRequest;
 import com.amazonaws.services.s3.model.InitiateMultipartUploadRequest;
 import com.amazonaws.services.s3.model.InitiateMultipartUploadResult;
+import com.amazonaws.services.s3.model.ListPartsRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.ObjectTagging;
 import com.amazonaws.services.s3.model.PartETag;
@@ -153,11 +155,13 @@ public class ReachabilityMetadataGenerator {
 
     s3.uploadPart(part1);
     s3.uploadPart(part2);
-
+    s3.listParts(new ListPartsRequest(bucketName, "my-object", initResult.getUploadId()));
     s3.completeMultipartUpload(new CompleteMultipartUploadRequest(bucketName, "my-object", initResult.getUploadId(), List.of(
         new PartETag(1, ""),
         new PartETag(2, "")
     )));
+    s3.initiateMultipartUpload(new InitiateMultipartUploadRequest(bucketName, "my-object"));
+    s3.abortMultipartUpload(new AbortMultipartUploadRequest(bucketName, "my-object", initResult.getUploadId()));
 
     SetBucketEncryptionRequest setBucketEncryptionRequest = new SetBucketEncryptionRequest();
     setBucketEncryptionRequest.setBucketName(bucketName);

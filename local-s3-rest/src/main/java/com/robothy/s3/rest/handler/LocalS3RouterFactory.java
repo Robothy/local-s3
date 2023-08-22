@@ -24,7 +24,7 @@ public class LocalS3RouterFactory {
         .method(HttpMethod.DELETE)
         .path("/{bucket}/{*key}")
         .paramMatcher(params -> params.containsKey("uploadId"))
-        .handler(new NotImplementedOperationController(serviceFactory, "AbortMultipartUpload"))
+        .handler(new AbortMultipartUploadController(serviceFactory))
         .build();
 
     Route CompleteMultipartUpload = Route.builder()
@@ -469,7 +469,7 @@ public class LocalS3RouterFactory {
         .method(HttpMethod.GET)
         .path("/{bucket}/{*key}")
         .paramMatcher(params -> params.containsKey("uploadId"))
-        .handler(new NotImplementedOperationController(serviceFactory, "ListParts"))
+        .handler(new ListPartsController(serviceFactory))
         .build();
 
     Route PutBucketAccelerateConfiguration = Route.builder()
