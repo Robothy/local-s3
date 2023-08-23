@@ -43,7 +43,8 @@ public interface ListObjectsService extends LocalS3MetadataApplicable {
     BucketMetadata bucketMetadata = BucketAssertions.assertBucketExists(localS3Metadata(), bucket);
     NavigableMap<String, ObjectMetadata> objectsAfterMarker = fetchObjectsAfterMarker(bucketMetadata, marker);
     ListObjectsAns listObjectsAns = listObjects(objectsAfterMarker, delimiter, maxKeys, prefix);
-    encodeKeyAndCommonPrefixesIfNeeded(listObjectsAns, encodingType);
+    listObjectsAns.setMarker(marker);
+    encodeIfNeeded(listObjectsAns, encodingType);
     return listObjectsAns;
   }
 
@@ -93,7 +94,11 @@ public interface ListObjectsService extends LocalS3MetadataApplicable {
     }
 
     return ListObjectsAns.builder()
-        .nextMarker(hasMore ? nextKeyMarker : null)
+        .delimiter(Objects.nonNull(delimiter) ? delimiter.toString() : null)
+        .maxKeys(maxKeys)
+        .prefix(prefix)
+        .nextMarker((hasMore && Objects.nonNull(delimiter)) ? nextKeyMarker : null)
+        .isTruncated(hasMore)
         .objects(objects)
         .commonPrefixes(new ArrayList<>(commonPrefixes))
         .build();
@@ -112,21 +117,26 @@ public interface ListObjectsService extends LocalS3MetadataApplicable {
     return object;
   }
 
-  static void encodeKeyAndCommonPrefixesIfNeeded(ListObjectsAns listObjectsAns, String encodingType) {
-    if (Objects.isNull(encodingType)) {
-      return;
-    }
+  static void encodeIfNeeded(ListObjectsAns listObjectsAns, String encodingType) {
+      if (Objects.isNull(encodingType)) {
+          return;
+      }
 
-    if (!"url".equalsIgnoreCase(encodingType)) {
-      throw new LocalS3InvalidArgumentException("encoding-type", encodingType, "Invalid Encoding Method specified in Request");
-    }
+      if (!"url".equalsIgnoreCase(encodingType)) {
+          throw new LocalS3InvalidArgumentException("encoding-type", encodingType, "Invalid Encoding Method specified in Request");
+      }
 
-    listObjectsAns.getObjects()
-        .forEach(object -> object.setKey(S3ObjectUtils.urlEncodeEscapeSlash(object.getKey())));
-    List<String> encodedPrefixes = new ArrayList<>(listObjectsAns.getCommonPrefixes().size());
-    listObjectsAns.getCommonPrefixes().forEach(commonPrefix ->
-        encodedPrefixes.add(S3ObjectUtils.urlEncodeEscapeSlash(commonPrefix)));
-    listObjectsAns.setCommonPrefixes(encodedPrefixes);
+      listObjectsAns.setEncodingType(encodingType);
+      listObjectsAns.getObjects()
+          .forEach(object -> object.setKey(S3ObjectUtils.urlEncodeEscapeSlash(object.getKey())));
+      List<String> encodedPrefixes = new ArrayList<>(listObjectsAns.getCommonPrefixes().size());
+      listObjectsAns.getCommonPrefixes().forEach(commonPrefix ->
+          encodedPrefixes.add(S3ObjectUtils.urlEncodeEscapeSlash(commonPrefix)));
+      listObjectsAns.setCommonPrefixes(encodedPrefixes);
+      listObjectsAns.setDelimiter(S3ObjectUtils.urlEncodeEscapeSlash(listObjectsAns.getDelimiter()));
+      listObjectsAns.setPrefix(S3ObjectUtils.urlEncodeEscapeSlash(listObjectsAns.getPrefix()));
+      listObjectsAns.setMarker(S3ObjectUtils.urlEncodeEscapeSlash(listObjectsAns.getMarker()));
+      listObjectsAns.setNextMarker(S3ObjectUtils.urlEncodeEscapeSlash(listObjectsAns.getNextMarker().orElse(null)));
   }
 
 }

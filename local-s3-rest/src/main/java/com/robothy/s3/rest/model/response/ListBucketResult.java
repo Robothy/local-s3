@@ -27,7 +27,7 @@ public class ListBucketResult {
   private String prefix;
 
   @JacksonXmlProperty(localName = "Delimiter")
-  private Character delimiter;
+  private String delimiter;
 
   @JacksonXmlProperty(localName = "MaxKeys")
   private int maxKeys;
