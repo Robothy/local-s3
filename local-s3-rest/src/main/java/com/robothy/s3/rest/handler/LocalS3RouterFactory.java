@@ -3,6 +3,7 @@ package com.robothy.s3.rest.handler;
 import com.robothy.netty.router.Route;
 import com.robothy.netty.router.Router;
 import com.robothy.s3.core.exception.LocalS3Exception;
+import com.robothy.s3.core.exception.LocalS3InvalidArgumentException;
 import com.robothy.s3.rest.constants.AmzHeaderNames;
 import com.robothy.s3.rest.service.ServiceFactory;
 import io.netty.handler.codec.http.HttpMethod;
@@ -804,6 +805,7 @@ public class LocalS3RouterFactory {
         .notFound(new NotFoundHandler())
         .exceptionHandler(LocalS3Exception.class, new LocalS3ExceptionHandler(serviceFactory))
         .exceptionHandler(IllegalArgumentException.class, new IllegalArgumentExceptionHandler())
+        .exceptionHandler(LocalS3InvalidArgumentException.class, new LocalS3InvalidArgumentExceptionHandler())
         .exceptionHandler(Exception.class, new ExceptionHandler())
         ;
   }

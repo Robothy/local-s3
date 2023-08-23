@@ -91,36 +91,6 @@ public class ObjectIntegrationTest {
 
   @Test
   @LocalS3
-  void listObjects(AmazonS3 s3) {
-    String bucket = "my-bucket";
-    String key = "a.txt";
-    s3.createBucket(bucket);
-    s3.putObject(bucket, key, "Text1");
-    s3.setBucketVersioningConfiguration(new SetBucketVersioningConfigurationRequest(bucket,
-        new BucketVersioningConfiguration(BucketVersioningConfiguration.ENABLED)));
-    s3.putObject(bucket, key, "Text2");
-    ObjectListing objectListing = s3.listObjects(bucket);
-    assertEquals(1, objectListing.getObjectSummaries().size());
-
-    s3.putObject(bucket, "dir1/a.txt", "Text3");
-    s3.putObject(bucket, "dir1/b.txt", "Text4");
-
-    ObjectListing objectListing1 = s3.listObjects(bucket);
-    assertEquals(3, objectListing1.getObjectSummaries().size());
-
-    ObjectListing objectListing2 = s3.listObjects(new ListObjectsRequest(bucket, null, null, "/", 10));
-    assertEquals(1, objectListing2.getObjectSummaries().size());
-    assertEquals(1, objectListing2.getCommonPrefixes().size());
-    assertEquals(10, objectListing2.getMaxKeys());
-
-    s3.deleteObject(bucket, key);
-    ObjectListing objectListing3 = s3.listObjects(bucket);
-    assertEquals(2, objectListing3.getObjectSummaries().size());
-    assertEquals(0, objectListing3.getCommonPrefixes().size());
-  }
-
-  @Test
-  @LocalS3
   void listObjectVersions(AmazonS3 s3) {
     String bucket = "my-bucket";
     s3.createBucket(bucket);

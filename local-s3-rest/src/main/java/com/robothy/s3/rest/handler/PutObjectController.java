@@ -3,7 +3,7 @@ package com.robothy.s3.rest.handler;
 import com.robothy.netty.http.HttpRequest;
 import com.robothy.netty.http.HttpRequestHandler;
 import com.robothy.netty.http.HttpResponse;
-import com.robothy.s3.core.exception.InvalidArgumentException;
+import com.robothy.s3.core.exception.LocalS3InvalidArgumentException;
 import com.robothy.s3.core.model.answers.PutObjectAns;
 import com.robothy.s3.core.model.request.PutObjectOptions;
 import com.robothy.s3.core.service.ObjectService;
@@ -74,7 +74,7 @@ class PutObjectController implements HttpRequestHandler {
     for (int i = 0; i < tags.length; i++) {
       String[] kv = tags[i].split("=");
       if (kv.length != 2) {
-        throw new InvalidArgumentException(AmzHeaderNames.X_AMZ_TAGGING, "Invalid tagging format.");
+        throw new LocalS3InvalidArgumentException(AmzHeaderNames.X_AMZ_TAGGING, "Invalid tagging format.");
       }
 
       tagSet[i][0] = kv[0];

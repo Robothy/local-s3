@@ -8,9 +8,8 @@ import com.robothy.s3.core.model.internal.ObjectMetadata;
 import com.robothy.s3.core.model.internal.VersionedObjectMetadata;
 import com.robothy.s3.core.model.request.PutObjectOptions;
 import com.robothy.s3.core.util.IdUtils;
-import org.apache.commons.codec.digest.DigestUtils;
+import com.robothy.s3.core.util.S3ObjectUtils;
 
-import java.io.IOException;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -46,11 +45,7 @@ public interface PutObjectService extends LocalS3MetadataApplicable, StorageAppl
     Long fileId = storage().put(options.getContent());
     versionedObjectMetadata.setFileId(fileId);
 
-    try {
-      versionedObjectMetadata.setEtag(DigestUtils.md5Hex(storage().getInputStream(fileId)));
-    } catch (IOException e) {
-      throw new IllegalStateException(e);
-    }
+    versionedObjectMetadata.setEtag(S3ObjectUtils.etag(storage().getInputStream(fileId)));
 
     options.getTagging().ifPresent(versionedObjectMetadata::setTagging);
 

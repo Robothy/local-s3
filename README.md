@@ -11,6 +11,7 @@ and without heavy dependencies, it starts up quickly and handles requests effici
 
 <details>
 <summary><b>Supported Amazon S3 APIs</b></summary>
+
 + AbortMultipartUpload
 + CopyObject
 + CreateBucket

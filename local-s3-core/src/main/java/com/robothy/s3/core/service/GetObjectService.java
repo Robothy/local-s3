@@ -3,7 +3,7 @@ package com.robothy.s3.core.service;
 import com.robothy.s3.core.asserionts.BucketAssertions;
 import com.robothy.s3.core.asserionts.ObjectAssertions;
 import com.robothy.s3.core.asserionts.VersionedObjectAssertions;
-import com.robothy.s3.core.exception.InvalidArgumentException;
+import com.robothy.s3.core.exception.LocalS3InvalidArgumentException;
 import com.robothy.s3.core.exception.ObjectNotExistException;
 import com.robothy.s3.core.exception.VersionedObjectNotExistException;
 import com.robothy.s3.core.model.answers.GetObjectAns;
@@ -32,7 +32,7 @@ public interface GetObjectService extends StorageApplicable, LocalS3MetadataAppl
                                                      String bucketName, String key, boolean metadataOnly, GetObjectOptions options) {
     ObjectMetadata objectMetadata = ObjectAssertions.assertObjectExists(bucketMetadata, key);
     if (options.getVersionId().isPresent() && !ObjectMetadata.NULL_VERSION.equals(options.getVersionId().get())) {
-      throw new InvalidArgumentException("versionId", options.getVersionId().get());
+      throw new LocalS3InvalidArgumentException("versionId", options.getVersionId().get());
     }
 
     VersionedObjectMetadata latestObject = objectMetadata.getLatest();
