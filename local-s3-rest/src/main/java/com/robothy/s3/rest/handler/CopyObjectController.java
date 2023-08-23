@@ -4,7 +4,7 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.robothy.netty.http.HttpRequest;
 import com.robothy.netty.http.HttpRequestHandler;
 import com.robothy.netty.http.HttpResponse;
-import com.robothy.s3.core.exception.InvalidArgumentException;
+import com.robothy.s3.core.exception.LocalS3InvalidArgumentException;
 import com.robothy.s3.core.model.answers.CopyObjectAns;
 import com.robothy.s3.core.model.request.CopyObjectOptions;
 import com.robothy.s3.core.service.CopyObjectService;
@@ -18,7 +18,6 @@ import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import java.time.Instant;
-import java.util.Date;
 import java.util.stream.Stream;
 
 /**
@@ -65,7 +64,7 @@ class CopyObjectController implements HttpRequestHandler {
 
     int delimiterIndex;
     if (-1 == (delimiterIndex = path.indexOf('/', 1)) || delimiterIndex == path.length() - 1) {
-      throw new InvalidArgumentException(AmzHeaderNames.X_AMZ_COPY_SOURCE, copySource, "Invalid copy source.");
+      throw new LocalS3InvalidArgumentException(AmzHeaderNames.X_AMZ_COPY_SOURCE, copySource, "Invalid copy source.");
     }
 
     String srcBucket = path.charAt(0) == '/' ? path.substring(1, delimiterIndex)

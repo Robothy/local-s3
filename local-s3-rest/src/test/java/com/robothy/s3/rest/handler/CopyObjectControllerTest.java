@@ -3,7 +3,7 @@ package com.robothy.s3.rest.handler;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import com.robothy.netty.http.HttpRequest;
-import com.robothy.s3.core.exception.InvalidArgumentException;
+import com.robothy.s3.core.exception.LocalS3InvalidArgumentException;
 import com.robothy.s3.core.model.request.CopyObjectOptions;
 import com.robothy.s3.rest.constants.AmzHeaderNames;
 import com.robothy.s3.rest.service.ServiceFactory;
@@ -24,7 +24,7 @@ class CopyObjectControllerTest {
     HttpRequest request = HttpRequest.builder().build();
     request.getHeaders().put(AmzHeaderNames.X_AMZ_COPY_SOURCE, copySource);
     if (result == null) {
-      assertThrows(InvalidArgumentException.class, () -> copyObjectController.parseCopyOptions(request));
+      assertThrows(LocalS3InvalidArgumentException.class, () -> copyObjectController.parseCopyOptions(request));
     } else {
       assertEquals(result, copyObjectController.parseCopyOptions(request));
     }

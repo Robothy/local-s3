@@ -2,23 +2,23 @@ package com.robothy.s3.core.service;
 
 import com.robothy.s3.core.asserionts.BucketAssertions;
 import com.robothy.s3.core.asserionts.ObjectAssertions;
+import com.robothy.s3.core.exception.LocalS3InvalidArgumentException;
 import com.robothy.s3.core.model.answers.ListObjectsAns;
 import com.robothy.s3.core.model.internal.BucketMetadata;
 import com.robothy.s3.core.model.internal.ObjectMetadata;
 import com.robothy.s3.core.model.internal.VersionedObjectMetadata;
+import com.robothy.s3.core.util.S3ObjectUtils;
 import com.robothy.s3.datatypes.Owner;
 import com.robothy.s3.datatypes.enums.StorageClass;
 import com.robothy.s3.datatypes.response.S3Object;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.NavigableMap;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.concurrent.ConcurrentSkipListMap;
 
 /**
  * Algorithm implementation of list objects.
@@ -30,24 +30,34 @@ public interface ListObjectsService extends LocalS3MetadataApplicable {
   /**
    * List objects with options.
    *
-   * @param bucket the bucket to list objects.
-   * @param delimiter the delimiter for condensing common prefixes in the returned listing results.
-   * @param marker the marker indicating where the returned results should begin.
-   * @param maxKeys the maximum objects to return.
-   * @param prefix the prefix restricting what keys will be listed.
+   * @param bucket       the bucket to list objects.
+   * @param delimiter    the delimiter for condensing common prefixes in the returned listing results.
+   * @param encodingType the encoding method for keys in the returned listing results.
+   * @param marker       the marker indicating where the returned results should begin.
+   * @param maxKeys      the maximum objects to return.
+   * @param prefix       the prefix restricting what keys will be listed.
    * @return a listing of objects from the specified bucket.
    */
-  default ListObjectsAns listObjects(String bucket, Character delimiter, String marker, int maxKeys, String prefix) {
+  default ListObjectsAns listObjects(String bucket, Character delimiter, String encodingType,
+                                     String marker, int maxKeys, String prefix) {
     BucketMetadata bucketMetadata = BucketAssertions.assertBucketExists(localS3Metadata(), bucket);
+    NavigableMap<String, ObjectMetadata> objectsAfterMarker = fetchObjectsAfterMarker(bucketMetadata, marker);
+    ListObjectsAns listObjectsAns = listObjects(objectsAfterMarker, delimiter, maxKeys, prefix);
+    encodeKeyAndCommonPrefixesIfNeeded(listObjectsAns, encodingType);
+    return listObjectsAns;
+  }
 
-    NavigableMap<String, ObjectMetadata> filteredWithMarker = bucketMetadata.getObjectMap();
-    if (Objects.nonNull(marker)) {
-      ObjectAssertions.assertObjectExists(bucketMetadata, marker);
-      ConcurrentSkipListMap<String, ObjectMetadata> allObjects = bucketMetadata.getObjectMap();
-      filteredWithMarker = allObjects.tailMap(marker, false);
+  static NavigableMap<String, ObjectMetadata> fetchObjectsAfterMarker(BucketMetadata bucketMetadata, String marker) {
+    if (Objects.isNull(marker)) {
+      return bucketMetadata.getObjectMap();
     }
 
-    if (filteredWithMarker.isEmpty()) {
+    ObjectAssertions.assertObjectExists(bucketMetadata, marker);
+    return bucketMetadata.getObjectMap().tailMap(marker, false);
+  }
+
+  static ListObjectsAns listObjects(NavigableMap<String, ObjectMetadata> objectsAfterMarker, Character delimiter, int maxKeys, String prefix) {
+    if (objectsAfterMarker.isEmpty()) {
       return EMPTY_RESULT;
     }
 
@@ -56,8 +66,8 @@ public interface ListObjectsService extends LocalS3MetadataApplicable {
     int prefixLen = Objects.isNull(prefix) ? 0 : prefix.length();
     boolean hasMore = false;
     String nextKeyMarker = null;
-    for (String key : filteredWithMarker.keySet()) {
-      if (filteredWithMarker.get(key).getLatest().isDeleted()) {
+    for (String key : objectsAfterMarker.keySet()) {
+      if (objectsAfterMarker.get(key).getLatest().isDeleted()) {
         continue;
       }
 
@@ -76,7 +86,7 @@ public interface ListObjectsService extends LocalS3MetadataApplicable {
         if (Objects.nonNull(delimiter) && (-1 != (prefixOccursAt = key.indexOf(delimiter, prefixLen)))) {
           commonPrefixes.add(key.substring(0, prefixOccursAt + 1));
         } else {
-          objects.add( fetchLatestObject(key, filteredWithMarker.get(key)));
+          objects.add(fetchLatestObject(key, objectsAfterMarker.get(key)));
         }
         nextKeyMarker = key;
       }
@@ -100,6 +110,23 @@ public interface ListObjectsService extends LocalS3MetadataApplicable {
     object.setOwner(Owner.DEFAULT_OWNER);
     object.setStorageClass(StorageClass.STANDARD);
     return object;
+  }
+
+  static void encodeKeyAndCommonPrefixesIfNeeded(ListObjectsAns listObjectsAns, String encodingType) {
+    if (Objects.isNull(encodingType)) {
+      return;
+    }
+
+    if (!"url".equalsIgnoreCase(encodingType)) {
+      throw new LocalS3InvalidArgumentException("encoding-type", encodingType, "Invalid Encoding Method specified in Request");
+    }
+
+    listObjectsAns.getObjects()
+        .forEach(object -> object.setKey(S3ObjectUtils.urlEncodeEscapeSlash(object.getKey())));
+    List<String> encodedPrefixes = new ArrayList<>(listObjectsAns.getCommonPrefixes().size());
+    listObjectsAns.getCommonPrefixes().forEach(commonPrefix ->
+        encodedPrefixes.add(S3ObjectUtils.urlEncodeEscapeSlash(commonPrefix)));
+    listObjectsAns.setCommonPrefixes(encodedPrefixes);
   }
 
 }

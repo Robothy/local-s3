@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.robothy.s3.core.asserionts.BucketAssertions;
 import com.robothy.s3.core.asserionts.ObjectAssertions;
-import com.robothy.s3.core.exception.InvalidArgumentException;
+import com.robothy.s3.core.exception.LocalS3InvalidArgumentException;
 import com.robothy.s3.core.exception.ObjectNotExistException;
 import com.robothy.s3.core.exception.VersionedObjectNotExistException;
 import com.robothy.s3.core.model.answers.DeleteObjectAns;
@@ -166,7 +166,7 @@ class GetObjectServiceTest extends LocalS3ServiceTestBase {
     assertFalse(getObjectAns.isDeleteMarker());
     assertEquals("Hello", new String(getObjectAns.getContent().readAllBytes()));
 
-    assertThrows(InvalidArgumentException.class, () -> objectService.getObject(bucketName, "a.txt", GetObjectOptions.builder()
+    assertThrows(LocalS3InvalidArgumentException.class, () -> objectService.getObject(bucketName, "a.txt", GetObjectOptions.builder()
         .versionId("123").build()));
 
     GetObjectAns getObjectAns1 = objectService.getObject(bucketName, "a.txt", GetObjectOptions.builder()

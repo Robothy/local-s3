@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import com.robothy.netty.http.HttpRequest;
-import com.robothy.s3.core.exception.InvalidArgumentException;
+import com.robothy.s3.core.exception.LocalS3InvalidArgumentException;
 import com.robothy.s3.rest.constants.AmzHeaderNames;
 import com.robothy.s3.rest.service.ServiceFactory;
 import java.util.Optional;
@@ -36,6 +36,6 @@ class PutObjectControllerTest {
     assertEquals("value1", tagArray[0][1]);
 
     when(request.header(AmzHeaderNames.X_AMZ_TAGGING)).thenReturn(Optional.of("invalid"));
-    assertThrows(InvalidArgumentException.class, () -> controller.extractTagging(request));
+    assertThrows(LocalS3InvalidArgumentException.class, () -> controller.extractTagging(request));
   }
 }

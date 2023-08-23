@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.robothy.s3.core.asserionts.BucketAssertions;
 import com.robothy.s3.core.asserionts.ObjectAssertions;
-import com.robothy.s3.core.exception.InvalidArgumentException;
+import com.robothy.s3.core.exception.LocalS3InvalidArgumentException;
 import com.robothy.s3.core.exception.ObjectNotExistException;
 import com.robothy.s3.core.model.answers.DeleteObjectAns;
 import com.robothy.s3.core.model.answers.GetObjectAns;
@@ -143,7 +143,7 @@ class DeleteObjectServiceTest extends LocalS3ServiceTestBase {
     assertNotNull(putObjectAns);
 
     // Delete with versionId
-    assertThrows(InvalidArgumentException.class, () -> objectService.deleteObject(bucketName, "a.txt", "123"));
+    assertThrows(LocalS3InvalidArgumentException.class, () -> objectService.deleteObject(bucketName, "a.txt", "123"));
     DeleteObjectAns deleteObjectAns = objectService.deleteObject(bucketName, "a.txt", ObjectMetadata.NULL_VERSION);
     assertNotNull(deleteObjectAns);
     assertFalse(deleteObjectAns.isDeleteMarker());
