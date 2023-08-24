@@ -43,7 +43,7 @@ public interface ListObjectsService extends LocalS3MetadataApplicable {
     BucketMetadata bucketMetadata = BucketAssertions.assertBucketExists(localS3Metadata(), bucket);
     NavigableMap<String, ObjectMetadata> objectsAfterMarker = fetchObjectsAfterMarker(bucketMetadata, marker);
     ListObjectsAns listObjectsAns = listObjects(objectsAfterMarker, delimiter, maxKeys, prefix);
-    listObjectsAns.setMarker(marker);
+    listObjectsAns.setMarker(Objects.isNull(marker) ? "" : marker);
     encodeIfNeeded(listObjectsAns, encodingType);
     return listObjectsAns;
   }
@@ -96,7 +96,7 @@ public interface ListObjectsService extends LocalS3MetadataApplicable {
     return ListObjectsAns.builder()
         .delimiter(Objects.nonNull(delimiter) ? delimiter.toString() : null)
         .maxKeys(maxKeys)
-        .prefix(prefix)
+        .prefix(Objects.isNull(prefix) ? "" : prefix)
         .nextMarker((hasMore && Objects.nonNull(delimiter)) ? nextKeyMarker : null)
         .isTruncated(hasMore)
         .objects(objects)

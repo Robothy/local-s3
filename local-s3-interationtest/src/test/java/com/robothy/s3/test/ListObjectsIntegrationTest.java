@@ -27,8 +27,10 @@ public class ListObjectsIntegrationTest {
     assertEquals("my-bucket", objectListing.getBucketName());
     assertTrue(objectListing.getObjectSummaries().isEmpty());
     assertTrue(objectListing.getCommonPrefixes().isEmpty());
-    assertEquals("", objectListing.getNextMarker());
+    assertNull(objectListing.getNextMarker());
     assertNull(objectListing.getDelimiter());
+    assertNull(objectListing.getPrefix());
+    assertNull(objectListing.getMarker());
 
 
     s3.putObject(bucket.getName(), "a.txt", "Hello");
@@ -37,7 +39,7 @@ public class ListObjectsIntegrationTest {
     assertEquals(1, objectListing.getObjectSummaries().size());
     assertEquals("a.txt", objectListing.getObjectSummaries().get(0).getKey());
     assertTrue(objectListing.getCommonPrefixes().isEmpty());
-    assertEquals("", objectListing.getNextMarker());
+    assertNull(objectListing.getNextMarker());
     assertNull(objectListing.getDelimiter());
 
 
@@ -62,14 +64,19 @@ public class ListObjectsIntegrationTest {
     assertEquals(1, objectListing1.getObjectSummaries().size());
     assertEquals("a.txt", objectListing1.getObjectSummaries().get(0).getKey());
     assertEquals(0, objectListing1.getCommonPrefixes().size());
+    assertTrue(objectListing1.isTruncated());
+    // The rest API won't return the next marker if the delimiter is not specified.
+    // But the SDK will automatically set the next marker to the last object key if the result is truncated.
     assertEquals("a.txt", objectListing1.getNextMarker());
 
-    listObjectsRequest.withMarker(objectListing1.getNextMarker())
+    listObjectsRequest.withMarker(objectListing1.getObjectSummaries().get(0).getKey())
         .withMaxKeys(2);
     ObjectListing objectListing2 = s3.listObjects(listObjectsRequest);
     assertEquals(2, objectListing2.getObjectSummaries().size());
     assertEquals("dir1/a.txt", objectListing2.getObjectSummaries().get(0).getKey());
     assertEquals("dir1/b.txt", objectListing2.getObjectSummaries().get(1).getKey());
+    assertEquals(0, objectListing2.getCommonPrefixes().size());
+    assertTrue(objectListing2.isTruncated());
     assertEquals("dir1/b.txt", objectListing2.getNextMarker());
   }
 
@@ -110,27 +117,61 @@ public class ListObjectsIntegrationTest {
     String bucket = "test-list-objects-with-key-encoding";
     s3.createBucket(bucket);
     s3.putObject(bucket, "my@dir/my@doc.txt", "Text3");
+    s3.putObject(bucket, "my@dir/my@doc2.txt", "Text3");
 
     ObjectListing objectListing1 = s3.listObjects(bucket);
-    assertEquals(1, objectListing1.getObjectSummaries().size());
+    assertEquals(2, objectListing1.getObjectSummaries().size());
     assertEquals("my@dir/my@doc.txt", objectListing1.getObjectSummaries().get(0).getKey());
+    assertEquals("my@dir/my@doc2.txt", objectListing1.getObjectSummaries().get(1).getKey());
     assertEquals(0, objectListing1.getCommonPrefixes().size());
 
+    // encoding key
     ObjectListing objectListingWithEncodingType = s3.listObjects(new ListObjectsRequest(
         bucket, null, null, null, 1000).withEncodingType("url"));
-    assertEquals(1, objectListingWithEncodingType.getObjectSummaries().size());
+    assertEquals(2, objectListingWithEncodingType.getObjectSummaries().size());
     assertEquals("my%40dir/my%40doc.txt", objectListingWithEncodingType.getObjectSummaries().get(0).getKey());
+    assertEquals("my%40dir/my%40doc2.txt", objectListingWithEncodingType.getObjectSummaries().get(1).getKey());
     assertEquals(0, objectListingWithEncodingType.getCommonPrefixes().size());
 
+    // encoding common prefix
     ObjectListing objectListingWithEncodingTypeAndDelimiter = s3.listObjects(new ListObjectsRequest(
         bucket, null, null, "/", 1000).withEncodingType("url"));
     assertEquals(0, objectListingWithEncodingTypeAndDelimiter.getObjectSummaries().size());
     assertEquals(1, objectListingWithEncodingTypeAndDelimiter.getCommonPrefixes().size());
     assertEquals("my%40dir/", objectListingWithEncodingTypeAndDelimiter.getCommonPrefixes().get(0));
+    assertEquals("/", objectListingWithEncodingTypeAndDelimiter.getDelimiter());
 
+    // encoding prefix
+    ObjectListing objectListingWithEncodingTypeAndPrefix = s3.listObjects(new ListObjectsRequest(
+        bucket, "my@dir", null, null, 1000).withEncodingType("url"));
+    assertEquals(2, objectListingWithEncodingTypeAndPrefix.getObjectSummaries().size());
+    assertEquals("my%40dir/my%40doc.txt", objectListingWithEncodingTypeAndPrefix.getObjectSummaries().get(0).getKey());
+    assertEquals("my%40dir/my%40doc2.txt", objectListingWithEncodingTypeAndPrefix.getObjectSummaries().get(1).getKey());
+    assertEquals(0, objectListingWithEncodingTypeAndPrefix.getCommonPrefixes().size());
+    assertEquals("my%40dir", objectListingWithEncodingTypeAndPrefix.getPrefix());
 
+    // ending delimiter
+    String bucket2 = prepareKeys(s3, "dir1@#key@", "dir2@#key1@");
+    ObjectListing objectListingWithEncodingTypeAndDelimiter2 = s3.listObjects(new ListObjectsRequest(
+        bucket2, null, null, "#", 1000).withEncodingType("url"));
+    assertEquals(0, objectListingWithEncodingTypeAndDelimiter2.getObjectSummaries().size());
+    assertEquals(2, objectListingWithEncodingTypeAndDelimiter2.getCommonPrefixes().size());
+    assertEquals("dir1%40%23", objectListingWithEncodingTypeAndDelimiter2.getCommonPrefixes().get(0));
+    assertEquals("dir2%40%23", objectListingWithEncodingTypeAndDelimiter2.getCommonPrefixes().get(1));
+    assertEquals("%23", objectListingWithEncodingTypeAndDelimiter2.getDelimiter());
+
+    // invalid encoding type
     assertThrows(AmazonS3Exception.class, () -> s3.listObjects(new ListObjectsRequest(
         bucket, null, null, "/", 1000).withEncodingType("invalid")));
+  }
+
+  String prepareKeys(AmazonS3 s3, String... keys) {
+    String bucket = "test-list-objects" + System.currentTimeMillis();
+    s3.createBucket(bucket);
+    for (String key : keys) {
+      s3.putObject(bucket, key, "Content");
+    }
+    return bucket;
   }
 
 }
