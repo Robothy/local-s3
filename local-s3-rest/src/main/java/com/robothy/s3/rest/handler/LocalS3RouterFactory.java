@@ -456,7 +456,7 @@ public class LocalS3RouterFactory {
         .method(HttpMethod.GET)
         .path("/{bucket}")
         .paramMatcher(params -> params.containsKey("list-type") && params.get("list-type").get(0).equals("2"))
-        .handler(new NotImplementedOperationController(serviceFactory, "ListObjectsV2"))
+        .handler(new ListObjectsV2Controller(serviceFactory))
         .build();
 
     Route ListObjectVersions = Route.builder()

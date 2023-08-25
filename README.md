@@ -38,6 +38,7 @@ and without heavy dependencies, it starts up quickly and handles requests effici
 + HeadObject
 + ListBuckets
 + ListObjects
++ ListObjectsV2
 + ListObjectVersions
 + ListParts
 + PutBucketAcl

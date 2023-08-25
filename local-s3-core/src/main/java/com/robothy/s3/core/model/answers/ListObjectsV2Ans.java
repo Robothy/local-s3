@@ -12,13 +12,28 @@ import java.util.Optional;
 @Data
 public class ListObjectsV2Ans {
 
+    private String delimiter;
+
+    private String encodingType;
+
+    private boolean isTruncated;
+
+    private int keyCount;
+
+    private int maxKeys;
+
+    private String nextContinuationToken;
+
+    private String prefix;
+
+    private String startAfter;
+
     @Builder.Default
     private List<S3Object> objects = Collections.emptyList();
 
     @Builder.Default
     private List<String> commonPrefixes = Collections.emptyList();
 
-    private String nextContinuationToken;
 
     public Optional<String> getNextContinuationToken() {
         return Optional.ofNullable(nextContinuationToken);

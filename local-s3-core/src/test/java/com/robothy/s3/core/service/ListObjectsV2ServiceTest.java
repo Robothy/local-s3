@@ -7,6 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.ByteArrayInputStream;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -24,7 +25,12 @@ class ListObjectsV2ServiceTest extends LocalS3ServiceTestBase {
     @MethodSource("localS3Services")
     @ParameterizedTest
     void listObjectsV2WithContinuationToken(BucketService bucketService, ObjectService objectService) {
-        String bucket = prepareKeys(bucketService, objectService);
+        String bucket = prepareKeys(bucketService, objectService,
+            "dir1/key1",
+            "dir1/key2",
+            "dir2/key1",
+            "dir3#key1",
+            "dir3#key2");
         ListObjectsV2Ans listObjectsV2Ans = objectService.listObjectsV2(bucket, null, null, null, false, 5, null, null);
         assertNotNull(listObjectsV2Ans);
         assertEquals(5, listObjectsV2Ans.getObjects().size());
@@ -51,36 +57,15 @@ class ListObjectsV2ServiceTest extends LocalS3ServiceTestBase {
         assertFalse(listObjectsV2Ans.getNextContinuationToken().isPresent());
     }
 
-    /**
-     * <pre>{@code
-     *
-     * dir1/key1
-     * dir1/key2
-     * dir2/key1
-     * dir3#key1
-     * dir3#key2
-     *
-     * }</pre>
-     * @return bucket
-     */
-    String prepareKeys(BucketService bucketService, ObjectService objectService) {
-        String bucket = "test-list-objects-v2";
+    String prepareKeys(BucketService bucketService, ObjectService objectService, String... keys) {
+        String bucket = "test-list-objects-v2" + UUID.randomUUID();
         bucketService.createBucket(bucket);
-        objectService.putObject(bucket, "dir1/key1", PutObjectOptions.builder()
-            .content(new ByteArrayInputStream("content".getBytes()))
-            .build());
-        objectService.putObject(bucket, "dir1/key2", PutObjectOptions.builder()
-            .content(new ByteArrayInputStream("content".getBytes()))
-            .build());
-        objectService.putObject(bucket, "dir2/key1", PutObjectOptions.builder()
-            .content(new ByteArrayInputStream("content".getBytes()))
-            .build());
-        objectService.putObject(bucket, "dir3#key1", PutObjectOptions.builder()
-            .content(new ByteArrayInputStream("content".getBytes()))
-            .build());
-        objectService.putObject(bucket, "dir3#key2", PutObjectOptions.builder()
-            .content(new ByteArrayInputStream("content".getBytes()))
-            .build());
+        for (String key : keys) {
+            objectService.putObject(bucket, key, PutObjectOptions.builder()
+                .content(new ByteArrayInputStream("test".getBytes()))
+                .size(4L)
+                .build());
+        }
         return bucket;
     }
 

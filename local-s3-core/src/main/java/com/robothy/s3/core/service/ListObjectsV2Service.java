@@ -38,6 +38,13 @@ public interface ListObjectsV2Service extends ListObjectsService {
 
         ListObjectsAns listObjectsAns = listObjects(bucket, delimiter, encodingType, startAfter, maxKeys, prefix);
         return ListObjectsV2Ans.builder()
+            .delimiter(listObjectsAns.getDelimiter())
+            .encodingType(listObjectsAns.getEncodingType())
+            .isTruncated(listObjectsAns.isTruncated())
+            .keyCount(listObjectsAns.getObjects().size() + listObjectsAns.getCommonPrefixes().size())
+            .maxKeys(listObjectsAns.getMaxKeys())
+            .prefix(listObjectsAns.getPrefix())
+            .startAfter(listObjectsAns.getMarker())
             .objects(listObjectsAns.getObjects())
             .commonPrefixes(listObjectsAns.getCommonPrefixes())
             .nextContinuationToken(generateNextContinuationToken(delimiter, encodingType, fetchOwner, maxKeys, prefix, listObjectsAns))
@@ -45,7 +52,7 @@ public interface ListObjectsV2Service extends ListObjectsService {
     }
 
     static String generateNextContinuationToken(Character delimiter, String encodingType, boolean fetchOwner, int maxKeys, String prefix, ListObjectsAns ans) {
-        if (ans.getNextMarker().isEmpty()) {
+        if (!ans.isTruncated()) {
             return null;
         }
 
@@ -55,7 +62,7 @@ public interface ListObjectsV2Service extends ListObjectsService {
             .fetchOwner(fetchOwner)
             .maxKeys(maxKeys)
             .prefix(prefix)
-            .startAfter(ans.getNextMarker().get())
+            .startAfter(ans.getObjects().get(ans.getObjects().size() - 1).getKey())
             .build()
             .encode();
     }
