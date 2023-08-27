@@ -1,7 +1,6 @@
 package com.robothy.s3.core.service;
 
 import com.robothy.s3.core.asserionts.BucketAssertions;
-import com.robothy.s3.core.asserionts.ObjectAssertions;
 import com.robothy.s3.core.exception.LocalS3InvalidArgumentException;
 import com.robothy.s3.core.model.answers.ListObjectsAns;
 import com.robothy.s3.core.model.internal.BucketMetadata;
@@ -11,21 +10,17 @@ import com.robothy.s3.core.util.S3ObjectUtils;
 import com.robothy.s3.datatypes.Owner;
 import com.robothy.s3.datatypes.enums.StorageClass;
 import com.robothy.s3.datatypes.response.S3Object;
+
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.NavigableMap;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 /**
  * Algorithm implementation of list objects.
  */
 public interface ListObjectsService extends LocalS3MetadataApplicable {
 
-  ListObjectsAns EMPTY_RESULT = new ListObjectsAns();
+  ConcurrentSkipListMap<String, ObjectMetadata> EMPTY_OBJECT_MAP = new ConcurrentSkipListMap<>();
 
   /**
    * List objects with options.
@@ -38,72 +33,128 @@ public interface ListObjectsService extends LocalS3MetadataApplicable {
    * @param prefix       the prefix restricting what keys will be listed.
    * @return a listing of objects from the specified bucket.
    */
-  default ListObjectsAns listObjects(String bucket, Character delimiter, String encodingType,
+  default ListObjectsAns listObjects(String bucket, String delimiter, String encodingType,
                                      String marker, int maxKeys, String prefix) {
     BucketMetadata bucketMetadata = BucketAssertions.assertBucketExists(localS3Metadata(), bucket);
-    NavigableMap<String, ObjectMetadata> objectsAfterMarker = fetchObjectsAfterMarker(bucketMetadata, marker);
-    ListObjectsAns listObjectsAns = listObjects(objectsAfterMarker, delimiter, maxKeys, prefix);
+
+    String originalDelimiter = delimiter;
+    if (Objects.nonNull(prefix) && Objects.nonNull(delimiter) && prefix.contains(delimiter)) {
+      delimiter = null;
+    }
+    NavigableMap<String, ObjectMetadata> objectsAfterMarker = filterByMarkerDelimiter(bucketMetadata, marker, delimiter);
+    NavigableMap<String, ObjectMetadata> filteredByPrefix = filterByPrefix(objectsAfterMarker, prefix);
+
+    ListObjectsAns listObjectsAns = listObjectsAndCommonPrefixes(filteredByPrefix, delimiter, maxKeys);
+    listObjectsAns.setDelimiter(originalDelimiter);
     listObjectsAns.setMarker(Objects.isNull(marker) ? "" : marker);
+    listObjectsAns.setPrefix(Objects.isNull(prefix) ? "" : prefix);
     encodeIfNeeded(listObjectsAns, encodingType);
     return listObjectsAns;
   }
 
-  static NavigableMap<String, ObjectMetadata> fetchObjectsAfterMarker(BucketMetadata bucketMetadata, String marker) {
+  static NavigableMap<String, ObjectMetadata> filterByMarkerDelimiter(BucketMetadata bucketMetadata, String marker, String delimiter) {
     if (Objects.isNull(marker)) {
       return bucketMetadata.getObjectMap();
     }
 
-    ObjectAssertions.assertObjectExists(bucketMetadata, marker);
-    return bucketMetadata.getObjectMap().tailMap(marker, false);
+    NavigableMap<String, ObjectMetadata> filteredByMarker = bucketMetadata.getObjectMap().tailMap(marker, false);
+    if (Objects.isNull(delimiter) || filteredByMarker.isEmpty()) {
+      return filteredByMarker;
+    }
+
+    if (filteredByMarker.firstKey().startsWith(marker) && marker.endsWith(delimiter)) {
+      String fromKey = filteredByMarker.ceilingKey(marker + Character.MAX_VALUE);
+      if (Objects.isNull(fromKey)) {
+        return EMPTY_OBJECT_MAP;
+      }
+
+      return filteredByMarker.tailMap(fromKey, true);
+    }
+
+    return filteredByMarker;
   }
 
-  static ListObjectsAns listObjects(NavigableMap<String, ObjectMetadata> objectsAfterMarker, Character delimiter, int maxKeys, String prefix) {
-    if (objectsAfterMarker.isEmpty()) {
-      return EMPTY_RESULT;
+
+
+  static NavigableMap<String, ObjectMetadata> filterByPrefix(NavigableMap<String, ObjectMetadata> objectsAfterMarker, String prefix) {
+    if (Objects.isNull(prefix) || objectsAfterMarker.isEmpty()) {
+      return objectsAfterMarker;
+    }
+
+    String fromKey = objectsAfterMarker.floorKey(prefix);
+    String toKey = objectsAfterMarker.floorKey(prefix + Character.MAX_VALUE);
+    if (Objects.isNull(toKey)) {
+      return EMPTY_OBJECT_MAP;
+    }
+
+    if (Objects.isNull(fromKey)) {
+      return objectsAfterMarker.headMap(toKey, true);
+    }
+
+    boolean fromKeyInclusive = fromKey.startsWith(prefix);
+    return objectsAfterMarker.subMap(fromKey, fromKeyInclusive, toKey, true);
+  }
+
+  static ListObjectsAns listObjectsAndCommonPrefixes(NavigableMap<String, ObjectMetadata> filteredObjects, String delimiter, int maxKeys) {
+    if (filteredObjects.isEmpty() || 0 == maxKeys) {
+      return ListObjectsAns.builder()
+        .delimiter(delimiter)
+        .maxKeys(maxKeys)
+        .build();
     }
 
     List<S3Object> objects = new LinkedList<>();
     Set<String> commonPrefixes = new TreeSet<>();
-    int prefixLen = Objects.isNull(prefix) ? 0 : prefix.length();
-    boolean hasMore = false;
-    String nextKeyMarker = null;
-    for (String key : objectsAfterMarker.keySet()) {
-      if (objectsAfterMarker.get(key).getLatest().isDeleted()) {
+
+
+    String nextMarker = null;
+
+    for (Iterator<String> keyIterator = filteredObjects.keySet().iterator(); keyIterator.hasNext(); ) {
+      String key = keyIterator.next();
+      if (filteredObjects.get(key).getLatest().isDeleted()) {
         continue;
       }
 
-      if (Objects.nonNull(prefix) && !key.startsWith(prefix)) {
-        continue;
+      if (Objects.nonNull(delimiter) && key.contains(delimiter)) {
+        commonPrefixes.add(calculateCommonPrefix(key, delimiter));
+      } else {
+        objects.add(fetchLatestObject(key, filteredObjects.get(key)));
       }
 
       int keyCount = commonPrefixes.size() + objects.size();
+
       if (keyCount == maxKeys) {
-        hasMore = true;
+        nextMarker = calculateNextMarker(key, keyIterator, delimiter);
         break;
       }
 
-      if (keyCount < maxKeys) {
-        int prefixOccursAt;
-        if (Objects.nonNull(delimiter) && (-1 != (prefixOccursAt = key.indexOf(delimiter, prefixLen)))) {
-          commonPrefixes.add(key.substring(0, prefixOccursAt + 1));
-        } else {
-          objects.add(fetchLatestObject(key, objectsAfterMarker.get(key)));
-        }
-        nextKeyMarker = key;
-      }
     }
 
     return ListObjectsAns.builder()
-        .delimiter(Objects.nonNull(delimiter) ? delimiter.toString() : null)
-        .maxKeys(maxKeys)
-        .prefix(Objects.isNull(prefix) ? "" : prefix)
-        .nextMarker((hasMore && Objects.nonNull(delimiter)) ? nextKeyMarker : null)
-        .isTruncated(hasMore)
-        .objects(objects)
-        .commonPrefixes(new ArrayList<>(commonPrefixes))
-        .build();
+      .delimiter(delimiter)
+      .maxKeys(maxKeys)
+      .nextMarker(nextMarker)
+      .isTruncated(Objects.nonNull(nextMarker))
+      .objects(objects)
+      .commonPrefixes(new ArrayList<>(commonPrefixes))
+      .build();
   }
 
+  static String calculateNextMarker(String currentKey, Iterator<String> keyIterator, String delimiter) {
+    if (Objects.isNull(delimiter) || !currentKey.contains(delimiter)) {
+      return keyIterator.hasNext() ? currentKey : null;
+    }
+
+    String commonPrefix = calculateCommonPrefix(currentKey, delimiter);
+
+    while (keyIterator.hasNext() && keyIterator.next().startsWith(commonPrefix)) ;
+
+    return keyIterator.hasNext() ? commonPrefix : null;
+  }
+
+  static String calculateCommonPrefix(String key, String delimiter) {
+    return key.substring(0, key.indexOf(delimiter) + delimiter.length());
+  }
 
   static S3Object fetchLatestObject(String key, ObjectMetadata objectMetadata) {
     VersionedObjectMetadata latest = objectMetadata.getLatest();
@@ -118,25 +169,25 @@ public interface ListObjectsService extends LocalS3MetadataApplicable {
   }
 
   static void encodeIfNeeded(ListObjectsAns listObjectsAns, String encodingType) {
-      if (Objects.isNull(encodingType)) {
-          return;
-      }
+    if (Objects.isNull(encodingType)) {
+      return;
+    }
 
-      if (!"url".equalsIgnoreCase(encodingType)) {
-          throw new LocalS3InvalidArgumentException("encoding-type", encodingType, "Invalid Encoding Method specified in Request");
-      }
+    if (!"url".equalsIgnoreCase(encodingType)) {
+      throw new LocalS3InvalidArgumentException("encoding-type", encodingType, "Invalid Encoding Method specified in Request");
+    }
 
-      listObjectsAns.setEncodingType(encodingType);
-      listObjectsAns.getObjects()
-          .forEach(object -> object.setKey(S3ObjectUtils.urlEncodeEscapeSlash(object.getKey())));
-      List<String> encodedPrefixes = new ArrayList<>(listObjectsAns.getCommonPrefixes().size());
-      listObjectsAns.getCommonPrefixes().forEach(commonPrefix ->
-          encodedPrefixes.add(S3ObjectUtils.urlEncodeEscapeSlash(commonPrefix)));
-      listObjectsAns.setCommonPrefixes(encodedPrefixes);
-      listObjectsAns.setDelimiter(S3ObjectUtils.urlEncodeEscapeSlash(listObjectsAns.getDelimiter()));
-      listObjectsAns.setPrefix(S3ObjectUtils.urlEncodeEscapeSlash(listObjectsAns.getPrefix()));
-      listObjectsAns.setMarker(S3ObjectUtils.urlEncodeEscapeSlash(listObjectsAns.getMarker()));
-      listObjectsAns.setNextMarker(S3ObjectUtils.urlEncodeEscapeSlash(listObjectsAns.getNextMarker().orElse(null)));
+    listObjectsAns.setEncodingType(encodingType);
+    listObjectsAns.getObjects()
+      .forEach(object -> object.setKey(S3ObjectUtils.urlEncodeEscapeSlash(object.getKey())));
+    List<String> encodedPrefixes = new ArrayList<>(listObjectsAns.getCommonPrefixes().size());
+    listObjectsAns.getCommonPrefixes().forEach(commonPrefix ->
+      encodedPrefixes.add(S3ObjectUtils.urlEncodeEscapeSlash(commonPrefix)));
+    listObjectsAns.setCommonPrefixes(encodedPrefixes);
+    listObjectsAns.setDelimiter(S3ObjectUtils.urlEncodeEscapeSlash(listObjectsAns.getDelimiter()));
+    listObjectsAns.setPrefix(S3ObjectUtils.urlEncodeEscapeSlash(listObjectsAns.getPrefix()));
+    listObjectsAns.setMarker(S3ObjectUtils.urlEncodeEscapeSlash(listObjectsAns.getMarker()));
+    listObjectsAns.setNextMarker(S3ObjectUtils.urlEncodeEscapeSlash(listObjectsAns.getNextMarker().orElse(null)));
   }
 
 }

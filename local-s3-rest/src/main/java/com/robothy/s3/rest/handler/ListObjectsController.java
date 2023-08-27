@@ -34,7 +34,7 @@ class ListObjectsController implements HttpRequestHandler {
   @Override
   public void handle(HttpRequest request, HttpResponse response) throws Exception {
     String bucket = RequestAssertions.assertBucketNameProvided(request);
-    Character delimiter = RequestAssertions.assertDelimiterIsValid(request).orElse(null);
+    String delimiter = RequestAssertions.assertDelimiterIsValid(request).orElse(null);
     String encodingType = RequestAssertions.assertEncodingTypeIsValid(request).orElse(null);
     String marker = request.parameter("marker").orElse(null);
     int maxKeys = Math.min(1000, request.parameter("max-keys").map(Integer::valueOf).orElse(1000));

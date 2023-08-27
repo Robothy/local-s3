@@ -24,7 +24,7 @@ import java.util.Set;
 public interface ListObjectVersionsService extends LocalS3MetadataApplicable {
 
 
-  default ListObjectVersionsAns listObjectVersions(String bucket, Character delimiter, String keyMarker, int maxKeys, String prefix, String versionIdMarker) {
+  default ListObjectVersionsAns listObjectVersions(String bucket, String delimiter, String keyMarker, int maxKeys, String prefix, String versionIdMarker) {
     BucketMetadata bucketMetadata = BucketAssertions.assertBucketExists(localS3Metadata(), bucket);
 
     if (Objects.nonNull(versionIdMarker) && Objects.isNull(keyMarker)) {

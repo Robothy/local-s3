@@ -23,17 +23,17 @@ public interface ListObjectsV2Service extends ListObjectsService {
      */
     @BucketChanged
     default ListObjectsV2Ans listObjectsV2(String bucket, String continuationToken,
-                                           Character delimiter, String encodingType,
+                                           String delimiter, String encodingType,
                                            boolean fetchOwner, int maxKeys,
                                            String prefix, String startAfter) {
         if (StringUtils.isNotBlank(continuationToken)) {
-            ContinuationParameters params = ContinuationParameters.decode(continuationToken);
-            delimiter = params.getDelimiter();
-            encodingType = params.getEncodingType();
-            fetchOwner = params.isFetchOwner();
-            maxKeys = params.getMaxKeys();
-            prefix = params.getPrefix();
-            startAfter = params.getStartAfter();
+            //ContinuationParameters params = ContinuationParameters.decode(continuationToken);
+//            delimiter = params.getDelimiter();
+//            encodingType = params.getEncodingType();
+//            fetchOwner = params.isFetchOwner();
+//            maxKeys = params.getMaxKeys();
+//            prefix = params.getPrefix();
+//            startAfter = params.getStartAfter();
         }
 
         ListObjectsAns listObjectsAns = listObjects(bucket, delimiter, encodingType, startAfter, maxKeys, prefix);
@@ -47,7 +47,7 @@ public interface ListObjectsV2Service extends ListObjectsService {
             .startAfter(listObjectsAns.getMarker())
             .objects(listObjectsAns.getObjects())
             .commonPrefixes(listObjectsAns.getCommonPrefixes())
-            .nextContinuationToken(generateNextContinuationToken(delimiter, encodingType, fetchOwner, maxKeys, prefix, listObjectsAns))
+           // .nextContinuationToken(generateNextContinuationToken(delimiter, encodingType, fetchOwner, maxKeys, prefix, listObjectsAns))
             .build();
     }
 

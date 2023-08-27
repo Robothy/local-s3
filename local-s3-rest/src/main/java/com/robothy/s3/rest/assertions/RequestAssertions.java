@@ -43,13 +43,8 @@ public class RequestAssertions {
    * @param request HTTP request.
    * @return fetched character or null.
    */
-  public static Optional<Character> assertDelimiterIsValid(HttpRequest request) {
-    return request.parameter("delimiter").map(delimiter -> {
-      if (delimiter.length() != 1) {
-        throw new IllegalArgumentException("Invalid delimiter. The delimiter must be a character.");
-      }
-      return delimiter.charAt(0);
-    });
+  public static Optional<String> assertDelimiterIsValid(HttpRequest request) {
+    return request.parameter("delimiter");
   }
 
   /**

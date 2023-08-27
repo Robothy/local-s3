@@ -111,7 +111,7 @@ class ListObjectVersionsServiceTest extends LocalS3ServiceTestBase {
     assertTrue(listObjectVersionsAns4.getNextVersionIdMarker().isEmpty());
 
     /*-- List versions with delimiter --*/
-    ListObjectVersionsAns listObjectVersionsAns5 = objectService.listObjectVersions(bucket, '/', null, 1, null, null);
+    ListObjectVersionsAns listObjectVersionsAns5 = objectService.listObjectVersions(bucket, "/", null, 1, null, null);
     assertEquals(0, listObjectVersionsAns5.getVersions().size());
     assertEquals(1, listObjectVersionsAns5.getCommonPrefixes().size());
     assertEquals("dir1/", listObjectVersionsAns5.getCommonPrefixes().get(0));
