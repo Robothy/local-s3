@@ -12,6 +12,8 @@ import java.util.Optional;
 @Data
 public class ListObjectsV2Ans {
 
+    private String continuationToken;
+
     private String delimiter;
 
     private String encodingType;

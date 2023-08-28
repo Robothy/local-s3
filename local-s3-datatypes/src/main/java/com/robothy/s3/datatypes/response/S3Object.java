@@ -1,5 +1,6 @@
 package com.robothy.s3.datatypes.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.robothy.s3.datatypes.Owner;
@@ -14,12 +15,12 @@ import lombok.Data;
  * Represents S3 <a href="https://docs.aws.amazon.com/AmazonS3/latest/API/API_Object.html">Object</a>.
  */
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class S3Object {
 
   /**
    * Order by key ascending.
    */
-
   public static final Comparator<S3Object> ORDER_BY_KEY_ASC = Comparator.comparing(S3Object::getKey);
 
   /**

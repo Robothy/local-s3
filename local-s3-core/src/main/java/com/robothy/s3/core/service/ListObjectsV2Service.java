@@ -1,9 +1,11 @@
 package com.robothy.s3.core.service;
 
 import com.robothy.s3.core.annotations.BucketChanged;
-import com.robothy.s3.core.model.ContinuationParameters;
+import com.robothy.s3.core.asserionts.BucketAssertions;
 import com.robothy.s3.core.model.answers.ListObjectsAns;
 import com.robothy.s3.core.model.answers.ListObjectsV2Ans;
+import com.robothy.s3.core.model.internal.BucketMetadata;
+import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 
 public interface ListObjectsV2Service extends ListObjectsService {
@@ -26,45 +28,43 @@ public interface ListObjectsV2Service extends ListObjectsService {
                                            String delimiter, String encodingType,
                                            boolean fetchOwner, int maxKeys,
                                            String prefix, String startAfter) {
-        if (StringUtils.isNotBlank(continuationToken)) {
-            //ContinuationParameters params = ContinuationParameters.decode(continuationToken);
-//            delimiter = params.getDelimiter();
-//            encodingType = params.getEncodingType();
-//            fetchOwner = params.isFetchOwner();
-//            maxKeys = params.getMaxKeys();
-//            prefix = params.getPrefix();
-//            startAfter = params.getStartAfter();
-        }
 
-        ListObjectsAns listObjectsAns = listObjects(bucket, delimiter, encodingType, startAfter, maxKeys, prefix);
-        return ListObjectsV2Ans.builder()
+        BucketMetadata bucketMetadata = BucketAssertions.assertBucketExists(localS3Metadata(), bucket);
+
+        String marker = StringUtils.isNotBlank(continuationToken) ? continuationToken : startAfter;
+        ListObjectsAns listObjectsAns = listObjects(bucket, delimiter, encodingType, marker, maxKeys, prefix);
+
+        String nextContinuationToken = calculateNextContinuationToken(listObjectsAns.getNextMarker().orElse(null), bucketMetadata);
+        ListObjectsV2Ans listObjectsV2Ans = ListObjectsV2Ans.builder()
+            .continuationToken(continuationToken)
             .delimiter(listObjectsAns.getDelimiter())
             .encodingType(listObjectsAns.getEncodingType())
             .isTruncated(listObjectsAns.isTruncated())
             .keyCount(listObjectsAns.getObjects().size() + listObjectsAns.getCommonPrefixes().size())
             .maxKeys(listObjectsAns.getMaxKeys())
-            .prefix(listObjectsAns.getPrefix())
-            .startAfter(listObjectsAns.getMarker())
+            .prefix(StringUtils.isBlank(prefix) ? null : prefix)
+            .startAfter(StringUtils.isBlank(startAfter) || StringUtils.isNotBlank(continuationToken) ? null : startAfter)
             .objects(listObjectsAns.getObjects())
             .commonPrefixes(listObjectsAns.getCommonPrefixes())
-           // .nextContinuationToken(generateNextContinuationToken(delimiter, encodingType, fetchOwner, maxKeys, prefix, listObjectsAns))
+            .nextContinuationToken(nextContinuationToken)
             .build();
+
+        if (!fetchOwner) {
+            removeOwner(listObjectsV2Ans);
+        }
+        return listObjectsV2Ans;
     }
 
-    static String generateNextContinuationToken(Character delimiter, String encodingType, boolean fetchOwner, int maxKeys, String prefix, ListObjectsAns ans) {
-        if (!ans.isTruncated()) {
+    static String calculateNextContinuationToken(String nextMarker, BucketMetadata bucketMetadata) {
+        if (Objects.isNull(nextMarker)) {
             return null;
         }
 
-        return ContinuationParameters.builder()
-            .delimiter(delimiter)
-            .encodingType(encodingType)
-            .fetchOwner(fetchOwner)
-            .maxKeys(maxKeys)
-            .prefix(prefix)
-            .startAfter(ans.getObjects().get(ans.getObjects().size() - 1).getKey())
-            .build()
-            .encode();
+        return bucketMetadata.getObjectMap().floorKey(nextMarker + Character.MAX_VALUE);
+    }
+
+    static void removeOwner(ListObjectsV2Ans listObjectsV2Ans) {
+        listObjectsV2Ans.getObjects().forEach(s3Object -> s3Object.setOwner(null));
     }
 
 }

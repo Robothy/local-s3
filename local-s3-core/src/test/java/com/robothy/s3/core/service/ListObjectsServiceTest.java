@@ -4,17 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.robothy.s3.core.exception.LocalS3InvalidArgumentException;
 import com.robothy.s3.core.model.answers.ListObjectsAns;
 import com.robothy.s3.core.model.internal.ObjectMetadata;
 import com.robothy.s3.core.model.request.PutObjectOptions;
 import com.robothy.s3.datatypes.response.S3Object;
 import java.io.ByteArrayInputStream;
-import java.lang.reflect.MalformedParameterizedTypeException;
 import java.util.Map;
 import java.util.NavigableMap;
-import java.util.TreeMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -73,7 +70,7 @@ class ListObjectsServiceTest extends LocalS3ServiceTestBase {
     assertEquals(1, listObjectsAns2.getCommonPrefixes().size());
     assertEquals("dir1/", listObjectsAns2.getCommonPrefixes().get(0));
     assertTrue(listObjectsAns2.getNextMarker().isPresent());
-    assertEquals("dir1/key1", listObjectsAns2.getNextMarker().get());
+    assertEquals("dir1/", listObjectsAns2.getNextMarker().get());
 
     ListObjectsAns listObjectsAns3 = objectService.listObjects(bucketName, "/", null, null, 5, null);
     assertEquals(0, listObjectsAns3.getObjects().size());

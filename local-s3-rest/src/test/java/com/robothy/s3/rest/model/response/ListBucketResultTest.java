@@ -11,7 +11,7 @@ class ListBucketResultTest {
   @Test
   void serialization() throws JsonProcessingException {
     ListBucketResult listBucketResult = ListBucketResult.builder().isTruncated(false)
-        .delimiter('/')
+        .delimiter("/")
         .maxKeys(100)
         .encodingType("url")
         .prefix("dir")

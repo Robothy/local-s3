@@ -1,6 +1,5 @@
 package com.robothy.s3.core.service;
 
-import com.robothy.s3.core.model.ContinuationParameters;
 import com.robothy.s3.core.model.answers.ListObjectsV2Ans;
 import com.robothy.s3.core.model.request.PutObjectOptions;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -42,13 +41,6 @@ class ListObjectsV2ServiceTest extends LocalS3ServiceTestBase {
         assertEquals(4, listObjectsV2Ans.getObjects().size());
         assertEquals(0, listObjectsV2Ans.getCommonPrefixes().size());
         assertTrue(listObjectsV2Ans.getNextContinuationToken().isPresent());
-        ContinuationParameters continuationParameters = ContinuationParameters.decode(listObjectsV2Ans.getNextContinuationToken().get());
-        assertNull(continuationParameters.getDelimiter());
-        assertNull(continuationParameters.getEncodingType());
-        assertFalse(continuationParameters.isFetchOwner());
-        assertEquals(4, continuationParameters.getMaxKeys());
-        assertNull(continuationParameters.getPrefix());
-        assertEquals("dir3#key1", continuationParameters.getStartAfter());
 
         listObjectsV2Ans = objectService.listObjectsV2(bucket, listObjectsV2Ans.getNextContinuationToken().get(), null, null, false, 4, null, null);
         assertNotNull(listObjectsV2Ans);

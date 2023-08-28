@@ -1,6 +1,10 @@
 package com.robothy.s3.test;
 
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.ListObjectsV2Request;
 import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.Owner;
@@ -38,7 +42,7 @@ public class ListObjectsV2IntegrationTest {
     S3ObjectSummary dir1key1 = result1.getObjectSummaries().get(0);
     assertEquals("dir1/key1", dir1key1.getKey());
     assertNotNull(DigestUtils.md5Hex("Content"), dir1key1.getETag());
-    assertEquals(5, dir1key1.getSize());
+    assertEquals(7, dir1key1.getSize());
     assertNotNull(dir1key1.getLastModified());
     assertNotNull(dir1key1.getStorageClass());
     assertNull(dir1key1.getOwner());
@@ -404,6 +408,69 @@ public class ListObjectsV2IntegrationTest {
     assertEquals("dir2@key1", objectsV2Result2.getObjectSummaries().get(0).getKey());
   }
 
+  //@Test
+  void test() {
+    AmazonS3 s3 = AmazonS3Client.builder()
+        .withCredentials(new AWSStaticCredentialsProvider(
+            new BasicAWSCredentials("AKIA372Q46RLSTQAB7HY", "fvf/ACjJA2rzS1iFHfByNV1V/ZuXlezaI97ZLGV0")))
+
+        .withRegion(Regions.AP_SOUTHEAST_1)
+        .build();
+    String bucketName = "robothy";
+
+    ListObjectsV2Result objectsV2Result = s3.listObjectsV2(new ListObjectsV2Request().withBucketName(bucketName)
+        .withMaxKeys(1));
+    assertTrue(objectsV2Result.isTruncated());
+    assertEquals(1, objectsV2Result.getObjectSummaries().size());
+    assertEquals(0, objectsV2Result.getCommonPrefixes().size());
+    assertEquals(1, objectsV2Result.getKeyCount());
+    assertEquals(1, objectsV2Result.getMaxKeys());
+    assertNotNull(objectsV2Result.getNextContinuationToken());
+    assertNull(objectsV2Result.getPrefix());
+    assertNull(objectsV2Result.getDelimiter());
+    assertNull(objectsV2Result.getEncodingType());
+    assertNull(objectsV2Result.getContinuationToken());
+    assertNull(objectsV2Result.getStartAfter());
+    assertEquals("dir1/key1", objectsV2Result.getObjectSummaries().get(0).getKey());
+
+    // now, the continuation token is after "dir1/key1"
+    ListObjectsV2Result objectsV2Result1 = s3.listObjectsV2(new ListObjectsV2Request().withBucketName(bucketName)
+        .withContinuationToken(objectsV2Result.getNextContinuationToken())
+        .withStartAfter("dir1/key2")
+        .withMaxKeys(1));
+    assertTrue(objectsV2Result1.isTruncated());
+    assertEquals(1, objectsV2Result1.getObjectSummaries().size());
+    assertEquals(0, objectsV2Result1.getCommonPrefixes().size());
+    assertEquals(1, objectsV2Result1.getKeyCount());
+    assertEquals(1, objectsV2Result1.getMaxKeys());
+    assertNotNull(objectsV2Result1.getNextContinuationToken());
+    assertNull(objectsV2Result1.getPrefix());
+    assertNull(objectsV2Result1.getDelimiter());
+    assertNull(objectsV2Result1.getEncodingType());
+    assertEquals(objectsV2Result.getNextContinuationToken(), objectsV2Result1.getContinuationToken());
+    assertNull(objectsV2Result1.getStartAfter());
+    assertEquals("dir1/key2", objectsV2Result1.getObjectSummaries().get(0).getKey());
+
+    // now, the continuation token is after "dir1@key2"
+    ListObjectsV2Result objectsV2Result2 = s3.listObjectsV2(new ListObjectsV2Request().withBucketName(bucketName)
+        .withContinuationToken(objectsV2Result1.getNextContinuationToken())
+        .withStartAfter("dir1/key1")
+        .withMaxKeys(1));
+    assertTrue(objectsV2Result2.isTruncated());
+    assertEquals(1, objectsV2Result2.getObjectSummaries().size());
+    assertEquals(0, objectsV2Result2.getCommonPrefixes().size());
+    assertEquals(1, objectsV2Result2.getKeyCount());
+    assertEquals(1, objectsV2Result2.getMaxKeys());
+    assertNotNull(objectsV2Result2.getNextContinuationToken());
+    assertNull(objectsV2Result2.getPrefix());
+    assertNull(objectsV2Result2.getDelimiter());
+    assertNull(objectsV2Result2.getEncodingType());
+    assertEquals(objectsV2Result1.getNextContinuationToken(), objectsV2Result2.getContinuationToken());
+    assertNull(objectsV2Result1.getStartAfter());
+    assertEquals("dir2@key1", objectsV2Result2.getObjectSummaries().get(0).getKey());
+
+    System.out.println("objectsV2Result = %s%n");
+  }
 
   String prepareKeys(AmazonS3 s3, String... keys) {
     String bucket = "test-list-objects" + System.currentTimeMillis();

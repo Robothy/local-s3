@@ -393,42 +393,6 @@ public class ListObjectsIntegrationTest {
     assertEquals("dir2@", objectListing3.getCommonPrefixes().get(0));
   }
 
-  //@Test
-  void test() {
-    AmazonS3 s3 = AmazonS3Client.builder()
-      .withCredentials(new AWSStaticCredentialsProvider(
-        new BasicAWSCredentials("", "")))
-
-      .withRegion(Regions.AP_SOUTHEAST_1)
-      .build();
-    String bucketName = "robothy";
-
-    ObjectListing objectListing = s3.listObjects(new ListObjectsRequest().withBucketName(bucketName)
-      .withPrefix("dir1").withMarker("dir1/key1").withDelimiter("/"));
-    assertEquals(0, objectListing.getObjectSummaries().size());
-    assertEquals(0, objectListing.getCommonPrefixes().size());
-
-    ObjectListing objectListing1 = s3.listObjects(new ListObjectsRequest().withBucketName(bucketName)
-      .withPrefix("dir1").withMarker("dir1/key1").withDelimiter("i"));
-    assertEquals(1, objectListing1.getObjectSummaries().size());
-    assertEquals(0, objectListing1.getCommonPrefixes().size());
-    assertEquals("dir1/key2", objectListing1.getObjectSummaries().get(0).getKey());
-
-    ObjectListing objectListing2 = s3.listObjects(new ListObjectsRequest().withBucketName(bucketName)
-      .withPrefix("dir2").withMarker("dir1/key1").withDelimiter("i"));
-    assertEquals(2, objectListing2.getObjectSummaries().size());
-    assertEquals(0, objectListing2.getCommonPrefixes().size());
-    assertEquals("dir2@key1", objectListing2.getObjectSummaries().get(0).getKey());
-    assertEquals("dir2@key2", objectListing2.getObjectSummaries().get(1).getKey());
-
-    ObjectListing objectListing3 = s3.listObjects(new ListObjectsRequest().withBucketName(bucketName)
-      .withPrefix("dir2").withMarker("dir1/key1").withDelimiter("@"));
-    assertEquals(0, objectListing3.getObjectSummaries().size());
-    assertEquals(1, objectListing3.getCommonPrefixes().size());
-    assertEquals("dir2@", objectListing3.getCommonPrefixes().get(0));
-
-    System.out.println("objectsV2Result = %s%n");
-  }
 
   String prepareKeys(AmazonS3 s3, String... keys) {
     String bucket = "test-list-objects" + System.currentTimeMillis();

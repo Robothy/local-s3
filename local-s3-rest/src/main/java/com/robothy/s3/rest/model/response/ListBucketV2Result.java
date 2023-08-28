@@ -1,6 +1,7 @@
 package com.robothy.s3.rest.model.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.robothy.s3.datatypes.response.S3Object;
@@ -17,6 +18,7 @@ public class ListBucketV2Result {
     private boolean isTruncated;
 
     @JacksonXmlProperty(localName = "Contents")
+    @JacksonXmlElementWrapper(useWrapping = false)
     private List<S3Object> contents;
 
     @JacksonXmlProperty(localName = "Name")
@@ -32,6 +34,7 @@ public class ListBucketV2Result {
     private int maxKeys;
 
     @JacksonXmlProperty(localName = "CommonPrefixes")
+    @JacksonXmlElementWrapper(useWrapping = false)
     private List<CommonPrefix> commonPrefixes;
 
     @JacksonXmlProperty(localName = "EncodingType")

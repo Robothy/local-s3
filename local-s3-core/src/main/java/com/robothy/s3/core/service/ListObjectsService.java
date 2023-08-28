@@ -62,16 +62,17 @@ public interface ListObjectsService extends LocalS3MetadataApplicable {
       return filteredByMarker;
     }
 
-    if (filteredByMarker.firstKey().startsWith(marker) && marker.endsWith(delimiter)) {
-      String fromKey = filteredByMarker.ceilingKey(marker + Character.MAX_VALUE);
-      if (Objects.isNull(fromKey)) {
-        return EMPTY_OBJECT_MAP;
-      }
-
-      return filteredByMarker.tailMap(fromKey, true);
+    String firstKey = filteredByMarker.firstKey();
+    String firstKeyCommonPrefix;
+    if (!firstKey.contains(delimiter) || (firstKeyCommonPrefix = calculateCommonPrefix(firstKey, delimiter)).compareTo(marker) > 0) {
+      return filteredByMarker;
     }
 
-    return filteredByMarker;
+    String fromKey = filteredByMarker.ceilingKey(firstKeyCommonPrefix + Character.MAX_VALUE);
+    if (Objects.isNull(fromKey)) {
+      return EMPTY_OBJECT_MAP;
+    }
+    return filteredByMarker.tailMap(fromKey, true);
   }
 
 
@@ -124,7 +125,7 @@ public interface ListObjectsService extends LocalS3MetadataApplicable {
       int keyCount = commonPrefixes.size() + objects.size();
 
       if (keyCount == maxKeys) {
-        nextMarker = calculateNextMarker(key, keyIterator, delimiter);
+        nextMarker = calculateNextMarker(filteredObjects, key, keyIterator, delimiter);
         break;
       }
 
@@ -140,16 +141,22 @@ public interface ListObjectsService extends LocalS3MetadataApplicable {
       .build();
   }
 
-  static String calculateNextMarker(String currentKey, Iterator<String> keyIterator, String delimiter) {
+  static String calculateNextMarker(NavigableMap<String, ObjectMetadata> filteredObjects,
+                                    String currentKey, Iterator<String> keyIterator, String delimiter) {
     if (Objects.isNull(delimiter) || !currentKey.contains(delimiter)) {
       return keyIterator.hasNext() ? currentKey : null;
     }
 
     String commonPrefix = calculateCommonPrefix(currentKey, delimiter);
 
-    while (keyIterator.hasNext() && keyIterator.next().startsWith(commonPrefix)) ;
+    while (keyIterator.hasNext()) {
+      String key = keyIterator.next();
+      if (!key.startsWith(commonPrefix) && !filteredObjects.get(key).getLatest().isDeleted()) {
+        return commonPrefix;
+      }
+    }
 
-    return keyIterator.hasNext() ? commonPrefix : null;
+    return null;
   }
 
   static String calculateCommonPrefix(String key, String delimiter) {
