@@ -3,12 +3,19 @@ package com.robothy.s3.core.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.robothy.s3.core.exception.LocalS3InvalidArgumentException;
 import com.robothy.s3.core.model.answers.ListObjectsAns;
+import com.robothy.s3.core.model.internal.ObjectMetadata;
 import com.robothy.s3.core.model.request.PutObjectOptions;
 import com.robothy.s3.datatypes.response.S3Object;
 import java.io.ByteArrayInputStream;
+import java.util.Map;
+import java.util.NavigableMap;
+import java.util.concurrent.ConcurrentSkipListMap;
+
 import org.apache.commons.codec.digest.DigestUtils;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -58,21 +65,21 @@ class ListObjectsServiceTest extends LocalS3ServiceTestBase {
     assertEquals(0, listObjectsAns1.getCommonPrefixes().size());
     assertTrue(listObjectsAns1.getNextMarker().isEmpty());
 
-    ListObjectsAns listObjectsAns2 = objectService.listObjects(bucketName, '/', null, null, 1, null);
+    ListObjectsAns listObjectsAns2 = objectService.listObjects(bucketName, "/", null, null, 1, null);
     assertEquals(0, listObjectsAns2.getObjects().size());
     assertEquals(1, listObjectsAns2.getCommonPrefixes().size());
     assertEquals("dir1/", listObjectsAns2.getCommonPrefixes().get(0));
     assertTrue(listObjectsAns2.getNextMarker().isPresent());
-    assertEquals("dir1/key1", listObjectsAns2.getNextMarker().get());
+    assertEquals("dir1/", listObjectsAns2.getNextMarker().get());
 
-    ListObjectsAns listObjectsAns3 = objectService.listObjects(bucketName, '/', null, null, 5, null);
+    ListObjectsAns listObjectsAns3 = objectService.listObjects(bucketName, "/", null, null, 5, null);
     assertEquals(0, listObjectsAns3.getObjects().size());
     assertEquals(2, listObjectsAns3.getCommonPrefixes().size());
     assertEquals("dir1/", listObjectsAns3.getCommonPrefixes().get(0));
     assertEquals("dir2/", listObjectsAns3.getCommonPrefixes().get(1));
     assertTrue(listObjectsAns3.getNextMarker().isEmpty());
 
-    ListObjectsAns listObjectsAns4 = objectService.listObjects(bucketName, '/', null, null, 5, "dir1");
+    ListObjectsAns listObjectsAns4 = objectService.listObjects(bucketName, "/", null, null, 5, "dir1");
     assertEquals(0, listObjectsAns4.getObjects().size());
     assertEquals(1, listObjectsAns4.getCommonPrefixes().size());
     assertEquals("dir1/", listObjectsAns4.getCommonPrefixes().get(0));
@@ -101,10 +108,33 @@ class ListObjectsServiceTest extends LocalS3ServiceTestBase {
     assertEquals(1, listObjectsAns1.getObjects().size());
     assertEquals("dir1@/key1@", listObjectsAns1.getObjects().get(0).getKey());
 
-    ListObjectsAns listObjectsAns2 = objectService.listObjects(bucketName, '/', "url", null, 2, null);
+    ListObjectsAns listObjectsAns2 = objectService.listObjects(bucketName, "/", "url", null, 2, null);
     assertEquals(0, listObjectsAns2.getObjects().size());
     assertEquals(1, listObjectsAns2.getCommonPrefixes().size());
     assertEquals("dir1%40/", listObjectsAns2.getCommonPrefixes().get(0));
+  }
+
+  @Test
+  void filterByPrefix() {
+
+    NavigableMap<String, ObjectMetadata> filtered = ListObjectsService.filterByPrefix(new ConcurrentSkipListMap<>(Map.of()), "prefix");
+    assertEquals(0, filtered.size());
+
+    ObjectMetadata object = new ObjectMetadata();
+    NavigableMap<String, ObjectMetadata> filtered1 = ListObjectsService.filterByPrefix(new ConcurrentSkipListMap<>(
+      Map.of("prefix", object, "prefiu", object, "prefix1", object)), "prefix");
+    assertEquals(2, filtered1.size());
+
+    NavigableMap<String, ObjectMetadata> filtered2 = ListObjectsService.filterByPrefix(new ConcurrentSkipListMap<>(Map.of("prefix", object)), null);
+    assertEquals(1, filtered2.size());
+
+    NavigableMap<String, ObjectMetadata> filtered3 = ListObjectsService.filterByPrefix(new ConcurrentSkipListMap<>(Map.of(
+      "prefix1", object, "prefix2", object, "prefiy", object)), "prefix");
+    assertEquals(2, filtered3.size());
+
+    NavigableMap<String, ObjectMetadata> filtered4 = ListObjectsService.filterByPrefix(new ConcurrentSkipListMap<>(Map.of(
+      "prefiy", object, "prefiz", object)), "prefix");
+    assertEquals(0, filtered4.size());
   }
 
 }

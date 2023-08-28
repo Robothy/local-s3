@@ -1,5 +1,6 @@
 package com.robothy.s3.rest.model.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
@@ -8,6 +9,7 @@ import java.util.List;
 import lombok.Builder;
 
 @Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JacksonXmlRootElement(localName = "ListBucketResult")
 public class ListBucketResult {
 
@@ -27,7 +29,7 @@ public class ListBucketResult {
   private String prefix;
 
   @JacksonXmlProperty(localName = "Delimiter")
-  private Character delimiter;
+  private String delimiter;
 
   @JacksonXmlProperty(localName = "MaxKeys")
   private int maxKeys;

@@ -117,6 +117,7 @@ public class ReachabilityMetadataGenerator {
     s3.listObjects(bucketName);
     s3.deleteObject(bucketName, "my-object");
     s3.setBucketVersioningConfiguration(new SetBucketVersioningConfigurationRequest(bucketName, new BucketVersioningConfiguration("Enabled")));
+    s3.listObjectsV2(bucketName);
 
     s3.putObject(bucketName, "my-object", "Hello World!");
     s3.deleteObject(bucketName, "my-object");

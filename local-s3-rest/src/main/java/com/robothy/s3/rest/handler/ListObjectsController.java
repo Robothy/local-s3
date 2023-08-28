@@ -15,10 +15,6 @@ import com.robothy.s3.rest.utils.ResponseUtils;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -38,7 +34,7 @@ class ListObjectsController implements HttpRequestHandler {
   @Override
   public void handle(HttpRequest request, HttpResponse response) throws Exception {
     String bucket = RequestAssertions.assertBucketNameProvided(request);
-    Character delimiter = RequestAssertions.assertDelimiterIsValid(request).orElse(null);
+    String delimiter = RequestAssertions.assertDelimiterIsValid(request).orElse(null);
     String encodingType = RequestAssertions.assertEncodingTypeIsValid(request).orElse(null);
     String marker = request.parameter("marker").orElse(null);
     int maxKeys = Math.min(1000, request.parameter("max-keys").map(Integer::valueOf).orElse(1000));
@@ -47,16 +43,16 @@ class ListObjectsController implements HttpRequestHandler {
     ListObjectsAns listObjectsAns = listObjectsService.listObjects(bucket, delimiter, encodingType, marker, maxKeys, prefix);
 
     ListBucketResult listBucketResult = ListBucketResult.builder()
-        .isTruncated(listObjectsAns.getNextMarker().isPresent())
-        .marker(marker)
+        .isTruncated(listObjectsAns.isTruncated())
+        .marker(listObjectsAns.getMarker())
         .nextMarker(listObjectsAns.getNextMarker().orElse(null))
         .contents(listObjectsAns.getObjects())
         .name(bucket)
-        .prefix(prefix)
-        .delimiter(delimiter)
-        .maxKeys(maxKeys)
+        .prefix(listObjectsAns.getPrefix())
+        .delimiter(listObjectsAns.getDelimiter())
+        .maxKeys(listObjectsAns.getMaxKeys())
         .commonPrefixes(listObjectsAns.getCommonPrefixes().stream().map(CommonPrefix::new).collect(Collectors.toList()))
-        .encodingType(encodingType)
+        .encodingType(listObjectsAns.getEncodingType())
         .build();
 
     String xml = xmlMapper.writeValueAsString(listBucketResult);

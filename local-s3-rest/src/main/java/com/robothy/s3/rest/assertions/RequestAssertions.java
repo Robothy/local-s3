@@ -2,6 +2,7 @@ package com.robothy.s3.rest.assertions;
 
 
 import com.robothy.netty.http.HttpRequest;
+import com.robothy.s3.core.exception.LocalS3InvalidArgumentException;
 import com.robothy.s3.rest.constants.AmzHeaderNames;
 import java.util.List;
 import java.util.Optional;
@@ -42,13 +43,8 @@ public class RequestAssertions {
    * @param request HTTP request.
    * @return fetched character or null.
    */
-  public static Optional<Character> assertDelimiterIsValid(HttpRequest request) {
-    return request.parameter("delimiter").map(delimiter -> {
-      if (delimiter.length() != 1) {
-        throw new IllegalArgumentException("Invalid delimiter. The delimiter must be a character.");
-      }
-      return delimiter.charAt(0);
-    });
+  public static Optional<String> assertDelimiterIsValid(HttpRequest request) {
+    return request.parameter("delimiter");
   }
 
   /**
@@ -60,7 +56,7 @@ public class RequestAssertions {
   public static Optional<String> assertEncodingTypeIsValid(HttpRequest request) {
     return request.parameter("encoding-type").map(encodingType -> {
       if (!"url".equalsIgnoreCase(encodingType)) {
-        throw new IllegalArgumentException("Invalid encoding-type. The valid value is 'url'.");
+        throw new LocalS3InvalidArgumentException("encoding-type", encodingType, "Invalid Encoding Method specified in Request");
       }
       return encodingType;
     });
