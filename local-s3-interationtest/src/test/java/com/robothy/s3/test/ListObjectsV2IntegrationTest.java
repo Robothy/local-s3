@@ -412,7 +412,7 @@ public class ListObjectsV2IntegrationTest {
   void test() {
     AmazonS3 s3 = AmazonS3Client.builder()
         .withCredentials(new AWSStaticCredentialsProvider(
-            new BasicAWSCredentials("AKIA372Q46RLSTQAB7HY", "fvf/ACjJA2rzS1iFHfByNV1V/ZuXlezaI97ZLGV0")))
+            new BasicAWSCredentials("", "")))
 
         .withRegion(Regions.AP_SOUTHEAST_1)
         .build();
