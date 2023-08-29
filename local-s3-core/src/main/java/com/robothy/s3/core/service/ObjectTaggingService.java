@@ -1,6 +1,8 @@
 package com.robothy.s3.core.service;
 
 import com.robothy.s3.core.annotations.BucketChanged;
+import com.robothy.s3.core.annotations.BucketReadLock;
+import com.robothy.s3.core.annotations.BucketWriteLock;
 import com.robothy.s3.core.asserionts.BucketAssertions;
 import com.robothy.s3.core.asserionts.ObjectAssertions;
 import com.robothy.s3.core.exception.MethodNotAllowedException;
@@ -25,6 +27,7 @@ public interface ObjectTaggingService extends LocalS3MetadataApplicable {
    * @return version ID where the new tagging applies to.
    */
   @BucketChanged
+  @BucketWriteLock
   default String putObjectTagging(String bucketName, String key, String versionId, String[][] tagging) {
     BucketMetadata bucketMetadata = BucketAssertions.assertBucketExists(localS3Metadata(), bucketName);
     ObjectMetadata objectMetadata = ObjectAssertions.assertObjectExists(bucketMetadata, key);
@@ -44,6 +47,7 @@ public interface ObjectTaggingService extends LocalS3MetadataApplicable {
    * @param versionId version ID.
    * @return versioned object tagging.
    */
+  @BucketReadLock
   default GetObjectTaggingAns getObjectTagging(String bucketName, String key, String versionId) {
     BucketMetadata bucketMetadata = BucketAssertions.assertBucketExists(localS3Metadata(), bucketName);
     ObjectMetadata objectMetadata = ObjectAssertions.assertObjectExists(bucketMetadata, key);
@@ -67,6 +71,7 @@ public interface ObjectTaggingService extends LocalS3MetadataApplicable {
    * @return version ID of the object where the tagging is deleted from.
    */
   @BucketChanged
+  @BucketWriteLock
   default String deleteObjectTagging(String bucketName, String key, String versionId) {
     BucketMetadata bucketMetadata = BucketAssertions.assertBucketExists(localS3Metadata(), bucketName);
     ObjectMetadata objectMetadata = ObjectAssertions.assertObjectExists(bucketMetadata, key);

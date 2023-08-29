@@ -1,5 +1,6 @@
 package com.robothy.s3.core.service;
 
+import com.robothy.s3.core.annotations.BucketReadLock;
 import com.robothy.s3.core.asserionts.BucketAssertions;
 import com.robothy.s3.core.asserionts.UploadAssertions;
 import com.robothy.s3.core.exception.ObjectNotExistException;
@@ -19,6 +20,7 @@ import java.util.SortedMap;
  **/
 public interface ListPartsService extends LocalS3MetadataApplicable {
 
+  @BucketReadLock
   default ListPartsAns listParts(String bucket, String key, String uploadId, Integer maxParts, Integer partNumberMarker) {
     LocalS3Metadata s3Metadata = localS3Metadata();
     BucketMetadata bucketMetadata = BucketAssertions.assertBucketExists(s3Metadata, bucket);

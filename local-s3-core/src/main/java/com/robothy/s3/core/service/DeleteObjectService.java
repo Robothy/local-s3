@@ -1,6 +1,7 @@
 package com.robothy.s3.core.service;
 
 import com.robothy.s3.core.annotations.BucketChanged;
+import com.robothy.s3.core.annotations.BucketWriteLock;
 import com.robothy.s3.core.asserionts.BucketAssertions;
 import com.robothy.s3.core.asserionts.ObjectAssertions;
 import com.robothy.s3.core.exception.LocalS3InvalidArgumentException;
@@ -19,11 +20,13 @@ import java.util.Optional;
 public interface DeleteObjectService extends LocalS3MetadataApplicable, StorageApplicable {
 
   @BucketChanged
+  @BucketWriteLock
   default DeleteObjectAns deleteObject(String bucketName, String key) {
     return deleteObject(bucketName, key, null);
   }
 
   @BucketChanged
+  @BucketWriteLock
   default DeleteObjectAns deleteObject(String bucketName, String key, String versionId) {
     BucketMetadata bucketMetadata = BucketAssertions.assertBucketExists(localS3Metadata(), bucketName);
     if (Objects.isNull(bucketMetadata.getVersioningEnabled())) {

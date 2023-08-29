@@ -1,6 +1,7 @@
 package com.robothy.s3.core.service;
 
 import com.robothy.s3.core.annotations.BucketChanged;
+import com.robothy.s3.core.annotations.BucketWriteLock;
 import com.robothy.s3.core.asserionts.BucketAssertions;
 import com.robothy.s3.core.model.Bucket;
 import com.robothy.s3.core.model.internal.BucketMetadata;
@@ -16,6 +17,7 @@ public interface CreateBucketService extends LocalS3MetadataApplicable {
    * Create a bucket.
    */
   @BucketChanged(type = BucketChanged.Type.CREATE)
+  @BucketWriteLock
   default Bucket createBucket(String bucketName) {
     return createBucket(bucketName, null);
   }
@@ -24,6 +26,7 @@ public interface CreateBucketService extends LocalS3MetadataApplicable {
    * Create a bucket.
    */
   @BucketChanged(type = BucketChanged.Type.CREATE)
+  @BucketWriteLock
   default Bucket createBucket(String bucketName, String region) {
     BucketAssertions.assertBucketNameIsValid(bucketName);
     BucketAssertions.assertBucketNotExists(localS3Metadata(), bucketName);

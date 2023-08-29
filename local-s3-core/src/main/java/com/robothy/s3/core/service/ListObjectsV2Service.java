@@ -1,6 +1,6 @@
 package com.robothy.s3.core.service;
 
-import com.robothy.s3.core.annotations.BucketChanged;
+import com.robothy.s3.core.annotations.BucketReadLock;
 import com.robothy.s3.core.asserionts.BucketAssertions;
 import com.robothy.s3.core.model.answers.ListObjectsAns;
 import com.robothy.s3.core.model.answers.ListObjectsV2Ans;
@@ -23,7 +23,7 @@ public interface ListObjectsV2Service extends ListObjectsService {
      * @param startAfter        the key indicating where the returned results should begin.
      * @return a listing of objects from the specified bucket.
      */
-    @BucketChanged
+    @BucketReadLock
     default ListObjectsV2Ans listObjectsV2(String bucket, String continuationToken,
                                            String delimiter, String encodingType,
                                            boolean fetchOwner, int maxKeys,

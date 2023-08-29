@@ -1,5 +1,6 @@
 package com.robothy.s3.core.service;
 
+import com.robothy.s3.core.annotations.BucketReadLock;
 import com.robothy.s3.core.asserionts.BucketAssertions;
 import com.robothy.s3.core.asserionts.ObjectAssertions;
 import com.robothy.s3.core.asserionts.VersionedObjectAssertions;
@@ -20,6 +21,7 @@ public interface GetObjectService extends StorageApplicable, LocalS3MetadataAppl
   /**
    * Get object.
    */
+  @BucketReadLock
   default GetObjectAns getObject(String bucketName, String key, GetObjectOptions options) {
     BucketMetadata bucketMetadata = BucketAssertions.assertBucketExists(localS3Metadata(), bucketName);
     if (Objects.isNull(bucketMetadata.getVersioningEnabled())) {
@@ -119,6 +121,7 @@ public interface GetObjectService extends StorageApplicable, LocalS3MetadataAppl
    * @param options options.
    * @return versioned object with metadata only.
    */
+  @BucketReadLock
   default GetObjectAns headObject(String bucketName, String key, GetObjectOptions options) {
     BucketMetadata bucketMetadata = BucketAssertions.assertBucketExists(localS3Metadata(), bucketName);
     if (Objects.isNull(bucketMetadata.getVersioningEnabled())) {

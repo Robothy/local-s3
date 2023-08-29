@@ -33,7 +33,7 @@ public interface LocalS3Manager {
    * @return an instance of file system implementation.
    */
   static LocalS3Manager createFileSystemS3Manager(Path dataDirectory) {
-    return new FileSystemLocalS3Proxy(dataDirectory);
+    return new FileSystemLocalS3Manager(dataDirectory);
   }
 
   /**

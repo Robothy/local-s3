@@ -1,6 +1,8 @@
 package com.robothy.s3.core.service;
 
 import com.robothy.s3.core.annotations.BucketChanged;
+import com.robothy.s3.core.annotations.BucketReadLock;
+import com.robothy.s3.core.annotations.BucketWriteLock;
 import com.robothy.s3.core.asserionts.BucketAssertions;
 import com.robothy.s3.core.model.internal.BucketMetadata;
 import com.robothy.s3.datatypes.AccessControlPolicy;
@@ -21,6 +23,7 @@ public interface BucketAclService extends LocalS3MetadataApplicable {
    * @param acl new ACL.
    */
   @BucketChanged
+  @BucketWriteLock
   default void putBucketAcl(String bucketName, AccessControlPolicy acl) {
     BucketAssertions.assertBucketNameIsValid(bucketName);
     BucketMetadata bucketMetadata = BucketAssertions.assertBucketExists(localS3Metadata(), bucketName);
@@ -34,6 +37,7 @@ public interface BucketAclService extends LocalS3MetadataApplicable {
    * @return the ACL of the bucket. If the ACL or owner is null,
    * then set the default owner 'LocalS3' to the ACL and return.
    */
+  @BucketReadLock
   default AccessControlPolicy getBucketAcl(String bucketName) {
     BucketAssertions.assertBucketNameIsValid(bucketName);
     BucketMetadata bucketMetadata = BucketAssertions.assertBucketExists(localS3Metadata(), bucketName);

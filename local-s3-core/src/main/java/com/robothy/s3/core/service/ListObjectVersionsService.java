@@ -1,5 +1,6 @@
 package com.robothy.s3.core.service;
 
+import com.robothy.s3.core.annotations.BucketReadLock;
 import com.robothy.s3.core.asserionts.BucketAssertions;
 import com.robothy.s3.core.asserionts.ObjectAssertions;
 import com.robothy.s3.core.asserionts.VersionedObjectAssertions;
@@ -13,7 +14,6 @@ import com.robothy.s3.datatypes.response.DeleteMarkerEntry;
 import com.robothy.s3.datatypes.response.ObjectVersion;
 import com.robothy.s3.datatypes.response.VersionItem;
 import java.time.Instant;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +24,7 @@ import java.util.Set;
 public interface ListObjectVersionsService extends LocalS3MetadataApplicable {
 
 
+  @BucketReadLock
   default ListObjectVersionsAns listObjectVersions(String bucket, String delimiter, String keyMarker, int maxKeys, String prefix, String versionIdMarker) {
     BucketMetadata bucketMetadata = BucketAssertions.assertBucketExists(localS3Metadata(), bucket);
 

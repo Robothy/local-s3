@@ -1,6 +1,7 @@
 package com.robothy.s3.core.service;
 
 import com.robothy.s3.core.annotations.BucketChanged;
+import com.robothy.s3.core.annotations.BucketWriteLock;
 import com.robothy.s3.core.asserionts.BucketAssertions;
 import com.robothy.s3.core.asserionts.ObjectAssertions;
 import com.robothy.s3.core.model.internal.BucketMetadata;
@@ -21,6 +22,7 @@ public interface CreateMultipartUploadService extends LocalS3MetadataApplicable 
    * @return the upload ID.
    */
   @BucketChanged
+  @BucketWriteLock
   default String createMultipartUpload(String bucket, String key, CreateMultipartUploadOptions options) {
     BucketMetadata bucketMetadata = BucketAssertions.assertBucketExists(localS3Metadata(), bucket);
     ObjectAssertions.assertObjectKeyIsValid(key);

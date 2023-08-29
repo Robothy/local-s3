@@ -1,6 +1,7 @@
 package com.robothy.s3.core.service;
 
 import com.robothy.s3.core.annotations.BucketChanged;
+import com.robothy.s3.core.annotations.BucketWriteLock;
 import com.robothy.s3.core.asserionts.BucketAssertions;
 import com.robothy.s3.core.asserionts.UploadAssertions;
 import com.robothy.s3.core.model.answers.UploadPartAns;
@@ -27,6 +28,7 @@ public interface UploadPartService extends LocalS3MetadataApplicable, StorageApp
    * @return result of the upload part.
    */
   @BucketChanged
+  @BucketWriteLock
   default UploadPartAns uploadPart(String bucket, String key, String uploadId, Integer partNumber, UploadPartOptions options) {
     BucketMetadata bucketMetadata = BucketAssertions.assertBucketExists(localS3Metadata(), bucket);
     UploadMetadata uploadMetadata = UploadAssertions.assertUploadExists(bucketMetadata, key, uploadId);

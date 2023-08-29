@@ -21,7 +21,7 @@ public class TransferManagerIntegrationTest {
   static long _1MB = 1024L * _1KB;
 
   @LocalS3
-  //@Test temporary disable(there's a thread-safety issue)
+  @Test
   void testWithUploadFileWithTransferManager(AmazonS3 s3) throws Exception {
     String bucketName = "my-bucket";
     s3.createBucket(bucketName);

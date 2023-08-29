@@ -8,6 +8,7 @@ import com.robothy.s3.core.service.ObjectService;
 import com.robothy.s3.core.service.loader.FileSystemS3MetadataLoader;
 import com.robothy.s3.core.storage.Storage;
 import com.robothy.s3.core.util.JsonUtils;
+import java.lang.reflect.Proxy;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -20,7 +21,7 @@ import java.util.Optional;
  * In memory implementation of {@linkplain LocalS3Manager}. Mange in memory
  * local-s3 related services.
  */
-class InMemoryLocalS3Manager implements LocalS3Manager {
+final class InMemoryLocalS3Manager implements LocalS3Manager {
 
   private final LocalS3Metadata s3Metadata;
 
@@ -79,12 +80,16 @@ class InMemoryLocalS3Manager implements LocalS3Manager {
 
   @Override
   public BucketService bucketService() {
-    return InMemoryBucketService.create(s3Metadata);
+    BucketService bucketService = InMemoryBucketService.create(s3Metadata);
+    LocalS3ServicesInvocationHandler invocationHandler = new LocalS3ServicesInvocationHandler(bucketService, s3Metadata, null);
+    return (BucketService) Proxy.newProxyInstance(BucketService.class.getClassLoader(), new Class[] {BucketService.class}, invocationHandler);
   }
 
   @Override
   public ObjectService objectService() {
-    return InMemoryObjectService.create(s3Metadata, storage);
+    ObjectService objectService = InMemoryObjectService.create(s3Metadata, storage);
+    LocalS3ServicesInvocationHandler invocationHandler = new LocalS3ServicesInvocationHandler(objectService, s3Metadata, null);
+    return (ObjectService) Proxy.newProxyInstance(ObjectService.class.getClassLoader(), new Class[] {ObjectService.class}, invocationHandler);
   }
 
   private LocalS3Metadata loadS3Metadata(Path initialDataDirectory) {
