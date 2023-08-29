@@ -60,8 +60,8 @@ final class LocalS3ServicesInvocationHandler implements InvocationHandler {
   }
 
   void unlockIfNeeded(Object[] args, boolean isRead, boolean isWrite) {
-    String bucketName = (String) args[0];
     if (isRead || isWrite) {
+      String bucketName = (String) args[0];
       BucketLock lock = BucketLock.getInstance();
       if (isRead) {
         lock.readLock(bucketName).unlock();

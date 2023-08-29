@@ -29,7 +29,6 @@ public interface BucketService extends CreateBucketService, BucketVersioningServ
    *
    * @return all buckets.
    */
-  @BucketReadLock
   default List<Bucket> listBuckets() {
     return localS3Metadata().listBuckets().stream()
         .map(Bucket::fromBucketMetadata).collect(Collectors.toList());
