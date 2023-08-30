@@ -6,14 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.robothy.s3.core.exception.BucketNotExistException;
-import com.robothy.s3.core.model.Bucket;
 import com.robothy.s3.core.model.answers.DeleteObjectAns;
 import com.robothy.s3.core.model.answers.GetObjectAns;
 import com.robothy.s3.core.model.request.GetObjectOptions;
 import com.robothy.s3.core.model.request.PutObjectOptions;
 import com.robothy.s3.core.service.BucketService;
-import com.robothy.s3.core.service.InMemoryBucketService;
-import com.robothy.s3.core.service.InMemoryObjectService;
 import com.robothy.s3.core.service.ObjectService;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -27,13 +24,13 @@ class InMemoryLocalS3ManagerTest {
   @Test
   void testConstructor() throws IOException {
     InMemoryLocalS3Manager managerWithoutInitData = new InMemoryLocalS3Manager(null, true);
-    assertInstanceOf(InMemoryBucketService.class, managerWithoutInitData.bucketService());
-    assertInstanceOf(InMemoryObjectService.class, managerWithoutInitData.objectService());
+    assertInstanceOf(BucketService.class, managerWithoutInitData.bucketService());
+    assertInstanceOf(ObjectService.class, managerWithoutInitData.objectService());
 
     Path tempDirectory = Files.createTempDirectory("local-s3");
     InMemoryLocalS3Manager managerWithInitData = new InMemoryLocalS3Manager(tempDirectory, true);
-    assertInstanceOf(InMemoryBucketService.class, managerWithInitData.bucketService());
-    assertInstanceOf(InMemoryObjectService.class, managerWithInitData.objectService());
+    assertInstanceOf(BucketService.class, managerWithInitData.bucketService());
+    assertInstanceOf(ObjectService.class, managerWithInitData.objectService());
     FileUtils.deleteDirectory(tempDirectory.toFile());
   }
 

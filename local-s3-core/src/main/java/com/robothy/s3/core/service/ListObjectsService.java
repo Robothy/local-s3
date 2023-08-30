@@ -1,5 +1,6 @@
 package com.robothy.s3.core.service;
 
+import com.robothy.s3.core.annotations.BucketReadLock;
 import com.robothy.s3.core.asserionts.BucketAssertions;
 import com.robothy.s3.core.exception.LocalS3InvalidArgumentException;
 import com.robothy.s3.core.model.answers.ListObjectsAns;
@@ -33,6 +34,7 @@ public interface ListObjectsService extends LocalS3MetadataApplicable {
    * @param prefix       the prefix restricting what keys will be listed.
    * @return a listing of objects from the specified bucket.
    */
+  @BucketReadLock
   default ListObjectsAns listObjects(String bucket, String delimiter, String encodingType,
                                      String marker, int maxKeys, String prefix) {
     BucketMetadata bucketMetadata = BucketAssertions.assertBucketExists(localS3Metadata(), bucket);

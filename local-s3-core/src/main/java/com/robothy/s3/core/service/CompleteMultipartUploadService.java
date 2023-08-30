@@ -1,6 +1,7 @@
 package com.robothy.s3.core.service;
 
 import com.robothy.s3.core.annotations.BucketChanged;
+import com.robothy.s3.core.annotations.BucketWriteLock;
 import com.robothy.s3.core.asserionts.BucketAssertions;
 import com.robothy.s3.core.asserionts.UploadAssertions;
 import com.robothy.s3.core.exception.InvalidPartOrderException;
@@ -35,6 +36,7 @@ public interface CompleteMultipartUploadService extends LocalS3MetadataApplicabl
    * @return result of the complete multipart operation.
    */
   @BucketChanged
+  @BucketWriteLock
   default CompleteMultipartUploadAns completeMultipartUpload(String bucket, String key, String uploadId,
                                                              List<CompleteMultipartUploadPartOption> completeParts) {
     BucketMetadata bucketMetadata = BucketAssertions.assertBucketExists(localS3Metadata(), bucket);

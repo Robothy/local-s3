@@ -1,6 +1,7 @@
 package com.robothy.s3.core.service;
 
 import com.robothy.s3.core.annotations.BucketChanged;
+import com.robothy.s3.core.annotations.BucketWriteLock;
 import com.robothy.s3.core.asserionts.BucketAssertions;
 import com.robothy.s3.core.model.answers.PutObjectAns;
 import com.robothy.s3.core.model.internal.BucketMetadata;
@@ -31,6 +32,7 @@ import java.util.Optional;
 public interface PutObjectService extends LocalS3MetadataApplicable, StorageApplicable {
 
   @BucketChanged
+  @BucketWriteLock
   default PutObjectAns putObject(String bucketName, String key, PutObjectOptions options) {
     BucketMetadata bucketMetadata = BucketAssertions.assertBucketExists(localS3Metadata(), bucketName);
 

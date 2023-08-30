@@ -1,6 +1,7 @@
 package com.robothy.s3.core.service;
 
 import com.robothy.s3.core.annotations.BucketChanged;
+import com.robothy.s3.core.annotations.BucketWriteLock;
 import com.robothy.s3.core.exception.LocalS3Exception;
 import com.robothy.s3.core.model.answers.DeleteObjectAns;
 import com.robothy.s3.datatypes.ObjectIdentifier;
@@ -20,6 +21,7 @@ public interface DeleteObjectsService extends DeleteObjectService {
    * @return delete results.
    */
   @BucketChanged
+  @BucketWriteLock
   default List<Object> deleteObjects(String bucketName, DeleteObjectsRequest request) {
 
     List<Object> results = new ArrayList<>(request.getObjects().size());

@@ -1,5 +1,8 @@
 package com.robothy.s3.core.service;
 
+import com.robothy.s3.core.annotations.BucketChanged;
+import com.robothy.s3.core.annotations.BucketReadLock;
+import com.robothy.s3.core.annotations.BucketWriteLock;
 import com.robothy.s3.core.model.Bucket;
 
 public interface BucketVersioningService {
@@ -11,6 +14,8 @@ public interface BucketVersioningService {
    * @param versioningEnabled if enable versioning.
    * @return bucket info.
    */
+  @BucketWriteLock
+  @BucketChanged
   Bucket setVersioningEnabled(String bucketName, boolean versioningEnabled);
 
   /**
@@ -21,6 +26,7 @@ public interface BucketVersioningService {
    * {@code true} - if versioning enabled;
    * {@code false} - if versioning disabled.
    */
+  @BucketReadLock
   Boolean getVersioningEnabled(String bucketName);
 
 }

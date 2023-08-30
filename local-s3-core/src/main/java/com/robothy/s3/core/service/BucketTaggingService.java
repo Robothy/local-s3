@@ -1,5 +1,7 @@
 package com.robothy.s3.core.service;
 
+import com.robothy.s3.core.annotations.BucketReadLock;
+import com.robothy.s3.core.annotations.BucketWriteLock;
 import com.robothy.s3.core.asserionts.BucketAssertions;
 import com.robothy.s3.core.model.internal.BucketMetadata;
 import java.util.Collection;
@@ -17,6 +19,7 @@ public interface BucketTaggingService extends LocalS3MetadataApplicable {
    * @param bucketName The name of the bucket for which to set the tagging.
    * @param tagging tagging to the bucket.
    */
+  @BucketWriteLock
   default void putTagging(String bucketName, Collection<Map<String, String>> tagging) {
     BucketMetadata bucketMetadata = BucketAssertions.assertBucketExists(localS3Metadata(), bucketName);
     bucketMetadata.setTagging(tagging);
@@ -28,6 +31,7 @@ public interface BucketTaggingService extends LocalS3MetadataApplicable {
    * @param bucketName The request object for retrieving the bucket tagging
    * @return tagging of the specified bucket.
    */
+  @BucketReadLock
   default Collection<Map<String, String>> getTagging(String bucketName) {
     BucketMetadata bucketMetadata = BucketAssertions.assertBucketExists(localS3Metadata(), bucketName);
     return BucketAssertions.assertBucketTaggingExist(bucketMetadata);
@@ -38,6 +42,7 @@ public interface BucketTaggingService extends LocalS3MetadataApplicable {
    *
    * @param bucketName the name of the bucket for which to remove the tagging
    */
+  @BucketWriteLock
   default void deleteTagging(String bucketName) {
     BucketMetadata bucketMetadata = BucketAssertions.assertBucketExists(localS3Metadata(), bucketName);
     bucketMetadata.setTagging(null);

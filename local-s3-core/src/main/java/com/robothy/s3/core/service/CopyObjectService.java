@@ -1,6 +1,7 @@
 package com.robothy.s3.core.service;
 
 import com.robothy.s3.core.annotations.BucketChanged;
+import com.robothy.s3.core.annotations.BucketWriteLock;
 import com.robothy.s3.core.model.answers.CopyObjectAns;
 import com.robothy.s3.core.model.answers.GetObjectAns;
 import com.robothy.s3.core.model.answers.PutObjectAns;
@@ -19,6 +20,7 @@ public interface CopyObjectService extends GetObjectService, PutObjectService, L
    * @return copy result.
    */
   @BucketChanged
+  @BucketWriteLock
   default CopyObjectAns copyObject(String bucket, String key, CopyObjectOptions options) {
     String srcVersion = options.getSourceVersion().orElse(null);
     GetObjectAns srcObjectAns = getObject(options.getSourceBucket(), options.getSourceKey(),

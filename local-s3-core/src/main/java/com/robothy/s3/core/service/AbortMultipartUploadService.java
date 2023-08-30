@@ -1,6 +1,7 @@
 package com.robothy.s3.core.service;
 
 import com.robothy.s3.core.annotations.BucketChanged;
+import com.robothy.s3.core.annotations.BucketWriteLock;
 import com.robothy.s3.core.asserionts.BucketAssertions;
 import com.robothy.s3.core.asserionts.ObjectAssertions;
 import com.robothy.s3.core.model.internal.BucketMetadata;
@@ -22,6 +23,7 @@ public interface AbortMultipartUploadService extends LocalS3MetadataApplicable, 
    * @param uploadId upload ID.
    */
   @BucketChanged
+  @BucketWriteLock
   default void abortMultipartUpload(String bucketName, String objectKey, String uploadId) {
     LocalS3Metadata s3Metadata = localS3Metadata();
     BucketMetadata bucketMetadata = BucketAssertions.assertBucketExists(s3Metadata, bucketName);

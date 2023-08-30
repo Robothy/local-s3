@@ -75,14 +75,4 @@ public class InMemoryBucketService implements BucketService {
     BucketMetadata bucketMetadata = BucketAssertions.assertBucketExists(s3Metadata, bucketName);
     return bucketMetadata.getVersioningEnabled();
   }
-
-  @Override
-  public void putSetting(String bucketName, String key, String value) {
-
-  }
-
-  @Override
-  public String getSetting(String bucketName, String key) {
-    return null;
-  }
 }
