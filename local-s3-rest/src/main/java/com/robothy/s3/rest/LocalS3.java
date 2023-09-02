@@ -136,14 +136,22 @@ public class LocalS3 {
     }
 
     try {
-      this.serverSocketChannel.close().sync();
+      if (this.serverSocketChannel.isOpen()) {
+        this.serverSocketChannel.close().sync();
+      }
       log.info("LocalS3 stopped.");
     } catch (InterruptedException e) {
       log.error("Close server socket channel failed.", e);
     } finally {
-      executorGroup.shutdownGracefully();
-      childGroup.shutdownGracefully();
-      parentGroup.shutdownGracefully();
+      shutdownEventExecutorsGroupIfNeeded(this.executorGroup, this.childGroup, this.parentGroup);
+    }
+  }
+
+  private void shutdownEventExecutorsGroupIfNeeded(EventExecutorGroup... eventExecutorsList) {
+    for (EventExecutorGroup eventExecutors : eventExecutorsList) {
+      if (!eventExecutors.isShuttingDown() && !eventExecutors.isShutdown()) {
+        eventExecutors.shutdownGracefully();
+      }
     }
   }
 
@@ -172,18 +180,17 @@ public class LocalS3 {
      * while data is stored in Java Heap.
      *
      * <p>
-     *   If the path is specified and the {@code mode} is {@code PERSISTENCE},
-     *   then the LocalS3 service load data from and store data in this directory.
+     * If the path is specified and the {@code mode} is {@code PERSISTENCE},
+     * then the LocalS3 service load data from and store data in this directory.
      *
      * <p>
-     *   If the data directory is set and LocalS3 runs in {@code IN_MEMORY} mode,
-     *   then data from that path will be loaded as initial data. All changes are
-     *   only available in the memory, i.e. won't write back to the specified path.
-     *
-     *   Besides, LocalS3 will cache accessed data from this path; which could reduce
-     *   disk I/O when start LocalS3 in {@code IN_MEMORY} mode with the same initial
-     *   data for multi-times.
-     *
+     * If the data directory is set and LocalS3 runs in {@code IN_MEMORY} mode,
+     * then data from that path will be loaded as initial data. All changes are
+     * only available in the memory, i.e. won't write back to the specified path.
+     * <p>
+     * Besides, LocalS3 will cache accessed data from this path; which could reduce
+     * disk I/O when start LocalS3 in {@code IN_MEMORY} mode with the same initial
+     * data for multi-times.
      *
      * @param dataPath data path.
      * @return builder.
