@@ -88,7 +88,7 @@ localS3.start();
 Call the stop method to shut down the service gracefully.
 
 ```java
-localS3.stop();
+localS3.shutdown();
 ```
 
 
