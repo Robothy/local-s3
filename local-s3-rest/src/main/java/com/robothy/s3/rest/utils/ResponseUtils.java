@@ -8,6 +8,7 @@ import io.netty.handler.codec.http.HttpHeaderNames;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 
 /**
  * LocalS3 response utils.
@@ -42,14 +43,16 @@ public class ResponseUtils {
     response.putHeader(HttpHeaderNames.SERVER.toString(), LocalS3Constants.SERVER_NAME);
   }
 
-/**
+  /**
    * Add 'ETag' header.
    *
    * @param response the response to add 'ETag' header.
    * @param etag the etag to add
    */
   public static void addETag(HttpResponse response, String etag) {
-    response.putHeader(HttpHeaderNames.ETAG.toString(), etag);
+    if (Objects.nonNull(etag)) {
+      response.putHeader(HttpHeaderNames.ETAG.toString(), etag);
+    }
   }
 
   /**
