@@ -31,22 +31,20 @@ import java.net.ServerSocket;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import javax.xml.stream.XMLInputFactory;
-import lombok.Getter;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.reflect.FieldUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * LocalS3 service launcher.
  */
-@Slf4j
 public class LocalS3 {
 
+  private static final Logger log = LoggerFactory.getLogger(LocalS3.class);
+
   /* Configurations */
-  @Getter
   private int port = 8080;
 
-  @Getter
   private Path dataPath;
 
   private LocalS3Mode mode = LocalS3Mode.IN_MEMORY;
@@ -81,7 +79,6 @@ public class LocalS3 {
   /**
    * Startup the local-s3 service.
    */
-  @SneakyThrows
   public void start() {
     ServiceFactory serviceFactory = createServiceFactory();
 
@@ -89,12 +86,17 @@ public class LocalS3 {
     this.childGroup = new NioEventLoopGroup(nettyChildEventGroupThreadNum);
     this.executorGroup = new DefaultEventLoopGroup(s3ExecutorThreadNum);
     ServerBootstrap serverBootstrap = new ServerBootstrap();
-    ChannelFuture channelFuture = serverBootstrap.group(parentGroup, childGroup)
-        .handler(new LoggingHandler(LogLevel.DEBUG))
-        .channel(NioServerSocketChannel.class)
-        .childHandler(new HttpServerInitializer(executorGroup, LocalS3RouterFactory.create(serviceFactory)))
-        .bind(port)
-        .sync();
+    ChannelFuture channelFuture = null;
+    try {
+      channelFuture = serverBootstrap.group(parentGroup, childGroup)
+          .handler(new LoggingHandler(LogLevel.DEBUG))
+          .channel(NioServerSocketChannel.class)
+          .childHandler(new HttpServerInitializer(executorGroup, LocalS3RouterFactory.create(serviceFactory)))
+          .bind(port)
+          .sync();
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    }
     log.info("LocalS3 started.");
     this.serverSocketChannel = channelFuture.channel();
     Runtime.getRuntime().addShutdownHook(new Thread(this::shutdown));
@@ -139,20 +141,41 @@ public class LocalS3 {
       if (this.serverSocketChannel.isOpen()) {
         this.serverSocketChannel.close().sync();
       }
-      log.info("LocalS3 stopped.");
     } catch (InterruptedException e) {
       log.error("Close server socket channel failed.", e);
     } finally {
-      shutdownEventExecutorsGroupIfNeeded(this.executorGroup, this.childGroup, this.parentGroup);
+      shutdownEventExecutorsGroupIfNeeded(this.childGroup, this.parentGroup, this.executorGroup);
     }
   }
 
   private void shutdownEventExecutorsGroupIfNeeded(EventExecutorGroup... eventExecutorsList) {
     for (EventExecutorGroup eventExecutors : eventExecutorsList) {
       if (!eventExecutors.isShuttingDown() && !eventExecutors.isShutdown()) {
-        eventExecutors.shutdownGracefully();
+        try {
+          eventExecutors.shutdownGracefully().sync();
+        } catch (InterruptedException e) {
+          throw new RuntimeException(e);
+        }
       }
     }
+
+    log.info("LocalS3 stopped.");
+  }
+
+  /**
+   * Get the port that local-s3 service listen to.
+   */
+  public int getPort() {
+    return port;
+  }
+
+  /**
+   * Get the data path that was set in {@linkplain Builder#dataPath(String)}.
+   *
+   * @return data path.
+   */
+  public Path getDataPath() {
+    return dataPath;
   }
 
   public static class Builder {

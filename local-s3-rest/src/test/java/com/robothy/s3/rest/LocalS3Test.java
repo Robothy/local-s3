@@ -1,5 +1,6 @@
 package com.robothy.s3.rest;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
@@ -21,9 +22,16 @@ class LocalS3Test {
         .build();
     localS3.start();
     localS3.shutdown();
-    Thread.sleep(1000);
     localS3.shutdown();
-    Thread.sleep(1000);
+  }
+
+  @Test
+  void testBuilder() {
+    LocalS3 localS3 = LocalS3.builder()
+        .dataPath("/tmp")
+        .build();
+    assertTrue(localS3.getDataPath().endsWith("tmp"));
+    assertTrue(localS3.getPort() > 0);
   }
 
 }
