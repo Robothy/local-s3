@@ -14,7 +14,9 @@ dependencies {
     implementation "commons-io:commons-io:${libVersion['commons-io.commons-io']}"
     implementation "org.apache.commons:commons-lang3:${libVersion['org.apache.commons.commons-lang3']}"
     implementation "org.apache.commons:commons-collections4:${libVersion['org.apache.commons.commons-collections4']}"
-    implementation ("io.github.robothy:netty-http-router:${libVersion['com.robothy.netty-http-router']}")
+    implementation ("io.github.robothy:netty-http-router:${libVersion['com.robothy.netty-http-router']}") {
+        exclude(group: "org.springframework", module: "spring-web")
+    }
 
     testImplementation "org.mockito:mockito-inline:${libVersion['org.mockito.mockito-inline']}"
 }

@@ -23,20 +23,20 @@ public class LocalS3RouterFactory {
 
     Route AbortMultipartUpload = Route.builder()
         .method(HttpMethod.DELETE)
-        .path("/{bucket}/{*key}")
+        .path(LocalS3Router.BUCKET_KEY_PATH)
         .paramMatcher(params -> params.containsKey("uploadId"))
         .handler(new AbortMultipartUploadController(serviceFactory))
         .build();
 
     Route CompleteMultipartUpload = Route.builder()
         .method(HttpMethod.POST)
-        .path("/{bucket}/{*key}")
+        .path(LocalS3Router.BUCKET_KEY_PATH)
         .handler(new CompleteMultipartUploadController(serviceFactory))
         .build();
 
     Route CopyObject = Route.builder()
         .method(HttpMethod.PUT)
-        .path("/{bucket}/{*key}")
+        .path(LocalS3Router.BUCKET_KEY_PATH)
         .headerMatcher(headers -> headers.containsKey(AmzHeaderNames.X_AMZ_COPY_SOURCE))
         .handler(new CopyObjectController(serviceFactory))
         .build();
@@ -49,7 +49,7 @@ public class LocalS3RouterFactory {
 
     Route CreateMultipartUpload = Route.builder()
         .method(HttpMethod.POST)
-        .path("/{bucket}/{*key}")
+        .path(LocalS3Router.BUCKET_KEY_PATH)
         .paramMatcher(params -> params.containsKey("uploads"))
         .handler(new CreateMultipartUploadController(serviceFactory))
         .build();
@@ -152,7 +152,7 @@ public class LocalS3RouterFactory {
 
     Route DeleteObject = Route.builder()
         .method(HttpMethod.DELETE)
-        .path("/{bucket}/{*key}")
+        .path(LocalS3Router.BUCKET_KEY_PATH)
         .handler(new DeleteObjectController(serviceFactory))
         .build();
 
@@ -165,7 +165,7 @@ public class LocalS3RouterFactory {
 
     Route DeleteObjectTagging = Route.builder()
         .method(HttpMethod.DELETE)
-        .path("/{bucket}/{*key}")
+        .path(LocalS3Router.BUCKET_KEY_PATH)
         .paramMatcher(params -> params.containsKey("tagging"))
         .handler(objectTaggingController::delete)
         .build();
@@ -333,55 +333,55 @@ public class LocalS3RouterFactory {
 
     Route GetObject = Route.builder()
         .method(HttpMethod.GET)
-        .path("/{bucket}/{*key}")
+        .path(LocalS3Router.BUCKET_KEY_PATH)
         .handler(new GetObjectController(serviceFactory))
         .build();
 
     Route GetObjectAcl = Route.builder()
         .method(HttpMethod.GET)
-        .path("/{bucket}/{*key}")
+        .path(LocalS3Router.BUCKET_KEY_PATH)
         .paramMatcher(params -> params.containsKey("acl"))
         .handler(new NotImplementedOperationController(serviceFactory, "GetObjectAcl"))
         .build();
 
     Route GetObjectAttributes = Route.builder()
         .method(HttpMethod.HEAD)
-        .path("/{bucket}/{*key}")
+        .path(LocalS3Router.BUCKET_KEY_PATH)
         .paramMatcher(params -> params.containsKey("attributes"))
         .handler(new NotImplementedOperationController(serviceFactory, "GetObjectAttributes"))
         .build();
 
     Route GetObjectLegalHold = Route.builder()
         .method(HttpMethod.GET)
-        .path("/{bucket}/{*key}")
+        .path(LocalS3Router.BUCKET_KEY_PATH)
         .paramMatcher(params -> params.containsKey("legal-hold"))
         .handler(new NotImplementedOperationController(serviceFactory, "GetObjectLegalHold"))
         .build();
 
     Route GetObjectLockConfiguration = Route.builder()
         .method(HttpMethod.GET)
-        .path("/{bucket}/{*key}")
+        .path(LocalS3Router.BUCKET_KEY_PATH)
         .paramMatcher(params -> params.containsKey("object-lock"))
         .handler(new NotImplementedOperationController(serviceFactory, "GetObjectLockConfiguration"))
         .build();
 
     Route GetObjectRetention = Route.builder()
         .method(HttpMethod.GET)
-        .path("/{bucket}/{*key}")
+        .path(LocalS3Router.BUCKET_KEY_PATH)
         .paramMatcher(params -> params.containsKey("retention"))
         .handler(new NotImplementedOperationController(serviceFactory, "GetObjectRetention"))
         .build();
 
     Route GetObjectTagging = Route.builder()
         .method(HttpMethod.GET)
-        .path("/{bucket}/{*key}")
+        .path(LocalS3Router.BUCKET_KEY_PATH)
         .paramMatcher(params -> params.containsKey("tagging"))
         .handler(objectTaggingController::get)
         .build();
 
     Route GetObjectTorrent = Route.builder()
         .method(HttpMethod.GET)
-        .path("/{bucket}/{*key}")
+        .path(LocalS3Router.BUCKET_KEY_PATH)
         .paramMatcher(params -> params.containsKey("torrent"))
         .handler(new NotImplementedOperationController(serviceFactory, "GetObjectTorrent"))
         .build();
@@ -401,7 +401,7 @@ public class LocalS3RouterFactory {
 
     Route HeadObject = Route.builder()
         .method(HttpMethod.HEAD)
-        .path("/{bucket}/{*key}")
+        .path(LocalS3Router.BUCKET_KEY_PATH)
         .handler(new HeadObjectController(serviceFactory))
         .build();
 
@@ -468,7 +468,7 @@ public class LocalS3RouterFactory {
 
     Route ListParts = Route.builder()
         .method(HttpMethod.GET)
-        .path("/{bucket}/{*key}")
+        .path(LocalS3Router.BUCKET_KEY_PATH)
         .paramMatcher(params -> params.containsKey("uploadId"))
         .handler(new ListPartsController(serviceFactory))
         .build();
@@ -613,41 +613,41 @@ public class LocalS3RouterFactory {
 
     Route PutObject = Route.builder()
         .method(HttpMethod.PUT)
-        .path("/{bucket}/{*key}")
+        .path(LocalS3Router.BUCKET_KEY_PATH)
         .handler(new PutObjectController(serviceFactory))
         .build();
 
     Route PutObjectAcl = Route.builder()
         .method(HttpMethod.PUT)
-        .path("/{bucket}/{*key}")
+        .path(LocalS3Router.BUCKET_KEY_PATH)
         .paramMatcher(params -> params.containsKey("acl"))
         .handler(new NotImplementedOperationController(serviceFactory, "PutObjectAcl"))
         .build();
 
     Route PutObjectLegalHold = Route.builder()
         .method(HttpMethod.PUT)
-        .path("/{bucket}/{*key}")
+        .path(LocalS3Router.BUCKET_KEY_PATH)
         .paramMatcher(params -> params.containsKey("legal-hold"))
         .handler(new NotImplementedOperationController(serviceFactory, "PutObjectLegalHold"))
         .build();
 
     Route PutObjectLockConfiguration = Route.builder()
         .method(HttpMethod.PUT)
-        .path("/{bucket}/{*key}")
+        .path(LocalS3Router.BUCKET_KEY_PATH)
         .paramMatcher(params -> params.containsKey("object-lock"))
         .handler(new NotImplementedOperationController(serviceFactory, "PutObjectLockConfiguration"))
         .build();
 
     Route PutObjectRetention = Route.builder()
         .method(HttpMethod.PUT)
-        .path("/{bucket}/{*key}")
+        .path(LocalS3Router.BUCKET_KEY_PATH)
         .paramMatcher(params -> params.containsKey("retention"))
         .handler(new NotImplementedOperationController(serviceFactory, "PutObjectRetention"))
         .build();
 
     Route PutObjectTagging = Route.builder()
         .method(HttpMethod.PUT)
-        .path("/{bucket}/{*key}")
+        .path(LocalS3Router.BUCKET_KEY_PATH)
         .paramMatcher(params -> params.containsKey("tagging"))
         .handler(objectTaggingController::put)
         .build();
@@ -661,28 +661,28 @@ public class LocalS3RouterFactory {
 
     Route RestoreObject = Route.builder()
         .method(HttpMethod.POST)
-        .path("/{bucket}/{*key}")
+        .path(LocalS3Router.BUCKET_KEY_PATH)
         .paramMatcher(params -> params.containsKey("restore"))
         .handler(new NotImplementedOperationController(serviceFactory, "RestoreObject"))
         .build();
 
     Route SelectObjectContent = Route.builder()
         .method(HttpMethod.POST)
-        .path("/{bucket}/{*key}")
+        .path(LocalS3Router.BUCKET_KEY_PATH)
         .paramMatcher(params -> params.containsKey("select"))
         .handler(new NotImplementedOperationController(serviceFactory, "SelectObjectContent"))
         .build();
 
     Route UploadPart = Route.builder()
         .method(HttpMethod.PUT)
-        .path("/{bucket}/{*key}")
+        .path(LocalS3Router.BUCKET_KEY_PATH)
         .paramMatcher(params -> params.containsKey("uploadId") && params.containsKey("partNumber"))
         .handler(new UploadPartController(serviceFactory))
         .build();
 
     Route UploadPartCopy = Route.builder()
         .method(HttpMethod.PUT)
-        .path("/{bucket}/{*key}")
+        .path(LocalS3Router.BUCKET_KEY_PATH)
         .paramMatcher(params -> params.containsKey("uploadId") && params.containsKey("partNumber"))
         .headerMatcher(headers -> headers.containsKey(AmzHeaderNames.X_AMZ_COPY_SOURCE))
         .handler(new NotImplementedOperationController(serviceFactory, "UploadPartCopy"))
@@ -702,7 +702,7 @@ public class LocalS3RouterFactory {
         .handler(new GetBucketController(serviceFactory))
         .build();
 
-    return Router.router()
+    return new LocalS3Router()
         .route(AbortMultipartUpload)
         .route(CompleteMultipartUpload)
         .route(CopyObject)
