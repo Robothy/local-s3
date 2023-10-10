@@ -133,7 +133,7 @@ public class LocalS3RouterFactory {
 
     Route DeleteBucketReplication = Route.builder()
         .method(HttpMethod.DELETE)
-        .path("/{bucket}/")
+        .path(BUCKET_PATH)
         .paramMatcher(params -> params.containsKey("replication"))
         .handler(bucketReplicationController::delete)
         .build();
