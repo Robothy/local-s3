@@ -4,6 +4,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.robothy.s3.jupiter.extensions.AmazonS3Resolver;
 import com.robothy.s3.jupiter.extensions.LocalS3EndpointResolver;
 import com.robothy.s3.jupiter.extensions.LocalS3Extension;
+import com.robothy.s3.jupiter.extensions.S3ClientResolver;
 import com.robothy.s3.jupiter.supplier.DataPathSupplier;
 import com.robothy.s3.rest.bootstrap.LocalS3Mode;
 import java.lang.annotation.ElementType;
@@ -11,11 +12,18 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import org.junit.jupiter.api.extension.ExtendWith;
+import software.amazon.awssdk.services.s3.S3Client;
 
 /**
  * {@code @LocalS3} is a Junit5/Jupiter extension that runs a mocked AmazonS3 service
  * for annotated test classes or test methods. To hit the mocked service, you can add
- * {@linkplain AmazonS3} or {@linkplain LocalS3Endpoint} parameters in test methods.
+ * the following parameter types in test methods.
+ *
+ * <ul>
+ *   <li>{@linkplain AmazonS3}</li>
+ *   <li>{@linkplain S3Client}</li>
+ *   <li>{@linkplain LocalS3Endpoint}</li>
+ * </ul>
  *
  * <p>Below example injects an {@code AmazonS3} instance to the parameter:
  *
@@ -55,6 +63,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @Retention(RetentionPolicy.RUNTIME)
 @ExtendWith(LocalS3Extension.class)
 @ExtendWith(AmazonS3Resolver.class)
+@ExtendWith(S3ClientResolver.class)
 @ExtendWith(LocalS3EndpointResolver.class)
 public @interface LocalS3 {
 

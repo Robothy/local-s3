@@ -5,12 +5,14 @@ import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
 
-public abstract class AbstractLocalS3ParameterResolver<T> implements ParameterResolver {
+import java.util.Objects;
+
+public abstract class AbstractLocalS3ParameterResolver implements ParameterResolver {
 
   @Override
   public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
       throws ParameterResolutionException {
-    return type() == parameterContext.getParameter().getType();
+    return Objects.equals(className(), parameterContext.getParameter().getType().getName());
   }
 
   @Override
@@ -29,8 +31,8 @@ public abstract class AbstractLocalS3ParameterResolver<T> implements ParameterRe
     return resolve(port);
   }
 
-  protected abstract Class<T> type();
+  protected abstract String className();
 
-  protected abstract T resolve(int port);
+  protected abstract Object resolve(int port);
 
 }
