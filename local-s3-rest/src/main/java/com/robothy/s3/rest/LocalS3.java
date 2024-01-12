@@ -153,11 +153,7 @@ public class LocalS3 {
     for (EventExecutorGroup eventExecutors : eventExecutorsList) {
       if (!eventExecutors.isShuttingDown() && !eventExecutors.isShutdown()) {
         shutdownPerformed = true;
-        try {
-          eventExecutors.shutdownGracefully();
-        } catch (Exception e) {
-          throw new RuntimeException(e);
-        }
+        eventExecutors.shutdownGracefully();
       }
     }
 
