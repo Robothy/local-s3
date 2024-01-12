@@ -1,11 +1,13 @@
 package com.robothy.s3.test;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.HeadBucketRequest;
-import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 import com.robothy.s3.rest.LocalS3;
 import com.robothy.s3.rest.bootstrap.LocalS3Mode;
 import java.io.IOException;
@@ -55,6 +57,7 @@ public class MultiLocalS3InstanceIntegrationTest {
   AmazonS3 createClient(int port) {
     return AmazonS3ClientBuilder.standard().withEndpointConfiguration(
             new AwsClientBuilder.EndpointConfiguration("http://localhost:" + port, "local"))
+      .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials("foo", "bar")))
         .enablePathStyleAccess()
         .build();
   }

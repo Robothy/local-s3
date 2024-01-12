@@ -149,17 +149,17 @@ public class LocalS3 {
   }
 
   private void shutdownEventExecutorsGroupIfNeeded(EventExecutorGroup... eventExecutorsList) {
+    boolean shutdownPerformed = false;
     for (EventExecutorGroup eventExecutors : eventExecutorsList) {
       if (!eventExecutors.isShuttingDown() && !eventExecutors.isShutdown()) {
-        try {
-          eventExecutors.shutdownGracefully().sync();
-        } catch (InterruptedException e) {
-          throw new RuntimeException(e);
-        }
+        shutdownPerformed = true;
+        eventExecutors.shutdownGracefully();
       }
     }
 
-    log.info("LocalS3 stopped.");
+    if (shutdownPerformed) {
+      log.info("LocalS3 stopped.");
+    }
   }
 
   /**
