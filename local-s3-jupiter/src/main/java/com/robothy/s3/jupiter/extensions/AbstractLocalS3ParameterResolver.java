@@ -5,6 +5,7 @@ import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
 
+import java.lang.reflect.Method;
 import java.util.Objects;
 
 public abstract class AbstractLocalS3ParameterResolver implements ParameterResolver {
@@ -18,8 +19,10 @@ public abstract class AbstractLocalS3ParameterResolver implements ParameterResol
   @Override
   public Object resolveParameter(ParameterContext parameterContext, ExtensionContext context)
       throws ParameterResolutionException {
+
+    String methodName = context.getTestMethod().map(Method::toString).orElse("");
     String s3OnMethodKey = context.getRequiredTestClass()
-        + (context.getRequiredTestMethod() + LocalS3Extension.LOCAL_S3_PORT_STORE_SUFFIX);
+        + (methodName + LocalS3Extension.LOCAL_S3_PORT_STORE_SUFFIX);
     String s3OnClassKey = context.getRequiredTestClass() + LocalS3Extension.LOCAL_S3_PORT_STORE_SUFFIX;
     ExtensionContext.Store store = context.getStore(ExtensionContext.Namespace.GLOBAL);
     Integer port = store.getOrDefault(s3OnMethodKey, Integer.TYPE, store.getOrDefault(s3OnClassKey, Integer.TYPE, null));

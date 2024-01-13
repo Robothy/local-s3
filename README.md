@@ -136,7 +136,7 @@ LocalS3 for Junit5 provides a Java annotation `@LocalS3` helps you easily launch
 ```
 
 When you annotate it on test classes or test methods, the LocalS3 extension automatically inject instances with 
-the following parameter types of test methods.
+the following parameter types of test methods or lifecycle methods.
 
 + `AmazonS3`
 + `S3Client`
@@ -163,6 +163,29 @@ class AppTest {
   @LocalS3
   void test(S3Client client) {
     client.createBucket(b -> b.bucket("my-bucket"));
+  }
+}
+```
+
+Example 3: Inject instances to junit5 lifecycle methods.
+
+```java
+@LocalS3
+class AppTest {
+  
+  @BeforeAll
+  static void beforeAll(S3Client client) {
+    client.createBucket(b -> b.bucket("my-bucket"));
+  }
+  
+  @Test
+  void test(S3Client client) {
+    client.headBucket(b -> b.bucket("my-bucket"));
+  }
+  
+  @AfterAll
+  static void afterAll(S3Client client) {
+    client.deleteBucket(b -> b.bucket("my-bucket"));
   }
 }
 ```
