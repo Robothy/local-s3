@@ -29,6 +29,17 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import software.amazon.awssdk.core.ResponseInputStream;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.CompleteMultipartUploadResponse;
+import software.amazon.awssdk.services.s3.model.CompletedPart;
+import software.amazon.awssdk.services.s3.model.CreateBucketResponse;
+import software.amazon.awssdk.services.s3.model.CreateMultipartUploadResponse;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
+import software.amazon.awssdk.services.s3.model.Tag;
+import software.amazon.awssdk.services.s3.model.Tagging;
+import software.amazon.awssdk.services.s3.model.UploadPartResponse;
 
 public class MultipartUploadIntegrationTest {
 
@@ -225,6 +236,36 @@ public class MultipartUploadIntegrationTest {
     s3.completeMultipartUpload(new CompleteMultipartUploadRequest(bucketName, "a.txt", initiateMultipartUploadResult.getUploadId(), partETags));
     assertThrows(AmazonS3Exception.class, () ->
         s3.listParts(new ListPartsRequest(bucketName, "a.txt", initiateMultipartUploadResult.getUploadId())));
+  }
+
+  @Test
+  @LocalS3
+  void testCreateMultipartUploadsWithTagging(S3Client s3) throws Exception {
+    s3.createBucket(builder -> builder.bucket("my-bucket"));
+    Tag tag1 = Tag.builder().key("k1").value("v1").build();
+    Tag tag2 = Tag.builder().key("k2").value("v2").build();
+    CreateMultipartUploadResponse multipartUpload = s3.createMultipartUpload(builder -> builder.bucket("my-bucket").key("a.txt")
+        .tagging(Tagging.builder().tagSet(tag1, tag2).build()));
+    UploadPartResponse part1 = s3.uploadPart(b -> b.bucket("my-bucket")
+            .uploadId(multipartUpload.uploadId()).key("a.txt").partNumber(1), RequestBody.fromString("Hello"));
+    UploadPartResponse part2 = s3.uploadPart(b -> b.bucket("my-bucket").uploadId(multipartUpload.uploadId()).key("a.txt").partNumber(2),
+            RequestBody.fromString("World"));
+
+    CompletedPart completedPart1 = CompletedPart.builder().partNumber(1).eTag(part1.eTag()).build();
+    CompletedPart completedPart2 = CompletedPart.builder().partNumber(2).eTag(part2.eTag()).build();
+    s3.completeMultipartUpload(b -> b.bucket("my-bucket").key("a.txt").multipartUpload(upload -> upload.parts(
+        completedPart1, completedPart2)).uploadId(multipartUpload.uploadId()));
+
+    ResponseInputStream<GetObjectResponse> completedObject =
+        s3.getObject(b -> b.bucket("my-bucket").key("a.txt"));
+    assertEquals("HelloWorld", new String(completedObject.readAllBytes()));
+    Integer tagCount = completedObject.response().tagCount();
+    assertEquals(2, tagCount);
+
+    List<Tag> tags = s3.getObjectTagging(b -> b.bucket("my-bucket").key("a.txt")).tagSet();
+    assertEquals(2, tags.size());
+    assertTrue(tags.contains(tag1));
+    assertTrue(tags.contains(tag2));
   }
 
 }

@@ -10,6 +10,7 @@ import com.robothy.s3.core.service.ObjectService;
 import com.robothy.s3.rest.assertions.RequestAssertions;
 import com.robothy.s3.rest.model.response.InitiateMultipartUploadResult;
 import com.robothy.s3.rest.service.ServiceFactory;
+import com.robothy.s3.rest.utils.RequestUtils;
 import com.robothy.s3.rest.utils.ResponseUtils;
 import io.netty.handler.codec.http.HttpResponseStatus;
 
@@ -33,6 +34,7 @@ class CreateMultipartUploadController implements HttpRequestHandler {
     String key = RequestAssertions.assertObjectKeyProvided(request);
     String contentType = request.parameter("content-type").orElse("octet/stream");
     String uploadId = uploadService.createMultipartUpload(bucket, key, CreateMultipartUploadOptions.builder()
+        .tagging(RequestUtils.extractTagging(request).orElse(null))
         .contentType(contentType).build());
     InitiateMultipartUploadResult result = InitiateMultipartUploadResult.builder()
         .bucket(bucket)

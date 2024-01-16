@@ -71,6 +71,7 @@ public interface CompleteMultipartUploadService extends LocalS3MetadataApplicabl
           .size(size)
           .content(in)
           .contentType(uploadMetadata.getContentType())
+          .tagging(uploadMetadata.getTagging().orElse(null))
           .build();
 
       putObjectAns = putObject(bucket, key, putObjectOptions);

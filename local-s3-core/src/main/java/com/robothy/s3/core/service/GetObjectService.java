@@ -48,6 +48,7 @@ public interface GetObjectService extends StorageApplicable, LocalS3MetadataAppl
         .content(metadataOnly ? null : storage.getInputStream(latestObject.getFileId()))
         .etag(latestObject.getEtag())
         .userMetadata(latestObject.getUserMetadata())
+        .taggingCount(latestObject.getTagging().map(tagging -> tagging.length).orElse(0))
         .build();
   }
 
@@ -108,6 +109,7 @@ public interface GetObjectService extends StorageApplicable, LocalS3MetadataAppl
           .size(versionedObjectMetadata.getSize())
           .content(metadataOnly ? null : storage.getInputStream(versionedObjectMetadata.getFileId()))
           .etag(versionedObjectMetadata.getEtag())
+          .taggingCount(versionedObjectMetadata.getTagging().map(tagging -> tagging.length).orElse(0))
           .userMetadata(versionedObjectMetadata.getUserMetadata())
           .build();
     }
