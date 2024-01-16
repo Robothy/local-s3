@@ -47,6 +47,7 @@ class GetObjectController implements HttpRequestHandler {
       ResponseUtils.addETag(response, getObjectAns.getEtag());
       response.status(HttpResponseStatus.OK)
           .write(content)
+          .putHeader(AmzHeaderNames.X_AMZ_TAGGING_COUNT, getObjectAns.getTaggingCount())
           .putHeader(HttpHeaderNames.CONTENT_TYPE.toString(), getObjectAns.getContentType())
           .putHeader(HttpHeaderNames.CONTENT_LENGTH.toString(), getObjectAns.getSize());
       getObjectAns.getUserMetadata().forEach((k, v) -> response.putHeader(AmzHeaderNames.X_AMZ_META_PREFIX + k, v));

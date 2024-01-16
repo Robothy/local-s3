@@ -19,6 +19,8 @@ public class AmzHeaderNames {
 
   public static final String X_AMZ_TAGGING = "x-amz-tagging";
 
+  public static final String X_AMZ_TAGGING_COUNT = "x-amz-tagging-count";
+
   /**
    * Specifies the source object for the copy operation.
    */

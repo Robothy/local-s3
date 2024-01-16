@@ -3,7 +3,6 @@ package com.robothy.s3.rest.handler;
 import com.robothy.netty.http.HttpRequest;
 import com.robothy.netty.http.HttpRequestHandler;
 import com.robothy.netty.http.HttpResponse;
-import com.robothy.s3.core.exception.LocalS3InvalidArgumentException;
 import com.robothy.s3.core.model.answers.PutObjectAns;
 import com.robothy.s3.core.model.request.PutObjectOptions;
 import com.robothy.s3.core.service.ObjectService;
@@ -18,8 +17,6 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * Handle <a href="https://docs.aws.amazon.com/AmazonS3/latest/API/API_PutObject.html">PutObject<a/>.
@@ -43,7 +40,7 @@ class PutObjectController implements HttpRequestHandler {
         .contentType(request.header(HttpHeaderNames.CONTENT_TYPE).orElse(null))
         .size(decodedBody.getDecodedContentLength())
         .content(decodedBody.getDecodedBody())
-        .tagging(extractTagging(request))
+        .tagging(RequestUtils.extractTagging(request).orElse(null))
         .userMetadata(extractUserMetadata(request))
         .build();
 
@@ -59,29 +56,6 @@ class PutObjectController implements HttpRequestHandler {
     ResponseUtils.addServerHeader(response);
     ResponseUtils.addDateHeader(response);
     ResponseUtils.addAmzRequestId(response);
-  }
-
-  // parse tagging from x-amz-tagging header in the put object request.
-  String[][] extractTagging(HttpRequest request) {
-    Optional<String> taggingOpt = request.header(AmzHeaderNames.X_AMZ_TAGGING);
-    String tagging;
-    if (taggingOpt.isEmpty() || StringUtils.isBlank(tagging = taggingOpt.get())) {
-      return null;
-    }
-
-    String[] tags = tagging.split("&");
-    String[][] tagSet = new String[tags.length][2];
-    for (int i = 0; i < tags.length; i++) {
-      String[] kv = tags[i].split("=");
-      if (kv.length != 2) {
-        throw new LocalS3InvalidArgumentException(AmzHeaderNames.X_AMZ_TAGGING, "Invalid tagging format.");
-      }
-
-      tagSet[i][0] = kv[0];
-      tagSet[i][1] = kv[1];
-    }
-
-    return tagSet;
   }
 
   Map<String, String> extractUserMetadata(HttpRequest request) {

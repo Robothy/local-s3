@@ -2,6 +2,7 @@ package com.robothy.s3.core.model.answers;
 
 import java.io.InputStream;
 import java.util.Map;
+import java.util.Optional;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -29,4 +30,5 @@ public class GetObjectAns {
 
   private Map<String, String> userMetadata;
 
+  private int taggingCount;
 }
