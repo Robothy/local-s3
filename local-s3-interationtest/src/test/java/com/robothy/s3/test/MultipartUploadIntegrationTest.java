@@ -99,6 +99,7 @@ public class MultipartUploadIntegrationTest {
 
     S3Object object = s3.getObject(bucket, key1);
     assertEquals("HelloWorld", new String(object.getObjectContent().readAllBytes()));
+    assertEquals("plain/text", object.getObjectMetadata().getContentType());
 
     assertThrows(AmazonS3Exception.class, () -> {
       s3.copyPart(new CopyPartRequest().withUploadId(initResult.getUploadId())
