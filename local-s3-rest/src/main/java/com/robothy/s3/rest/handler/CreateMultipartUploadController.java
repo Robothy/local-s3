@@ -32,7 +32,7 @@ class CreateMultipartUploadController implements HttpRequestHandler {
   public void handle(HttpRequest request, HttpResponse response) throws Exception {
     String bucket = RequestAssertions.assertBucketNameProvided(request);
     String key = RequestAssertions.assertObjectKeyProvided(request);
-    String contentType = request.parameter("content-type").orElse("octet/stream");
+    String contentType = request.header("content-type").orElse("octet/stream");
     String uploadId = uploadService.createMultipartUpload(bucket, key, CreateMultipartUploadOptions.builder()
         .tagging(RequestUtils.extractTagging(request).orElse(null))
         .contentType(contentType).build());
