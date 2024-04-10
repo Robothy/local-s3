@@ -5,6 +5,7 @@ import static org.mockito.Mockito.mock;
 import com.robothy.netty.http.HttpRequest;
 import com.robothy.netty.http.HttpRequestHandler;
 import com.robothy.netty.router.Route;
+import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpMethod;
 import java.util.HashMap;
 import java.util.List;
@@ -47,10 +48,6 @@ class LocalS3RouterTest {
   }
 
   @Test
-  void matchMethod() {
-  }
-
-  @Test
   void matchPath() {
     LocalS3Router localS3Router = new LocalS3Router();
     Map<String, List<Route>> rules = new HashMap<>();
@@ -75,6 +72,12 @@ class LocalS3RouterTest {
     assertEquals("a", bucketOperation2.parameter("bucket").get());
     assertTrue(bucketOperation2.parameter("key").isEmpty());
 
+    HttpRequest bucketOperation3 = HttpRequest.builder().path("/").build();
+    bucketOperation3.getHeaders().put(HttpHeaderNames.HOST, "images.example.com.s3.us-east-1.amazonaws.com");
+    assertSame(bucketPathRule, localS3Router.matchPath(rules, bucketOperation3));
+    assertEquals("images.example.com", bucketOperation3.parameter("bucket").get());
+    assertFalse(bucketOperation3.parameter("key").isPresent());
+
     HttpRequest objectOperation1 = HttpRequest.builder().path("/a/key").build();
     assertSame(objectPathRule, localS3Router.matchPath(rules, objectOperation1));
     assertEquals("a", objectOperation1.parameter("bucket").get());
@@ -94,6 +97,12 @@ class LocalS3RouterTest {
     assertSame(objectPathRule, localS3Router.matchPath(rules, objectOperation4));
     assertEquals("a", objectOperation4.parameter("bucket").get());
     assertEquals("dir/sub-dir/", objectOperation4.parameter("key").get());
+
+    HttpRequest objectOperation5 = HttpRequest.builder().path("/a/dir/sub-dir/")
+        .headers(Map.of(HttpHeaderNames.HOST, "bucket1.s3.region1.localhost")).build();
+    assertSame(objectPathRule, localS3Router.matchPath(rules, objectOperation5));
+    assertEquals("bucket1", objectOperation5.parameter("bucket").get());
+    assertEquals("a/dir/sub-dir/", objectOperation5.parameter("key").get());
   }
 
   @Test
