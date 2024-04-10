@@ -5,13 +5,18 @@ import com.robothy.netty.http.HttpRequestHandler;
 import com.robothy.netty.router.AbstractRouter;
 import com.robothy.netty.router.Route;
 import com.robothy.netty.router.Router;
+import com.robothy.s3.rest.model.request.BucketRegion;
+import com.robothy.s3.rest.utils.VirtualHostParser;
+import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpMethod;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+
 import org.apache.commons.lang3.StringUtils;
 
 class LocalS3Router extends AbstractRouter {
@@ -56,12 +61,30 @@ class LocalS3Router extends AbstractRouter {
     }
 
     Map<CharSequence, List<String>> params = request.getParams();
-    int slashCount = StringUtils.countMatches(path, '/');
-    if (slashCount == 1 || (slashCount == 2 && path.endsWith("/"))) {
-      return getHandlerForBucketOperation(pathRules, trimmedPath, params);
+
+    Optional<BucketRegion> bucketRegion = VirtualHostParser.getBucketRegionFromHost(request.getHeaders().get(HttpHeaderNames.HOST));
+    boolean bucketNameInPath = !bucketRegion.isPresent() || !bucketRegion.get().getBucketName().isPresent();
+    String bucketName;
+    String objectKey = null;
+    if (bucketNameInPath) {
+      int slashCount = StringUtils.countMatches(path, '/');
+      if (slashCount == 1 || (slashCount == 2 && path.endsWith("/"))) { // bucket operation.
+        bucketName = trimmedPath.substring(1);
+      } else { // object operation.
+        int secondSlashIdx = path.indexOf('/', 1);
+        bucketName = path.substring(1, secondSlashIdx);
+        objectKey = path.substring(secondSlashIdx + 1);
+      }
     } else {
-      return getHandlerForObjectOperation(pathRules, path, params);
+      bucketName = bucketRegion.get().getBucketName().get();
+      if (!"/".equals(trimmedPath)) {
+        objectKey = path.substring(1);
+      }
     }
+
+    setBucketNameAndObjectKeyToRequestParams(params, bucketName, objectKey);
+    boolean isBucketOperation = Objects.isNull(objectKey);
+    return getCandidateHandlers(pathRules, isBucketOperation);
   }
 
   String trimPath(String path) {
@@ -76,19 +99,21 @@ class LocalS3Router extends AbstractRouter {
     return path;
   }
 
-  List<Route> getHandlerForBucketOperation(Map<String, List<Route>> pathRules,
-                                           String trimmedPath, Map<CharSequence, List<String>> params) {
-    params.put("bucket", List.of(trimmedPath.substring(1)));
-    return pathRules.get(BUCKET_PATH);
+  void setBucketNameAndObjectKeyToRequestParams(Map<CharSequence, List<String>> params, String bucketName, String objectKey) {
+    params.put("bucket", List.of(bucketName));
+    if (Objects.nonNull(objectKey)) {
+      params.put("key", List.of(objectKey));
+    }
   }
 
-  List<Route> getHandlerForObjectOperation(Map<String, List<Route>> pathRules,
-                                           String path, Map<CharSequence, List<String>> params) {
-    int secondSlashIdx = path.indexOf('/', 1);
-    params.put("bucket", List.of(path.substring(1, secondSlashIdx)));
-    params.put("key", List.of(path.substring(secondSlashIdx + 1)));
+  List<Route> getCandidateHandlers(Map<String, List<Route>> pathRules, boolean bucketOperation) {
+    if (bucketOperation) {
+      return pathRules.get(BUCKET_PATH);
+    }
+
     return pathRules.get(BUCKET_KEY_PATH);
   }
+
 
   HttpRequestHandler matchHandler(List<Route> candidates, HttpRequest request) {
     HttpRequestHandler result = null;
@@ -108,7 +133,7 @@ class LocalS3Router extends AbstractRouter {
     int priority = 0;
 
     if (Objects.isNull(route.getHeaderMatcher())) {
-      priority |= (1<<1);
+      priority |= (1 << 1);
     } else if (route.getHeaderMatcher().apply(request.getHeaders())) {
       priority |= (1 << 3);
     } else {
@@ -116,7 +141,7 @@ class LocalS3Router extends AbstractRouter {
     }
 
     if (Objects.isNull(route.getParamMatcher())) {
-      priority |= (1<<2);
+      priority |= (1 << 2);
     } else if (route.getParamMatcher().apply(request.getParams())) {
       priority |= (1 << 4);
     } else {
