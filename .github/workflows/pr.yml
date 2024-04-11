@@ -53,6 +53,7 @@ jobs:
         run: ./gradlew mergeReports
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           files: ./build/reports/jacoco/mergeReports/mergeReports.xml
+          token: ${{ secrets.CODECOV_GLOBAL_UPLOAD_TOKEN }}

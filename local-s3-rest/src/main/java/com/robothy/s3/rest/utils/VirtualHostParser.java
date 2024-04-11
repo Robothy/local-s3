@@ -9,21 +9,36 @@ import java.util.Set;
 // bucket-name.s3.{region-id}.{domain}
 public class VirtualHostParser {
 
-  static Set<String> SUPPORTED_DOMAINS = Set.of(".localhost", ".amazonaws.com", ".local");
+  static final String AWS_DOMAIN = ".amazonaws.com";
+
+  static final Set<String> LOCAL_DOMAINS = Set.of(".localhost", ".127.0.0.1", ".0.0.0.0");
 
   public static Optional<BucketRegion> getBucketRegionFromHost(String host) {
     if (StringUtils.isBlank(host)) {
       return Optional.empty();
     }
 
-    host = host.trim();
-    Optional<String> supportedDomainOpt = SUPPORTED_DOMAINS.stream().filter(host::endsWith)
+    host = removePortIfExist(host.trim());
+
+    if (host.endsWith(AWS_DOMAIN)) {
+      return parseHostUnderAwsDomain(host);
+    }
+
+
+    Optional<String> localDomainOpt = LOCAL_DOMAINS.stream().filter(host::endsWith)
         .map(domainWithDotPrefix -> domainWithDotPrefix.substring(1)).findFirst();
-    if (!supportedDomainOpt.isPresent()) {
+    if (!localDomainOpt.isPresent()) {
       return Optional.empty();
     }
 
-    String domain = supportedDomainOpt.get();
+    String finalHost = host;
+    return LOCAL_DOMAINS.stream().filter(host::endsWith)
+        .findFirst()
+        .flatMap(localDomainPrependDot -> parseHostFromLocalDomain(finalHost, localDomainPrependDot));
+  }
+
+  static Optional<BucketRegion> parseHostUnderAwsDomain(String host) {
+    String domain = AWS_DOMAIN.substring(1);
     if (isLegacyGlobalEndpoint(host, domain)) { // {bucketName}.s3.{domain}
       return parseLegacyEndpoint(host, domain);
     }
@@ -77,6 +92,22 @@ public class VirtualHostParser {
   static boolean isLegacyGlobalEndpoint(String hostWithDomain, String domain) {
     String s3WithDomain = ".s3." + domain;
     return hostWithDomain.endsWith(s3WithDomain);
+  }
+
+  static String removePortIfExist(String host) {
+    int colonIdx = host.lastIndexOf(':');
+    if (colonIdx > 0) {
+      return host.substring(0, colonIdx);
+    }
+    return host;
+  }
+
+  static Optional<BucketRegion> parseHostFromLocalDomain(String host, String localDomainPrependDot) {
+    if (localDomainPrependDot.endsWith(host)) {
+      return Optional.empty();
+    }
+
+    return Optional.of(new BucketRegion("local", host.substring(0, host.length() - localDomainPrependDot.length())));
   }
 
 }

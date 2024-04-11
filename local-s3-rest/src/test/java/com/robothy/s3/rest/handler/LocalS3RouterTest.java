@@ -73,7 +73,7 @@ class LocalS3RouterTest {
     assertTrue(bucketOperation2.parameter("key").isEmpty());
 
     HttpRequest bucketOperation3 = HttpRequest.builder().path("/").build();
-    bucketOperation3.getHeaders().put(HttpHeaderNames.HOST, "images.example.com.s3.us-east-1.amazonaws.com");
+    bucketOperation3.getHeaders().put(HttpHeaderNames.HOST.toString(), "images.example.com.s3.us-east-1.amazonaws.com");
     assertSame(bucketPathRule, localS3Router.matchPath(rules, bucketOperation3));
     assertEquals("images.example.com", bucketOperation3.parameter("bucket").get());
     assertFalse(bucketOperation3.parameter("key").isPresent());
@@ -99,9 +99,9 @@ class LocalS3RouterTest {
     assertEquals("dir/sub-dir/", objectOperation4.parameter("key").get());
 
     HttpRequest objectOperation5 = HttpRequest.builder().path("/a/dir/sub-dir/")
-        .headers(Map.of(HttpHeaderNames.HOST, "bucket1.s3.region1.localhost")).build();
+        .headers(Map.of(HttpHeaderNames.HOST.toString(), "bucket1.s3.localhost")).build();
     assertSame(objectPathRule, localS3Router.matchPath(rules, objectOperation5));
-    assertEquals("bucket1", objectOperation5.parameter("bucket").get());
+    assertEquals("bucket1.s3", objectOperation5.parameter("bucket").get());
     assertEquals("a/dir/sub-dir/", objectOperation5.parameter("key").get());
   }
 

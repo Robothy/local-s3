@@ -3,12 +3,14 @@ package com.robothy.s3.rest.model.request;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.ToString;
 
 import java.util.Optional;
 
 @EqualsAndHashCode
 @AllArgsConstructor
 @Getter
+@ToString
 public class BucketRegion {
 
   private final String region;
