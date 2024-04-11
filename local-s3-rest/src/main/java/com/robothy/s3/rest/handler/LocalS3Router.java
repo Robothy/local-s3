@@ -62,7 +62,7 @@ class LocalS3Router extends AbstractRouter {
 
     Map<CharSequence, List<String>> params = request.getParams();
 
-    Optional<BucketRegion> bucketRegion = VirtualHostParser.getBucketRegionFromHost(request.getHeaders().get(HttpHeaderNames.HOST));
+    Optional<BucketRegion> bucketRegion = VirtualHostParser.getBucketRegionFromHost(request.getHeaders().get(HttpHeaderNames.HOST.toString()));
     boolean bucketNameInPath = !bucketRegion.isPresent() || !bucketRegion.get().getBucketName().isPresent();
     String bucketName;
     String objectKey = null;
