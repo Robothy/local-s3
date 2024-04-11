@@ -50,6 +50,7 @@ class VirtualHostParserTest {
         VirtualHostParser.getBucketRegionFromHost("bucket.s3..localhost").get());
 
     assertFalse(VirtualHostParser.getBucketRegionFromHost("localhost").isPresent());
+    assertFalse(VirtualHostParser.getBucketRegionFromHost(".localhost").isPresent());
     assertFalse(VirtualHostParser.getBucketRegionFromHost("127.0.0.1").isPresent());
   }
 
