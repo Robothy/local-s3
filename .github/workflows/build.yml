@@ -55,6 +55,6 @@ jobs:
         run: ./gradlew mergeReports
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4.3.0
         with:
           files: ./build/reports/jacoco/mergeReports/mergeReports.xml
