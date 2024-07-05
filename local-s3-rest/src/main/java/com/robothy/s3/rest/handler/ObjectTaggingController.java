@@ -14,6 +14,8 @@ import com.robothy.s3.rest.utils.RequestUtils;
 import com.robothy.s3.rest.utils.ResponseUtils;
 import io.netty.handler.codec.http.HttpResponseStatus;
 
+import java.util.Objects;
+
 class ObjectTaggingController {
 
   private final ObjectTaggingService objectTaggingService;
@@ -55,9 +57,12 @@ class ObjectTaggingController {
     String key = RequestAssertions.assertObjectKeyProvided(request);
     String versionId = request.parameter("versionId").orElse(null);
     objectTaggingService.deleteObjectTagging(bucketName, key, versionId);
+    if (Objects.nonNull(versionId)) {
+      response.putHeader(AmzHeaderNames.X_AMZ_VERSION_ID, versionId);
+    }
 
     ResponseUtils.addCommonHeaders(response)
-        .status(HttpResponseStatus.NO_CONTENT);
+      .status(HttpResponseStatus.NO_CONTENT);
   }
 
 }
