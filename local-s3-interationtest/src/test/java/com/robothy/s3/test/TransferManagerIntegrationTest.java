@@ -11,7 +11,7 @@ import com.amazonaws.services.s3.transfer.Upload;
 import com.robothy.s3.jupiter.LocalS3;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import org.junit.jupiter.api.Assertions;
+
 import org.junit.jupiter.api.Test;
 
 public class TransferManagerIntegrationTest {
