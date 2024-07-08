@@ -104,6 +104,18 @@ public class ObjectTaggingIntegrationTest {
 
     S3Object object = s3.getObject(bucketName, key);
     assertNull(object.getTaggingCount());
+
+
+    s3.setBucketVersioningConfiguration(new SetBucketVersioningConfigurationRequest(bucketName, new BucketVersioningConfiguration(BucketVersioningConfiguration.ENABLED)));
+    PutObjectResult putObjectResult = s3.putObject(bucketName, key, "World");
+    s3.setObjectTagging(new SetObjectTaggingRequest(bucketName, key, putObjectResult.getVersionId(), new ObjectTagging(List.of(new Tag("K1", "V1")))));
+    s3.deleteObjectTagging(new DeleteObjectTaggingRequest(bucketName, key).withVersionId(putObjectResult.getVersionId()));
+    objectTagging = s3.getObjectTagging(new GetObjectTaggingRequest(bucketName, key));
+    assertEquals(0, objectTagging.getTagSet().size());
+    assertEquals(putObjectResult.getVersionId(), objectTagging.getVersionId());
+
+    S3Object object1 = s3.getObject(bucketName, key);
+    assertNull(object1.getTaggingCount());
   }
 
 }
