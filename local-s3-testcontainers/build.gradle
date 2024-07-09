@@ -6,6 +6,7 @@ plugins {
 
 dependencies {
     implementation "org.testcontainers:testcontainers:${libVersion['org.testcontainers.testcontainers']}"
+    implementation("org.apache.commons:commons-compress:${libVersion['org.apache.commons.commons-compress']}")
 }
 
 test {
