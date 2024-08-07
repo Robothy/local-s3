@@ -107,7 +107,7 @@ public class MultipartUploadIntegrationTest {
     Map<String, String> userMetadata = object.getObjectMetadata().getUserMetadata();
     assertEquals(2, userMetadata.size());
     assertEquals("a.txt", userMetadata.get("x-filename"));
-    assertEquals("x-other", userMetadata.get("other-value"));
+    assertEquals("other-value", userMetadata.get("x-other"));
 
     assertThrows(AmazonS3Exception.class, () -> {
       s3.copyPart(new CopyPartRequest().withUploadId(initResult.getUploadId())
