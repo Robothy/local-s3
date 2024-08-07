@@ -35,6 +35,7 @@ class CreateMultipartUploadController implements HttpRequestHandler {
     String contentType = request.header("content-type").orElse("octet/stream");
     String uploadId = uploadService.createMultipartUpload(bucket, key, CreateMultipartUploadOptions.builder()
         .tagging(RequestUtils.extractTagging(request).orElse(null))
+        .userMetadata(RequestUtils.extractUserMetadata(request))
         .contentType(contentType).build());
     InitiateMultipartUploadResult result = InitiateMultipartUploadResult.builder()
         .bucket(bucket)

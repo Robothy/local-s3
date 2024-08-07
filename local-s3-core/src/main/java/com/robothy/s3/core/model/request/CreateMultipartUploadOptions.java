@@ -1,5 +1,6 @@
 package com.robothy.s3.core.model.request;
 
+import java.util.Map;
 import java.util.Optional;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,4 +16,6 @@ public class CreateMultipartUploadOptions {
   public Optional<String[][]> getTagging() {
     return Optional.ofNullable(tagging);
   }
+
+  private Map<String, String> userMetadata;
 }

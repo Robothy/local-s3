@@ -33,6 +33,7 @@ public interface CreateMultipartUploadService extends LocalS3MetadataApplicable 
         .contentType(options.getContentType())
         .createDate(System.currentTimeMillis())
         .tagging(options.getTagging().orElse(null))
+        .userMetadata(options.getUserMetadata())
         .build());
     return uploadId;
   }
