@@ -41,7 +41,7 @@ class PutObjectController implements HttpRequestHandler {
         .size(decodedBody.getDecodedContentLength())
         .content(decodedBody.getDecodedBody())
         .tagging(RequestUtils.extractTagging(request).orElse(null))
-        .userMetadata(extractUserMetadata(request))
+        .userMetadata(RequestUtils.extractUserMetadata(request))
         .build();
 
     PutObjectAns ans = objectService.putObject(bucketName, key, options);
@@ -58,16 +58,6 @@ class PutObjectController implements HttpRequestHandler {
     ResponseUtils.addAmzRequestId(response);
   }
 
-  Map<String, String> extractUserMetadata(HttpRequest request) {
-    Map<String, String> userMetadata = new HashMap<>();
-    request.getHeaders()
-        .forEach((k, v) -> {
-            if (k.toString().startsWith(AmzHeaderNames.X_AMZ_META_PREFIX)) {
-              String metaName = RequestAssertions.assertUserMetadataHeaderIsValid(k.toString());
-              userMetadata.put(metaName, v);
-            }
-        });
-    return userMetadata;
-  }
+
 
 }

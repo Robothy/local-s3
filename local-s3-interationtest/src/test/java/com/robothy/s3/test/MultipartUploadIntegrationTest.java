@@ -28,6 +28,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
+
 import org.junit.jupiter.api.Test;
 import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -56,6 +58,8 @@ public class MultipartUploadIntegrationTest {
     s3.createBucket(bucket);
     ObjectMetadata objectMetadata1 = new ObjectMetadata();
     objectMetadata1.setContentType("plain/text");
+    objectMetadata1.addUserMetadata("x-filename", "a.txt");
+    objectMetadata1.addUserMetadata("x-other", "other-value");
     InitiateMultipartUploadResult initResult =
         s3.initiateMultipartUpload(new InitiateMultipartUploadRequest(bucket, key1, objectMetadata1));
     assertNotNull(initResult.getUploadId());
@@ -100,6 +104,10 @@ public class MultipartUploadIntegrationTest {
     S3Object object = s3.getObject(bucket, key1);
     assertEquals("HelloWorld", new String(object.getObjectContent().readAllBytes()));
     assertEquals("plain/text", object.getObjectMetadata().getContentType());
+    Map<String, String> userMetadata = object.getObjectMetadata().getUserMetadata();
+    assertEquals(2, userMetadata.size());
+    assertEquals("a.txt", userMetadata.get("x-filename"));
+    assertEquals("other-value", userMetadata.get("x-other"));
 
     assertThrows(AmazonS3Exception.class, () -> {
       s3.copyPart(new CopyPartRequest().withUploadId(initResult.getUploadId())
