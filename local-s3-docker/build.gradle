@@ -32,11 +32,11 @@ tasks.register('collectReachabilityMetadata', JavaExec) {
 
     outputs.cacheIf { true }
 
-    inputs.file("${project.layout.buildDirectory.get()}/libs/s3.jar")
+    inputs.file(project.layout.buildDirectory.file("/libs/s3.jar"))
             .withPropertyName("jar")
             .withPathSensitivity(PathSensitivity.RELATIVE)
 
-    outputs.dir(file("${project.layout.buildDirectory.get()}/reachability-metadata"))
+    outputs.dir(project.layout.buildDirectory.file("/reachability-metadata"))
             .withPropertyName("reachability-metadata")
 
     mainClass.set('com.robothy.s3.docker.ReachabilityMetadataGenerator')
