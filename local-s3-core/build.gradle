@@ -5,9 +5,9 @@ plugins {
 
 dependencies {
     implementation project(":local-s3-datatypes")
-    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:${libVersion['com.fasterxml.jackson.datatype.jackson-datatype-jdk8']}"
-    implementation "com.fasterxml.jackson.core:jackson-databind:${libVersion['com.fasterxml.jackson.core.jackson-databind']}"
-    implementation "commons-io:commons-io:${libVersion['commons-io.commons-io']}"
-    implementation "org.apache.commons:commons-lang3:${libVersion['org.apache.commons.commons-lang3']}"
-    implementation "commons-codec:commons-codec:${libVersion['commons-codec.commons-codec']}"
+    implementation(libs.jacksonDatatypeJdk8)
+    implementation(libs.jacksonDatabind)
+    implementation(libs.commonsIo)
+    implementation(libs.apacheCommonsLang3)
+    implementation(libs.apacheCommonsCodec)
 }

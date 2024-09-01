@@ -5,14 +5,14 @@ plugins {
 
 dependencies {
     implementation project(":local-s3-rest")
-    compileOnly "software.amazon.awssdk:s3:${libVersion['software.amazon.awssdk.s3']}"
-    compileOnly "com.amazonaws:aws-java-sdk:${libVersion['com.amazonaws.aws-java-sdk']}"
-    implementation "commons-io:commons-io:${libVersion['commons-io.commons-io']}"
-    implementation "org.apache.commons:commons-lang3:${libVersion['org.apache.commons.commons-lang3']}"
-    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${libVersion['com.fasterxml.jackson.dataformat.jackson-dataformat-xml']}"
-    implementation "org.junit.jupiter:junit-jupiter:${libVersion['org.junit.jupiter.junit-jupiter']}"
-    testRuntimeOnly "ch.qos.logback:logback-classic:${libVersion['ch.qos.logback.logback-classic']}"
-    testImplementation "software.amazon.awssdk:s3:${libVersion['software.amazon.awssdk.s3']}"
-    testImplementation "com.amazonaws:aws-java-sdk:${libVersion['com.amazonaws.aws-java-sdk']}"
+    compileOnly(libs.awssdkS3)
+    compileOnly(libs.awsJavaSdk)
+    implementation(libs.commonsIo)
+    implementation(libs.apacheCommonsLang3)
+    implementation(libs.jacksonDataformatXml)
+    implementation(libs.junit5JupiterEngine)
+    implementation(libs.logbackClassic)
+    implementation(libs.awssdkS3)
+    implementation(libs.awsJavaSdk)
 }
 

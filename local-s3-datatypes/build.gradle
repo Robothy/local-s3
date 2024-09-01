@@ -4,11 +4,11 @@ plugins {
 }
 
 dependencies {
-    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:${libVersion['com.fasterxml.jackson.datatype.jackson-datatype-jdk8']}"
-    implementation "com.fasterxml.jackson.core:jackson-databind:${libVersion['com.fasterxml.jackson.core.jackson-databind']}"
-    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${libVersion['com.fasterxml.jackson.dataformat.jackson-dataformat-xml']}"
-    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${libVersion['com.fasterxml.jackson.datatype.jackson-datatype-jsr310']}"
-    implementation "commons-io:commons-io:${libVersion['commons-io.commons-io']}"
-    implementation "org.apache.commons:commons-lang3:${libVersion['org.apache.commons.commons-lang3']}"
-    implementation "org.apache.commons:commons-collections4:${libVersion['org.apache.commons.commons-collections4']}"
+    implementation(libs.jacksonDatatypeJdk8)
+    implementation(libs.jacksonDatabind)
+    implementation(libs.jacksonDataformatXml)
+    implementation(libs.jacksonDatatypeJsr310)
+    implementation(libs.commonsIo)
+    implementation(libs.apacheCommonsLang3)
+    implementation(libs.apacheCommonsCollections4)
 }

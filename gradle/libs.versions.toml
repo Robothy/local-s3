@@ -1,0 +1,45 @@
+[versions]
+logback = "1.4.12"
+awsJavaSdk = "1.12.757"
+awssdkS3 = "2.26.16"
+jackson = "2.15.2"
+nettyHttpRouter = "1.15"
+apacheCommonsCodec = "1.15"
+netty = "4.1.108.Final"
+apacheCommonsCollections4 = "4.4"
+commonsIo = "2.13.0"
+apacheCommonsLang3 = "3.12.0"
+junit5 = "5.8.1"
+mockito = "4.2.0"
+lombok = "1.18.30"
+slf4j = "1.7.36"
+testContainers = "1.17.5"
+apacheCommonsCompress = "1.26.2"
+
+robothyCnRepo = "1.18"
+gradleLombok = "5.0.0"
+
+[libraries]
+logbackClassic = { group = "ch.qos.logback", name = "logback-classic", version.ref = "logback" }
+awsJavaSdk = { group = "com.amazonaws", name = "aws-java-sdk", version.ref = "awsJavaSdk" }
+awssdkS3 = { group = "software.amazon.awssdk", name = "s3", version.ref = "awssdkS3" }
+jacksonDatabind = { group = "com.fasterxml.jackson.core", name = "jackson-databind", version.ref = "jackson" }
+jacksonDataformatXml = { group = "com.fasterxml.jackson.dataformat", name = "jackson-dataformat-xml", version.ref = "jackson" }
+jacksonDatatypeJdk8 = { group = "com.fasterxml.jackson.datatype", name = "jackson-datatype-jdk8", version.ref = "jackson" }
+jacksonDatatypeJsr310 = { group = "com.fasterxml.jackson.datatype", name = "jackson-datatype-jsr310", version.ref = "jackson" }
+nettyHttpRouter = { group = "io.github.robothy", name = "netty-http-router", version.ref = "nettyHttpRouter" }
+apacheCommonsCodec = { group = "commons-codec", name = "commons-codec", version.ref = "apacheCommonsCodec" }
+nettyAll = { group = "io.netty", name = "netty-all", version.ref = "netty" }
+apacheCommonsCollections4 = { group = "org.apache.commons", name = "commons-collections4", version.ref = "apacheCommonsCollections4" }
+commonsIo = { group = "commons-io", name = "commons-io", version.ref = "commonsIo" }
+apacheCommonsLang3 = { group = "org.apache.commons", name = "commons-lang3", version.ref = "apacheCommonsLang3" }
+junit5 = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junit5" }
+junit5JupiterEngine = { group = "org.junit.jupiter", name = "junit-jupiter-engine", version.ref = "junit5" }
+mockitoInline = { group = "org.mockito", name = "mockito-inline", version.ref = "mockito" }
+lombok = { group = "org.projectlombok", name = "lombok", version.ref = "lombok" }
+slf4jApi = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
+testContainers = { group = "org.testcontainers", name = "testcontainers", version.ref = "testContainers" }
+testContainersJunit = { group = "org.testcontainers", name = "junit-jupiter", version.ref = "testContainers" }
+apacheCommonsCompress = { group = "org.apache.commons", name = "commons-compress", version.ref = "apacheCommonsCompress" }
+robothyCnRepo = { group = "com.robothy", name = "cn-repo", version.ref = "robothyCnRepo" }
+gradleLombok = { group = "io.franzbecker", name = "gradle-lombok", version.ref = "gradleLombok" }
