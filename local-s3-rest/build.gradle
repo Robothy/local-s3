@@ -6,17 +6,16 @@ plugins {
 dependencies {
     implementation project(":local-s3-core")
     implementation project(":local-s3-datatypes")
-    implementation "io.netty:netty-all:${libVersion['io.netty.netty-all']}"
-    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${libVersion['com.fasterxml.jackson.dataformat.jackson-dataformat-xml']}"
-    implementation "com.fasterxml.jackson.core:jackson-databind:${libVersion['com.fasterxml.jackson.core.jackson-databind']}"
-    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:${libVersion['com.fasterxml.jackson.datatype.jackson-datatype-jdk8']}"
-    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${libVersion['com.fasterxml.jackson.datatype.jackson-datatype-jsr310']}"
-    implementation "commons-io:commons-io:${libVersion['commons-io.commons-io']}"
-    implementation "org.apache.commons:commons-lang3:${libVersion['org.apache.commons.commons-lang3']}"
-    implementation "org.apache.commons:commons-collections4:${libVersion['org.apache.commons.commons-collections4']}"
-    implementation ("io.github.robothy:netty-http-router:${libVersion['com.robothy.netty-http-router']}") {
+    implementation(libs.nettyAll)
+    implementation(libs.jacksonDataformatXml)
+    implementation(libs.jacksonDatabind)
+    implementation(libs.jacksonDatatypeJdk8)
+    implementation(libs.jacksonDatatypeJsr310)
+    implementation(libs.commonsIo)
+    implementation(libs.apacheCommonsLang3)
+    implementation(libs.apacheCommonsCollections4)
+    implementation(libs.nettyHttpRouter) {
         exclude(group: "org.springframework", module: "spring-web")
     }
-
-    testImplementation "org.mockito:mockito-inline:${libVersion['org.mockito.mockito-inline']}"
+    implementation(libs.mockitoInline)
 }

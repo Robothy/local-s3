@@ -4,17 +4,12 @@ plugins {
 
 dependencies {
 
-    testImplementation("software.amazon.awssdk:s3:${libVersion['software.amazon.awssdk.s3']}")
-
-    testImplementation("com.amazonaws:aws-java-sdk:${libVersion['com.amazonaws.aws-java-sdk']}")
-
     testImplementation(project(":local-s3-jupiter"))
-
     testImplementation (project(":local-s3-datatypes"))
-
     testImplementation(project(":local-s3-core"))
     testImplementation(project(":local-s3-rest"))
 
-    //testRuntimeOnly "ch.qos.logback:logback-core:${libVersion['ch.qos.logback.logback-core']}"
-    testRuntimeOnly "ch.qos.logback:logback-classic:${libVersion['ch.qos.logback.logback-classic']}"
+    testImplementation(libs.awssdkS3)
+    testImplementation(libs.awsJavaSdk)
+    testRuntimeOnly(libs.logbackClassic)
 }

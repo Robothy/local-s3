@@ -7,7 +7,6 @@ plugins {
 repositories {
     mavenLocal()
     mavenCentral()
-    jcenter()
 
 
 //    maven { url 'https://maven.aliyun.com/repository/google/' }
@@ -20,22 +19,15 @@ repositories {
 
 project.group = 'io.github.robothy'
 
-// Load version
-ext {
-    libVersion = new Properties()
-    def versionFile = new File("${project.rootProject.rootDir}/buildSrc/src/main/resources/version.properties")
-    ext.libVersion.load(versionFile.newInputStream())
-}
-
 dependencies {
-    implementation "org.slf4j:slf4j-api:${libVersion['org.slf4j.slf4j-api']}"
-    compileOnly "org.projectlombok:lombok:${libVersion['org.projectlombok.lombok']}"
-    annotationProcessor "org.projectlombok:lombok:${libVersion['org.projectlombok.lombok']}"
-    testCompileOnly "org.projectlombok:lombok:${libVersion['org.projectlombok.lombok']}"
-    testAnnotationProcessor "org.projectlombok:lombok:${libVersion['org.projectlombok.lombok']}"
-    testImplementation "org.mockito:mockito-inline:${libVersion['org.mockito.mockito-inline']}"
-    testImplementation "org.junit.jupiter:junit-jupiter:${libVersion['org.junit.jupiter.junit-jupiter']}"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${libVersion['org.junit.jupiter.junit-jupiter-engine']}"
+    implementation(libs.slf4jApi)
+    compileOnly(libs.lombok)
+    annotationProcessor(libs.lombok)
+    testCompileOnly(libs.lombok)
+    testAnnotationProcessor(libs.lombok)
+    testImplementation(libs.mockitoInline)
+    testImplementation(libs.junit5JupiterEngine)
+    testImplementation(libs.junit5)
 }
 
 test {

@@ -56,7 +56,7 @@ public class ReachabilityMetadataGenerator {
     File dataPath = Files.createTempDirectory("local-s3-data").toFile();
     dataPath.deleteOnExit();
 
-    try (CollectReachabilityMetadataContainer container = new CollectReachabilityMetadataContainer("ol9-java17-22.3.0")) {
+    try (CollectReachabilityMetadataContainer container = new CollectReachabilityMetadataContainer("ol9-java17-22.3.3")) {
 
 
 
@@ -87,7 +87,7 @@ public class ReachabilityMetadataGenerator {
     }
 
     /*======== Load data from data path. ========*/
-    try (CollectReachabilityMetadataContainer container = new CollectReachabilityMetadataContainer("ol9-java17-22.3.0")) {
+    try (CollectReachabilityMetadataContainer container = new CollectReachabilityMetadataContainer("ol9-java17-22.3.3")) {
       container.port(port)
           .withFileSystemBind("build/reachability-metadata/META-INF/native-image", "/metadata", BindMode.READ_WRITE)
           .withFileSystemBind("build/libs", "/app", BindMode.READ_WRITE)
