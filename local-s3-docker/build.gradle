@@ -32,11 +32,11 @@ tasks.register('collectReachabilityMetadata', JavaExec) {
 
     outputs.cacheIf { true }
 
-    inputs.file("${layout.buildDirectory}/libs/s3.jar")
+    inputs.file("${project.layout.buildDirectory}/libs/s3.jar")
             .withPropertyName("jar")
             .withPathSensitivity(PathSensitivity.RELATIVE)
 
-    outputs.dir(file("${layout.buildDirectory}/reachability-metadata"))
+    outputs.dir(file("${project.layout.buildDirectory}/reachability-metadata"))
             .withPropertyName("reachability-metadata")
 
     mainClass.set('com.robothy.s3.docker.ReachabilityMetadataGenerator')
@@ -48,13 +48,13 @@ tasks.register('buildGraalVMNativeImage', Exec) {
     dependsOn('collectReachabilityMetadata')
 
     outputs.cacheIf { true }
-    inputs.dir(file("${layout.buildDirectory}/reachability-metadata"))
+    inputs.dir(file("${project.layout.buildDirectory}/reachability-metadata"))
             .withPropertyName("reachability-metadata")
             .withPathSensitivity(PathSensitivity.RELATIVE)
-    inputs.file("${layout.buildDirectory}/libs/s3.jar")
+    inputs.file("${project.layout.buildDirectory}/libs/s3.jar")
             .withPropertyName("jar")
             .withPathSensitivity(PathSensitivity.RELATIVE)
-    outputs.file("${layout.buildDirectory}/bin/s3")
+    outputs.file("${project.layout.buildDirectory}/bin/s3")
             .withPropertyName("s3-native-image")
 
     doFirst {
@@ -79,7 +79,7 @@ tasks.register('buildGraalVMNativeBasedDockerImage', Exec) {
 
     outputs.cacheIf { true }
 
-    inputs.file("${layout.buildDirectory}/bin/s3")
+    inputs.file("${project.layout.buildDirectory}/bin/s3")
             .withPropertyName("s3-native-image")
             .withPathSensitivity(PathSensitivity.RELATIVE)
 
