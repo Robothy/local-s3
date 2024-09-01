@@ -32,11 +32,11 @@ tasks.register('collectReachabilityMetadata', JavaExec) {
 
     outputs.cacheIf { true }
 
-    inputs.file("${project.layout.buildDirectory}/libs/s3.jar")
+    inputs.file("${project.layout.buildDirectory.get()}/libs/s3.jar")
             .withPropertyName("jar")
             .withPathSensitivity(PathSensitivity.RELATIVE)
 
-    outputs.dir(file("${project.layout.buildDirectory}/reachability-metadata"))
+    outputs.dir(file("${project.layout.buildDirectory.get()}/reachability-metadata"))
             .withPropertyName("reachability-metadata")
 
     mainClass.set('com.robothy.s3.docker.ReachabilityMetadataGenerator')
@@ -48,20 +48,20 @@ tasks.register('buildGraalVMNativeImage', Exec) {
     dependsOn('collectReachabilityMetadata')
 
     outputs.cacheIf { true }
-    inputs.dir(file("${project.layout.buildDirectory}/reachability-metadata"))
+    inputs.dir(project.layout.buildDirectory.dir("/reachability-metadata"))
             .withPropertyName("reachability-metadata")
             .withPathSensitivity(PathSensitivity.RELATIVE)
-    inputs.file("${project.layout.buildDirectory}/libs/s3.jar")
+    inputs.file(project.layout.buildDirectory.file("/libs/s3.jar"))
             .withPropertyName("jar")
             .withPathSensitivity(PathSensitivity.RELATIVE)
-    outputs.file("${project.layout.buildDirectory}/bin/s3")
+    outputs.file(project.layout.buildDirectory.file("/bin/s3"))
             .withPropertyName("s3-native-image")
 
     doFirst {
         var cmd = new ArrayList(executor)
         var buildCmd = """docker run --rm \
 -v ${project.projectDir}:/project \
--v ${project.layout.buildDirectory}/bin:/app \
+-v ${project.layout.buildDirectory.get().asFile}/bin:/app \
 ghcr.io/graalvm/native-image:ol9-java17-22.3.0 \
 -jar /project/build/libs/s3.jar \
 --initialize-at-build-time=ch.qos.logback,org.slf4j \
@@ -79,7 +79,7 @@ tasks.register('buildGraalVMNativeBasedDockerImage', Exec) {
 
     outputs.cacheIf { true }
 
-    inputs.file("${project.layout.buildDirectory}/bin/s3")
+    inputs.file(project.layout.buildDirectory.file("/bin/s3"))
             .withPropertyName("s3-native-image")
             .withPathSensitivity(PathSensitivity.RELATIVE)
 

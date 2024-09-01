@@ -79,7 +79,7 @@ publishing {
 
 
 task delombok(type: DelombokTask, dependsOn: compileJava) {
-    ext.outputDir = file("${project.layout.buildDirectory}/delombok")
+    ext.outputDir = project.layout.buildDirectory.dir("/delombok").get()
     outputs.dir(outputDir)
     sourceSets.main.java.srcDirs.each {
         inputs.dir(it)
