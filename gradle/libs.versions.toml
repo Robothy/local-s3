@@ -2,7 +2,7 @@
 logback = "1.4.12"
 awsJavaSdk = "1.12.757"
 awssdkS3 = "2.26.16"
-jackson = "2.15.2"
+jackson = "2.17.2"
 nettyHttpRouter = "1.15"
 apacheCommonsCodec = "1.15"
 netty = "4.1.108.Final"
