@@ -7,6 +7,7 @@ import com.robothy.s3.core.storage.MetadataStore;
 import com.robothy.s3.core.util.PathUtils;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
@@ -27,7 +28,7 @@ public class DefaultFileSystemS3MetadataLoader implements FileSystemS3MetadataLo
     LocalS3Metadata s3Metadata = new LocalS3Metadata();
     if (!versionFile.exists()) {
       try {
-        Files.writeString(versionFile.toPath(), String.valueOf(LocalS3Metadata.VERSION));
+        Files.write(versionFile.toPath(), String.valueOf(LocalS3Metadata.VERSION).getBytes(StandardCharsets.UTF_8));
       } catch (IOException e) {
         throw new IllegalStateException("Failed to load S3 metadata from " + s3DataPath);
       }
