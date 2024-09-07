@@ -31,13 +31,13 @@ class PutBucketAclController implements HttpRequestHandler {
     this.xmlMapper = serviceFactory.getInstance(XmlMapper.class);
   }
 
-  private static final Map<String, String> HEADER_PERMISSION_MAP = Map.of(
-      "x-amz-grant-full-control", "FULL_CONTROL",
-      "x-amz-grant-read", "READ",
-      "x-amz-grant-read-acp","READ_ACP",
-      "x-amz-grant-write", "WRITE",
-      "x-amz-grant-write-acp", "WRITE_ACP"
-  );
+//  private static final Map<String, String> HEADER_PERMISSION_MAP = Map.of(
+//      "x-amz-grant-full-control", "FULL_CONTROL",
+//      "x-amz-grant-read", "READ",
+//      "x-amz-grant-read-acp","READ_ACP",
+//      "x-amz-grant-write", "WRITE",
+//      "x-amz-grant-write-acp", "WRITE_ACP"
+//  );
 
   @Override
   public void handle(HttpRequest request, HttpResponse response) throws Exception {

@@ -39,6 +39,7 @@ import software.amazon.awssdk.services.s3.model.CompletedPart;
 import software.amazon.awssdk.services.s3.model.CreateBucketResponse;
 import software.amazon.awssdk.services.s3.model.CreateMultipartUploadResponse;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
+import software.amazon.awssdk.services.s3.model.ObjectVersion;
 import software.amazon.awssdk.services.s3.model.Tag;
 import software.amazon.awssdk.services.s3.model.Tagging;
 import software.amazon.awssdk.services.s3.model.UploadPartResponse;
@@ -275,6 +276,49 @@ public class MultipartUploadIntegrationTest {
     assertEquals(2, tags.size());
     assertTrue(tags.contains(tag1));
     assertTrue(tags.contains(tag2));
+  }
+
+  @Test
+  @LocalS3
+  void testMultipartUploadWithMultiVersions(S3Client s3Client) throws Exception {
+    s3Client.createBucket(builder -> builder.bucket("my-bucket"));
+    s3Client.putBucketVersioning(builder -> builder.bucket("my-bucket").versioningConfiguration(c -> c.status("Enabled")));
+    CreateMultipartUploadResponse multipartUploadV1 = s3Client.createMultipartUpload(builder -> builder.bucket("my-bucket").key("a.txt"));
+    UploadPartResponse part1V1 = s3Client.uploadPart(b -> b.bucket("my-bucket")
+            .uploadId(multipartUploadV1.uploadId()).key("a.txt").partNumber(1), RequestBody.fromString("v1"));
+    UploadPartResponse part2V1 = s3Client.uploadPart(b -> b.bucket("my-bucket").uploadId(multipartUploadV1.uploadId()).key("a.txt").partNumber(2),
+            RequestBody .fromString("v1"));
+    CompleteMultipartUploadResponse multipartUploadResponseV1 = s3Client.completeMultipartUpload(b -> b
+        .bucket("my-bucket")
+        .key("a.txt")
+        .multipartUpload(upload -> upload.parts(CompletedPart.builder().partNumber(1).eTag(part1V1.eTag()).build(),
+            CompletedPart.builder().partNumber(2).eTag(part2V1.eTag()).build()))
+        .uploadId(multipartUploadV1.uploadId()));
+
+
+    CreateMultipartUploadResponse multipartUploadV2 =
+        s3Client.createMultipartUpload(builder -> builder.bucket("my-bucket").key("a.txt"));
+    UploadPartResponse part1V2 = s3Client.uploadPart(b -> b.bucket("my-bucket")
+            .uploadId(multipartUploadV2.uploadId()).key("a.txt").partNumber(1), RequestBody.fromString("v2"));
+    UploadPartResponse part2V2 = s3Client.uploadPart(b -> b.bucket("my-bucket").uploadId(multipartUploadV2.uploadId()).key("a.txt").partNumber(2),
+            RequestBody.fromString("v2"));
+    CompleteMultipartUploadResponse multipartUploadResponseV2 = s3Client.completeMultipartUpload(b -> b
+        .bucket("my-bucket")
+        .key("a.txt")
+        .multipartUpload(upload -> upload.parts(CompletedPart.builder().partNumber(1).eTag(part1V2.eTag()).build(),
+            CompletedPart.builder().partNumber(2).eTag(part2V2.eTag()).build()))
+        .uploadId(multipartUploadV2.uploadId()));
+
+    List<ObjectVersion> versions = s3Client.listObjectVersions(builder -> builder.bucket("my-bucket").prefix("a.txt")).versions();
+    assertEquals(2, versions.size());
+    assertEquals(multipartUploadResponseV1.versionId(), versions.get(1).versionId());
+    assertEquals(multipartUploadResponseV2.versionId(), versions.get(0).versionId());
+    ResponseInputStream<GetObjectResponse> objectV1 =
+        s3Client.getObject(builder -> builder.bucket("my-bucket").key("a.txt").versionId(multipartUploadResponseV1.versionId()));
+    assertEquals("v1v1", new String(objectV1.readAllBytes()));
+    ResponseInputStream<GetObjectResponse> objectV2 =
+        s3Client.getObject(builder -> builder.bucket("my-bucket").key("a.txt").versionId(multipartUploadResponseV2.versionId()));
+    assertEquals("v2v2", new String(objectV2.readAllBytes()));
   }
 
 }
