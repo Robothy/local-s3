@@ -12,7 +12,7 @@ apacheCommonsLang3 = "3.17.0"
 junit5 = "5.11.0"
 mockito = "4.2.0"
 lombok = "1.18.34"
-slf4j = "1.7.36"
+slf4j = "2.0.16"
 testContainers = "1.17.5"
 apacheCommonsCompress = "1.26.2"
 
