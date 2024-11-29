@@ -1,6 +1,7 @@
 package com.robothy.s3.test;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -22,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.jupiter.api.Test;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
 
 public class PutObjectIntegrationTest {
 
@@ -65,6 +68,17 @@ public class PutObjectIntegrationTest {
     Tag tag2 = objectTaggingResult.getTagSet().get(1);
     assertEquals("key2", tag2.getKey());
     assertEquals("value2", tag2.getValue());
+  }
+
+  @Test
+  @LocalS3
+  void testPutObjectWithSpecialCharactersInObjectKey(S3Client s3Client) {
+    String bucketName = "my-bucket";
+    s3Client.createBucket(b -> b.bucket(bucketName));
+
+    String objectKeyWithPlusSign = "hello+world.txt";
+    s3Client.putObject(b -> b.bucket(bucketName).key(objectKeyWithPlusSign), RequestBody.fromString("Hello World"));
+    assertDoesNotThrow(() -> s3Client.headObject(b -> b.bucket(bucketName).key(objectKeyWithPlusSign)));
   }
 
 
