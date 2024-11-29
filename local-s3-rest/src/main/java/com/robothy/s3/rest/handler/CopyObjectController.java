@@ -17,7 +17,11 @@ import com.robothy.s3.rest.utils.ResponseUtils;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 /**
@@ -36,10 +40,10 @@ class CopyObjectController implements HttpRequestHandler {
 
   @Override
   public void handle(HttpRequest request, HttpResponse response) throws Exception {
-    String bucket = RequestAssertions.assertBucketNameProvided(request);
-    String key = RequestAssertions.assertObjectKeyProvided(request);
+    String destinationBucket = RequestAssertions.assertBucketNameProvided(request);
+    String destinationKey = RequestAssertions.assertObjectKeyProvided(request);
     CopyObjectOptions copyObjectOptions = parseCopyOptions(request);
-    CopyObjectAns copyObjectAns = objectService.copyObject(bucket, key, copyObjectOptions);
+    CopyObjectAns copyObjectAns = objectService.copyObject(destinationBucket, destinationKey, copyObjectOptions);
     CopyObjectResult result = CopyObjectResult.builder()
         .lastModified(Instant.ofEpochMilli(copyObjectAns.getLastModified()))
         .etag(copyObjectAns.getEtag())
@@ -81,10 +85,22 @@ class CopyObjectController implements HttpRequestHandler {
     }
 
     return CopyObjectOptions.builder()
-        .sourceBucket(srcBucket)
-        .sourceKey(srcKey)
-        .sourceVersion(srcVersionId)
+        .sourceBucket(urlDecode(srcBucket))
+        .sourceKey(urlDecode(srcKey))
+        .sourceVersion(urlDecode(srcVersionId))
         .build();
+  }
+
+  private String urlDecode(String value) {
+    try {
+      if (Objects.isNull(value)) {
+        return null;
+      }
+
+      return URLDecoder.decode(value, StandardCharsets.UTF_8.displayName());
+    } catch (UnsupportedEncodingException e) {
+      throw new RuntimeException(e);
+    }
   }
 
 }
