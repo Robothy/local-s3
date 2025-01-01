@@ -30,6 +30,7 @@ import java.lang.reflect.Modifier;
 import java.net.ServerSocket;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.concurrent.ThreadFactory;
 import javax.xml.stream.XMLInputFactory;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.slf4j.Logger;
@@ -82,9 +83,9 @@ public class LocalS3 {
   public void start() {
     ServiceFactory serviceFactory = createServiceFactory();
 
-    this.parentGroup = new NioEventLoopGroup(nettyParentEventGroupThreadNum);
-    this.childGroup = new NioEventLoopGroup(nettyChildEventGroupThreadNum);
-    this.executorGroup = new DefaultEventLoopGroup(s3ExecutorThreadNum);
+    this.parentGroup = new NioEventLoopGroup(nettyParentEventGroupThreadNum, new NamingThreadFactory("locals3-parent-event-group"));
+    this.childGroup = new NioEventLoopGroup(nettyChildEventGroupThreadNum, new NamingThreadFactory("locals3-child-event-group"));
+    this.executorGroup = new DefaultEventLoopGroup(s3ExecutorThreadNum, new NamingThreadFactory("locals3-executor-group"));
     ServerBootstrap serverBootstrap = new ServerBootstrap();
     ChannelFuture channelFuture = null;
     try {
@@ -320,6 +321,22 @@ public class LocalS3 {
       return freePort;
     }
 
+  }
+
+  private static final class NamingThreadFactory implements ThreadFactory {
+
+    private final String name;
+
+    private int counter = 0;
+
+    public NamingThreadFactory(String name) {
+      this.name = name;
+    }
+
+    @Override
+    public Thread newThread(Runnable r) {
+      return new Thread(r, name + "-" + counter++);
+    }
   }
 
 }
