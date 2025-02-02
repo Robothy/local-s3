@@ -1,5 +1,6 @@
 package com.robothy.s3.jupiter.extensions;
 
+import com.robothy.s3.jupiter.AmzS3;
 import com.robothy.s3.jupiter.LocalS3;
 import com.robothy.s3.jupiter.supplier.DataPathSupplier;
 import java.io.IOException;
@@ -7,6 +8,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.net.ServerSocket;
 import java.util.Objects;
+import java.util.Optional;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.AfterEachCallback;
@@ -27,6 +29,8 @@ public class LocalS3Extension implements BeforeAllCallback, AfterAllCallback, Be
 
   public static final String LOCAL_S3_PORT_STORE_SUFFIX = ".LocalS3.Port";
 
+  public static final String AMAZON_S3_REGION_STORE_SUFFIX = ".AmazonS3.Region";
+
   @Override
   public void beforeAll(ExtensionContext context) throws Exception {
     LocalS3 s3Config = context.getRequiredTestClass().getAnnotation(LocalS3.class);
@@ -36,6 +40,8 @@ public class LocalS3Extension implements BeforeAllCallback, AfterAllCallback, Be
       String key = context.getRequiredTestClass() + LOCAL_S3_PORT_STORE_SUFFIX;
       context.getStore(ExtensionContext.Namespace.GLOBAL).put(key, localS3.getPort());
     }
+
+    setAmzConfig(context);
   }
 
   @Override
@@ -47,6 +53,19 @@ public class LocalS3Extension implements BeforeAllCallback, AfterAllCallback, Be
       localS3ForEach.set(localS3);
       String key = context.getRequiredTestClass() + (context.getRequiredTestMethod() + LOCAL_S3_PORT_STORE_SUFFIX);
       context.getStore(ExtensionContext.Namespace.GLOBAL).put(key, localS3.getPort());
+    }
+
+    setAmzConfig(context);
+  }
+
+
+  void setAmzConfig(ExtensionContext context) {
+    AmzS3 amzS3Config = Optional.ofNullable(context.getRequiredTestClass().getAnnotation(AmzS3.class))
+        .orElse(context.getRequiredTestMethod().getAnnotation(AmzS3.class));
+
+    if (amzS3Config != null) {
+      String key = context.getRequiredTestClass() + AMAZON_S3_REGION_STORE_SUFFIX;
+      context.getStore(ExtensionContext.Namespace.GLOBAL).put(key, amzS3Config.region());
     }
   }
 
@@ -66,6 +85,9 @@ public class LocalS3Extension implements BeforeAllCallback, AfterAllCallback, Be
       shutdown(localS3ForAll.get());
       localS3ForAll.remove();
     }
+
+    String key = context.getRequiredTestClass() + AMAZON_S3_REGION_STORE_SUFFIX;
+    context.getStore(ExtensionContext.Namespace.GLOBAL).remove(key);
   }
 
   @SneakyThrows

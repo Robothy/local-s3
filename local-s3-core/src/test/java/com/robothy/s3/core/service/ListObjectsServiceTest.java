@@ -6,16 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.robothy.s3.core.exception.LocalS3InvalidArgumentException;
 import com.robothy.s3.core.model.answers.ListObjectsAns;
-import com.robothy.s3.core.model.internal.ObjectMetadata;
 import com.robothy.s3.core.model.request.PutObjectOptions;
 import com.robothy.s3.datatypes.response.S3Object;
 import java.io.ByteArrayInputStream;
-import java.util.Map;
-import java.util.NavigableMap;
-import java.util.concurrent.ConcurrentSkipListMap;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -114,27 +109,6 @@ class ListObjectsServiceTest extends LocalS3ServiceTestBase {
     assertEquals("dir1%40/", listObjectsAns2.getCommonPrefixes().get(0));
   }
 
-  @Test
-  void filterByPrefix() {
 
-    NavigableMap<String, ObjectMetadata> filtered = ListObjectsService.filterByPrefix(new ConcurrentSkipListMap<>(Map.of()), "prefix");
-    assertEquals(0, filtered.size());
-
-    ObjectMetadata object = new ObjectMetadata();
-    NavigableMap<String, ObjectMetadata> filtered1 = ListObjectsService.filterByPrefix(new ConcurrentSkipListMap<>(
-      Map.of("prefix", object, "prefiu", object, "prefix1", object)), "prefix");
-    assertEquals(2, filtered1.size());
-
-    NavigableMap<String, ObjectMetadata> filtered2 = ListObjectsService.filterByPrefix(new ConcurrentSkipListMap<>(Map.of("prefix", object)), null);
-    assertEquals(1, filtered2.size());
-
-    NavigableMap<String, ObjectMetadata> filtered3 = ListObjectsService.filterByPrefix(new ConcurrentSkipListMap<>(Map.of(
-      "prefix1", object, "prefix2", object, "prefiy", object)), "prefix");
-    assertEquals(2, filtered3.size());
-
-    NavigableMap<String, ObjectMetadata> filtered4 = ListObjectsService.filterByPrefix(new ConcurrentSkipListMap<>(Map.of(
-      "prefiy", object, "prefiz", object)), "prefix");
-    assertEquals(0, filtered4.size());
-  }
 
 }

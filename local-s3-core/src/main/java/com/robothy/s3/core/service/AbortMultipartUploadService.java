@@ -39,6 +39,10 @@ public interface AbortMultipartUploadService extends LocalS3MetadataApplicable, 
       storage().delete(part.getFileId());
     });
 
+    if (uploads.get(objectKey).isEmpty()) {
+      uploads.remove(objectKey);
+    }
+
     // help GC.
     uploadMetadata.getParts().clear();
   }

@@ -43,8 +43,8 @@ public interface ListObjectsService extends LocalS3MetadataApplicable {
     if (Objects.nonNull(prefix) && Objects.nonNull(delimiter) && prefix.contains(delimiter)) {
       delimiter = null;
     }
-    NavigableMap<String, ObjectMetadata> objectsAfterMarker = filterByMarkerDelimiter(bucketMetadata, marker, delimiter);
-    NavigableMap<String, ObjectMetadata> filteredByPrefix = filterByPrefix(objectsAfterMarker, prefix);
+    NavigableMap<String, ObjectMetadata> objectsAfterMarker = ListItemUtils.filterByKeyMarkerAndDelimiter(bucketMetadata.getObjectMap(), marker, delimiter);
+    NavigableMap<String, ObjectMetadata> filteredByPrefix = ListItemUtils.filterByPrefix(objectsAfterMarker, prefix);
 
     ListObjectsAns listObjectsAns = listObjectsAndCommonPrefixes(filteredByPrefix, delimiter, maxKeys);
     listObjectsAns.setDelimiter(originalDelimiter);
@@ -52,50 +52,6 @@ public interface ListObjectsService extends LocalS3MetadataApplicable {
     listObjectsAns.setPrefix(Objects.isNull(prefix) ? "" : prefix);
     encodeIfNeeded(listObjectsAns, encodingType);
     return listObjectsAns;
-  }
-
-  static NavigableMap<String, ObjectMetadata> filterByMarkerDelimiter(BucketMetadata bucketMetadata, String marker, String delimiter) {
-    if (Objects.isNull(marker)) {
-      return bucketMetadata.getObjectMap();
-    }
-
-    NavigableMap<String, ObjectMetadata> filteredByMarker = bucketMetadata.getObjectMap().tailMap(marker, false);
-    if (Objects.isNull(delimiter) || filteredByMarker.isEmpty()) {
-      return filteredByMarker;
-    }
-
-    String firstKey = filteredByMarker.firstKey();
-    String firstKeyCommonPrefix;
-    if (!firstKey.contains(delimiter) || (firstKeyCommonPrefix = calculateCommonPrefix(firstKey, delimiter)).compareTo(marker) > 0) {
-      return filteredByMarker;
-    }
-
-    String fromKey = filteredByMarker.ceilingKey(firstKeyCommonPrefix + Character.MAX_VALUE);
-    if (Objects.isNull(fromKey)) {
-      return EMPTY_OBJECT_MAP;
-    }
-    return filteredByMarker.tailMap(fromKey, true);
-  }
-
-
-
-  static NavigableMap<String, ObjectMetadata> filterByPrefix(NavigableMap<String, ObjectMetadata> objectsAfterMarker, String prefix) {
-    if (Objects.isNull(prefix) || objectsAfterMarker.isEmpty()) {
-      return objectsAfterMarker;
-    }
-
-    String fromKey = objectsAfterMarker.floorKey(prefix);
-    String toKey = objectsAfterMarker.floorKey(prefix + Character.MAX_VALUE);
-    if (Objects.isNull(toKey)) {
-      return EMPTY_OBJECT_MAP;
-    }
-
-    if (Objects.isNull(fromKey)) {
-      return objectsAfterMarker.headMap(toKey, true);
-    }
-
-    boolean fromKeyInclusive = fromKey.startsWith(prefix);
-    return objectsAfterMarker.subMap(fromKey, fromKeyInclusive, toKey, true);
   }
 
   static ListObjectsAns listObjectsAndCommonPrefixes(NavigableMap<String, ObjectMetadata> filteredObjects, String delimiter, int maxKeys) {
@@ -119,7 +75,7 @@ public interface ListObjectsService extends LocalS3MetadataApplicable {
       }
 
       if (Objects.nonNull(delimiter) && key.contains(delimiter)) {
-        commonPrefixes.add(calculateCommonPrefix(key, delimiter));
+        commonPrefixes.add(ListItemUtils.calculateCommonPrefix(key, delimiter));
       } else {
         objects.add(fetchLatestObject(key, filteredObjects.get(key)));
       }
@@ -149,7 +105,7 @@ public interface ListObjectsService extends LocalS3MetadataApplicable {
       return keyIterator.hasNext() ? currentKey : null;
     }
 
-    String commonPrefix = calculateCommonPrefix(currentKey, delimiter);
+    String commonPrefix = ListItemUtils.calculateCommonPrefix(currentKey, delimiter);
 
     while (keyIterator.hasNext()) {
       String key = keyIterator.next();
@@ -159,10 +115,6 @@ public interface ListObjectsService extends LocalS3MetadataApplicable {
     }
 
     return null;
-  }
-
-  static String calculateCommonPrefix(String key, String delimiter) {
-    return key.substring(0, key.indexOf(delimiter) + delimiter.length());
   }
 
   static S3Object fetchLatestObject(String key, ObjectMetadata objectMetadata) {
