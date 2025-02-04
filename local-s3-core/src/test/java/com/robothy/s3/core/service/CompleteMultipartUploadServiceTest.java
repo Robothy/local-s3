@@ -29,7 +29,7 @@ class CompleteMultipartUploadServiceTest extends LocalS3ServiceTestBase {
 
     assertThrows(BucketNotExistException.class, () -> objectService.completeMultipartUpload(bucket, key, "123", null));
     bucketService.createBucket(bucket);
-    assertThrows(ObjectNotExistException.class, () -> objectService.completeMultipartUpload(bucket, key, "123", null));
+    assertThrows(UploadNotExistException.class, () -> objectService.completeMultipartUpload(bucket, key, "123", null));
 
     String uploadId = objectService.createMultipartUpload(bucket, key, CreateMultipartUploadOptions.builder()
         .contentType("plain/text")
