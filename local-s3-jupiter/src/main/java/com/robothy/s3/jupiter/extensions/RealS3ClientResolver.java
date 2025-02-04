@@ -1,6 +1,7 @@
 package com.robothy.s3.jupiter.extensions;
 
 import static com.robothy.s3.jupiter.extensions.LocalS3Extension.AMAZON_S3_REGION_STORE_SUFFIX;
+import java.util.Optional;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
@@ -12,8 +13,8 @@ import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 
 public class RealS3ClientResolver implements ParameterResolver {
 
-  private static final String AWS_ACCESS_KEY_ENV = "AWS_ACCESS_KEY_ID";
-  private static final String AWS_SECRET_KEY_ENV = "AWS_SECRET_ACCESS_KEY";
+  public static final String AWS_ACCESS_KEY_ENV = "AWS_ACCESS_KEY_ID";
+  public static final String AWS_SECRET_KEY_ENV = "AWS_SECRET_ACCESS_KEY";
 
   @Override
   public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
@@ -22,8 +23,10 @@ public class RealS3ClientResolver implements ParameterResolver {
   }
 
   private StaticCredentialsProvider getCredentialsProvider() {
-    String accessKey = System.getenv(AWS_ACCESS_KEY_ENV);
-    String secretKey = System.getenv(AWS_SECRET_KEY_ENV);
+    String accessKey = Optional.ofNullable(System.getenv(AWS_ACCESS_KEY_ENV))
+        .orElse(System.getProperty(AWS_ACCESS_KEY_ENV));
+    String secretKey = Optional.ofNullable(System.getenv(AWS_SECRET_KEY_ENV))
+        .orElse(System.getProperty(AWS_SECRET_KEY_ENV));
 
     if (accessKey == null || secretKey == null) {
       throw new IllegalStateException(
