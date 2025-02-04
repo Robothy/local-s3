@@ -60,9 +60,13 @@ public class LocalS3Extension implements BeforeAllCallback, AfterAllCallback, Be
 
 
   void setAmzConfig(ExtensionContext context) {
-    AmzS3 amzS3Config = Optional.ofNullable(context.getRequiredTestClass().getAnnotation(AmzS3.class))
-        .orElse(context.getRequiredTestMethod().getAnnotation(AmzS3.class));
+    AmzS3 amzS3ConfigFromTestMethod = context.getTestMethod().map(testMethod -> testMethod.getAnnotation(AmzS3.class))
+        .orElse(null);
 
+    AmzS3 amzS3ConfigFromTestClass = context.getTestClass().map(testClass -> testClass.getAnnotation(AmzS3.class))
+        .orElse(null);
+
+    AmzS3 amzS3Config = Optional.ofNullable(amzS3ConfigFromTestMethod).orElse(amzS3ConfigFromTestClass);
     if (amzS3Config != null) {
       String key = context.getRequiredTestClass() + AMAZON_S3_REGION_STORE_SUFFIX;
       context.getStore(ExtensionContext.Namespace.GLOBAL).put(key, amzS3Config.region());
