@@ -1,6 +1,5 @@
 package com.robothy.s3.core.asserionts;
 
-import com.robothy.s3.core.exception.ObjectNotExistException;
 import com.robothy.s3.core.exception.UploadNotExistException;
 import com.robothy.s3.core.model.internal.BucketMetadata;
 import com.robothy.s3.core.model.internal.UploadMetadata;
@@ -19,9 +18,9 @@ public class UploadAssertions {
    * @param key the object key.
    * @return the {@linkplain UploadMetadata} map of the specified key.
    */
-  public static NavigableMap<String, UploadMetadata> assertKeyExists(BucketMetadata bucketMetadata, String key) {
+  public static NavigableMap<String, UploadMetadata> assertKeyExists(BucketMetadata bucketMetadata, String key, String uploadId) {
     if (!bucketMetadata.getUploads().containsKey(key)) {
-      throw new ObjectNotExistException(key);
+      throw new UploadNotExistException(key, uploadId);
     }
     return bucketMetadata.getUploads().get(key);
   }
@@ -35,7 +34,7 @@ public class UploadAssertions {
    * @return the upload metadata of specified upload ID.
    */
   public static UploadMetadata assertUploadExists(BucketMetadata bucketMetadata, String key, String uploadId) {
-    NavigableMap<String, UploadMetadata> uploadMetadataMap = assertKeyExists(bucketMetadata, key);
+    NavigableMap<String, UploadMetadata> uploadMetadataMap = assertKeyExists(bucketMetadata, key, uploadId);
     if (!uploadMetadataMap.containsKey(uploadId)) {
       throw new UploadNotExistException(key, uploadId);
     }

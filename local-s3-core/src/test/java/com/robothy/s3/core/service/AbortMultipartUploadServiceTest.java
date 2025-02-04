@@ -45,6 +45,24 @@ class AbortMultipartUploadServiceTest extends LocalS3ServiceTestBase {
         objectService.completeMultipartUpload(bucketName, "a.txt", uploadId2, List.of(CompleteMultipartUploadPartOption.builder()
             .partNumber(1)
             .build())));
+
+
+    String uploadId3 = objectService.createMultipartUpload(bucketName, "a.txt", CreateMultipartUploadOptions.builder()
+        .contentType("text/plain")
+        .build());
+    objectService.uploadPart(bucketName, "a.txt", uploadId3, 1, UploadPartOptions.builder()
+        .contentLength(5)
+        .data(new ByteArrayInputStream("Hello".getBytes()))
+        .build());
+    String uploadId4 = objectService.createMultipartUpload(bucketName, "a.txt", CreateMultipartUploadOptions.builder()
+        .contentType("text/plain")
+        .build());
+    objectService.uploadPart(bucketName, "a.txt", uploadId4, 1, UploadPartOptions.builder()
+        .contentLength(5)
+        .data(new ByteArrayInputStream("Hello".getBytes()))
+        .build());
+    assertDoesNotThrow(() -> objectService.abortMultipartUpload(bucketName, "a.txt", uploadId3));
+    assertDoesNotThrow(() -> objectService.abortMultipartUpload(bucketName, "a.txt", uploadId3));
   }
 
 }

@@ -445,7 +445,7 @@ public class LocalS3RouterFactory {
         .method(HttpMethod.GET)
         .path(BUCKET_PATH)
         .paramMatcher(params -> params.containsKey("uploads"))
-        .handler(new NotImplementedOperationController(serviceFactory, "ListMultipartUploads"))
+        .handler(new ListMultipartUploadsController(serviceFactory))
         .build();
 
     Route ListObjects = Route.builder()
@@ -695,7 +695,6 @@ public class LocalS3RouterFactory {
         .path("/WriteGetObjectResponse")
         .handler(new NotImplementedOperationController(serviceFactory, "WriteGetObjectResponse"))
         .build();
-
 
 
 //    Route GetBucket = Route.builder()

@@ -24,7 +24,7 @@ class UploadPartServiceTest extends LocalS3ServiceTestBase {
     String key = "a.txt";
     bucketService.createBucket(bucket);
 
-    assertThrows(ObjectNotExistException.class, () -> objectService.uploadPart(bucket, key, "123", 1, null));
+    assertThrows(UploadNotExistException.class, () -> objectService.uploadPart(bucket, key, "123", 1, null));
     String uploadId = objectService.createMultipartUpload(bucket, key,
         CreateMultipartUploadOptions.builder().contentType("plain/text").build());
     assertThrows(UploadNotExistException.class, () -> objectService.uploadPart(bucket, key, "123", 1, null));

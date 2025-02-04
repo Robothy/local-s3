@@ -1,10 +1,6 @@
 package com.robothy.s3.test;
 
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.*;
 import com.robothy.s3.jupiter.LocalS3;
 import org.apache.commons.codec.digest.DigestUtils;
