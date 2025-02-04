@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.robothy.s3.core.exception.LocalS3InvalidArgumentException;
 import com.robothy.s3.core.model.answers.ListMultipartUploadsAns;
 import com.robothy.s3.core.model.internal.UploadMetadata;
+import java.util.Collections;
 import java.util.Iterator;
 import org.junit.jupiter.api.Test;
 import java.util.NavigableMap;
@@ -24,12 +25,14 @@ class ListMultipartUploadsServiceTest {
         .nextKeyMarker("nextKeyMarker")
         .uploadIdMarker("uploadIdMarker")
         .nextUploadIdMarker("nextUploadIdMarker")
+        .uploads(Collections.singletonList(UploadItem.builder().key("key1").build()))
+        .commonPrefixes(Collections.singletonList("prefix1"))
         .build();
 
     ListMultipartUploadsAns encodedResult = ListMultipartUploadsService.encodeResultIfNeeded(result, "url");
 
-    assertEquals("test%2Fprefix", encodedResult.getPrefix());
-    assertEquals("%2F", encodedResult.getDelimiter());
+    assertEquals("test/prefix", encodedResult.getPrefix());
+    assertEquals("/", encodedResult.getDelimiter());
     assertEquals("keyMarker", encodedResult.getKeyMarker());
     assertEquals("nextKeyMarker", encodedResult.getNextKeyMarker());
     assertEquals("uploadIdMarker", encodedResult.getUploadIdMarker());
@@ -124,7 +127,7 @@ class ListMultipartUploadsServiceTest {
     map.put("key2/part1", new TreeMap<>());
     Iterator<Map.Entry<String, NavigableMap<String, UploadMetadata>>> iterator = map.entrySet().iterator();
     String nextKeyMarker = ListMultipartUploadsService.calculateNextKeyMarker(iterator, "key1/part1", "/");
-    assertEquals("key1/part1", nextKeyMarker);
+    assertEquals("key1/", nextKeyMarker);
   }
 
   @Test
