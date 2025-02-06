@@ -8,7 +8,6 @@ import com.robothy.s3.rest.constants.AmzHeaderValues;
 import com.robothy.s3.rest.model.request.DecodedAmzRequestBody;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.handler.codec.http.HttpHeaderNames;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -20,23 +19,6 @@ import org.apache.commons.lang3.StringUtils;
 public class RequestUtils {
 
   /**
-   * Get request body as decoded input stream.
-   *
-   * @param request HTTP request.
-   * @return decoded input stream.
-   */
-  @Deprecated
-  public static InputStream getInputStream(HttpRequest request) {
-    InputStream inputStream = new ByteBufInputStream(request.getBody());
-    if (request.header(AmzHeaderNames.X_AMZ_CONTENT_SHA256)
-        .map(AmzHeaderValues.STREAMING_AWS4_HMAC_SHA_256_PAYLOAD::equals).orElse(false)) {
-      return InputStreamUtils.decodeAwsChunkedEncodingInputStream(inputStream);
-    } else {
-      return inputStream;
-    }
-  }
-
-  /**
    * Get the decoded request body. Decode the request body if needed.
    *
    * @param request HTTP request.
@@ -44,16 +26,25 @@ public class RequestUtils {
    */
   public static DecodedAmzRequestBody getBody(HttpRequest request) {
     DecodedAmzRequestBody result = new DecodedAmzRequestBody();
-    if (request.header(AmzHeaderNames.X_AMZ_CONTENT_SHA256)
-        .map(AmzHeaderValues.STREAMING_AWS4_HMAC_SHA_256_PAYLOAD::equals).orElse(false)) {
-      result.setDecodedBody(new AwsChunkedDecodingInputStream(new ByteBufInputStream(request.getBody())));
-      result.setDecodedContentLength(request.header(AmzHeaderNames.X_AMZ_DECODED_CONTENT_LENGTH).map(Long::parseLong)
-          .orElseThrow(() -> new IllegalArgumentException(AmzHeaderNames.X_AMZ_DECODED_CONTENT_LENGTH + "header not exist.")));
-    } else {
-      result.setDecodedBody(new ByteBufInputStream(request.getBody()));
-      result.setDecodedContentLength(request.header(HttpHeaderNames.CONTENT_LENGTH.toString()).map(Long::parseLong)
-          .orElseThrow(() -> new IllegalArgumentException("Content-Type is required.")));
+
+    String amzContentSha256 = request.header(AmzHeaderNames.X_AMZ_CONTENT_SHA256).orElse("");
+    switch (amzContentSha256) {
+      case AmzHeaderValues.STREAMING_AWS4_HMAC_SHA_256_PAYLOAD:
+        result.setDecodedBody(new AwsChunkedDecodingInputStream(new ByteBufInputStream(request.getBody())));
+        result.setDecodedContentLength(request.header(AmzHeaderNames.X_AMZ_DECODED_CONTENT_LENGTH).map(Long::parseLong)
+            .orElseThrow(() -> new IllegalArgumentException(AmzHeaderNames.X_AMZ_DECODED_CONTENT_LENGTH + "header not exist.")));
+        break;
+      case AmzHeaderValues.STREAMING_UNSIGNED_PAYLOAD_TRAILER:
+        result.setDecodedBody(new AwsUnsignedChunkedDecodingInputStream(new ByteBufInputStream(request.getBody())));
+        result.setDecodedContentLength(request.header(AmzHeaderNames.X_AMZ_DECODED_CONTENT_LENGTH).map(Long::parseLong)
+            .orElseThrow(() -> new IllegalArgumentException(AmzHeaderNames.X_AMZ_DECODED_CONTENT_LENGTH + "header not exist.")));
+        break;
+      default:
+        result.setDecodedBody(new ByteBufInputStream(request.getBody()));
+        result.setDecodedContentLength(request.header(HttpHeaderNames.CONTENT_LENGTH.toString()).map(Long::parseLong)
+            .orElseThrow(() -> new IllegalArgumentException("Content-Length is required.")));
     }
+
     return result;
   }
 
@@ -101,12 +92,12 @@ public class RequestUtils {
   public static Map<String, String> extractUserMetadata(HttpRequest request) {
     Map<String, String> userMetadata = new HashMap<>();
     request.getHeaders()
-      .forEach((k, v) -> {
-        if (k.toString().startsWith(AmzHeaderNames.X_AMZ_META_PREFIX)) {
-          String metaName = RequestAssertions.assertUserMetadataHeaderIsValid(k.toString());
-          userMetadata.put(metaName, v);
-        }
-      });
+        .forEach((k, v) -> {
+          if (k.toString().startsWith(AmzHeaderNames.X_AMZ_META_PREFIX)) {
+            String metaName = RequestAssertions.assertUserMetadataHeaderIsValid(k.toString());
+            userMetadata.put(metaName, v);
+          }
+        });
     return userMetadata;
   }
 
