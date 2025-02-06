@@ -6,10 +6,8 @@ import com.robothy.s3.rest.assertions.RequestAssertions;
 import com.robothy.s3.rest.constants.AmzHeaderNames;
 import com.robothy.s3.rest.constants.AmzHeaderValues;
 import com.robothy.s3.rest.model.request.DecodedAmzRequestBody;
-import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.handler.codec.http.HttpHeaderNames;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -28,29 +26,26 @@ public class RequestUtils {
    */
   public static DecodedAmzRequestBody getBody(HttpRequest request) {
     DecodedAmzRequestBody result = new DecodedAmzRequestBody();
-    if (request.header(AmzHeaderNames.X_AMZ_CONTENT_SHA256).isPresent()) {
-      String amzContentSha256 = request.header(AmzHeaderNames.X_AMZ_CONTENT_SHA256).get();
-      result.setDecodedBody(decodeRequestBody(amzContentSha256, request.getBody()));
-      result.setDecodedContentLength(request.header(AmzHeaderNames.X_AMZ_DECODED_CONTENT_LENGTH).map(Long::parseLong)
-          .orElseThrow(() -> new IllegalArgumentException(AmzHeaderNames.X_AMZ_DECODED_CONTENT_LENGTH + "header not exist.")));
-    } else {
-      result.setDecodedBody(new ByteBufInputStream(request.getBody()));
-      result.setDecodedContentLength(request.header(HttpHeaderNames.CONTENT_LENGTH.toString()).map(Long::parseLong)
-          .orElseThrow(() -> new IllegalArgumentException("Content-Type is required.")));
-    }
-    return result;
-  }
 
-  private static InputStream decodeRequestBody(String amzContentSha256, ByteBuf body) {
-    if (AmzHeaderValues.STREAMING_UNSIGNED_PAYLOAD_TRAILER.equals(amzContentSha256)) {
-      return new AwsUnsignedChunkedDecodingInputStream(new ByteBufInputStream(body));
-    } else if (AmzHeaderValues.STREAMING_AWS4_HMAC_SHA_256_PAYLOAD.equals(amzContentSha256)) {
-      return new AwsChunkedDecodingInputStream(new ByteBufInputStream(body));
-    } else {
-      throw new UnsupportedOperationException("Unsupported content encoding: " + amzContentSha256 + ". "
-          + "If you need this feature, please submit an issue at "
-          + "https://github.com/Robothy/local-s3/issues/new.");
+    String amzContentSha256 = request.header(AmzHeaderNames.X_AMZ_CONTENT_SHA256).orElse("");
+    switch (amzContentSha256) {
+      case AmzHeaderValues.STREAMING_AWS4_HMAC_SHA_256_PAYLOAD:
+        result.setDecodedBody(new AwsChunkedDecodingInputStream(new ByteBufInputStream(request.getBody())));
+        result.setDecodedContentLength(request.header(AmzHeaderNames.X_AMZ_DECODED_CONTENT_LENGTH).map(Long::parseLong)
+            .orElseThrow(() -> new IllegalArgumentException(AmzHeaderNames.X_AMZ_DECODED_CONTENT_LENGTH + "header not exist.")));
+        break;
+      case AmzHeaderValues.STREAMING_UNSIGNED_PAYLOAD_TRAILER:
+        result.setDecodedBody(new AwsUnsignedChunkedDecodingInputStream(new ByteBufInputStream(request.getBody())));
+        result.setDecodedContentLength(request.header(AmzHeaderNames.X_AMZ_DECODED_CONTENT_LENGTH).map(Long::parseLong)
+            .orElseThrow(() -> new IllegalArgumentException(AmzHeaderNames.X_AMZ_DECODED_CONTENT_LENGTH + "header not exist.")));
+        break;
+      default:
+        result.setDecodedBody(new ByteBufInputStream(request.getBody()));
+        result.setDecodedContentLength(request.header(HttpHeaderNames.CONTENT_LENGTH.toString()).map(Long::parseLong)
+            .orElseThrow(() -> new IllegalArgumentException("Content-Length is required.")));
     }
+
+    return result;
   }
 
   public static Optional<String> getETag(HttpRequest request) {
@@ -97,12 +92,12 @@ public class RequestUtils {
   public static Map<String, String> extractUserMetadata(HttpRequest request) {
     Map<String, String> userMetadata = new HashMap<>();
     request.getHeaders()
-      .forEach((k, v) -> {
-        if (k.toString().startsWith(AmzHeaderNames.X_AMZ_META_PREFIX)) {
-          String metaName = RequestAssertions.assertUserMetadataHeaderIsValid(k.toString());
-          userMetadata.put(metaName, v);
-        }
-      });
+        .forEach((k, v) -> {
+          if (k.toString().startsWith(AmzHeaderNames.X_AMZ_META_PREFIX)) {
+            String metaName = RequestAssertions.assertUserMetadataHeaderIsValid(k.toString());
+            userMetadata.put(metaName, v);
+          }
+        });
     return userMetadata;
   }
 
