@@ -23,8 +23,10 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.jupiter.api.Test;
+import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 
 public class PutObjectIntegrationTest {
 
@@ -81,5 +83,23 @@ public class PutObjectIntegrationTest {
     assertDoesNotThrow(() -> s3Client.headObject(b -> b.bucket(bucketName).key(objectKeyWithPlusSign)));
   }
 
+  @Test
+  @LocalS3
+  void testPutObjectWithS3Client(S3Client client) throws Exception {
+    String bucketName = "my-bucket";
+    client.createBucket(b -> b.bucket(bucketName));
+    String objectKey = "hello.txt";
+    String content = "Hello";
+    for (int i = 0; i < 13; i++) {
+      content += content;
+    }
+
+    String finalContent = content;
+    client.putObject(b -> b.bucket(bucketName).key("hello.txt")
+        .contentLength((long) finalContent.length()), RequestBody.fromString(content));
+    ResponseBytes<GetObjectResponse> gotObjectAsBytes = client.getObjectAsBytes(b -> b.bucket(bucketName).key(objectKey));
+    System.out.println("Content-Length: " + content.length());
+    assertEquals(content, gotObjectAsBytes.asUtf8String());
+  }
 
 }
