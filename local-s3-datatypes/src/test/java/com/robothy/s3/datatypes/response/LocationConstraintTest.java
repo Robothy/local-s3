@@ -12,7 +12,7 @@ class LocationConstraintTest {
     LocationConstraint locationConstraint = LocationConstraint.builder()
         .locationConstraint("local")
         .build();
-    assertEquals("<LocationConstraint><LocationConstraint>local</LocationConstraint></LocationConstraint>", xmlMapper.writeValueAsString(locationConstraint));
+    assertEquals("<LocationConstraint>local</LocationConstraint>", xmlMapper.writeValueAsString(locationConstraint));
   }
 
 }

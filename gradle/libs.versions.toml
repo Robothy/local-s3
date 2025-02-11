@@ -23,6 +23,7 @@ gradleLombok = "5.0.0"
 logbackClassic = { group = "ch.qos.logback", name = "logback-classic", version.ref = "logback" }
 awsJavaSdk = { group = "com.amazonaws", name = "aws-java-sdk", version.ref = "awsJavaSdk" }
 awssdkS3 = { group = "software.amazon.awssdk", name = "s3", version.ref = "awssdkS3" }
+awss3ApacheClient = { group = "software.amazon.awssdk", name = "apache-client", version.ref = "awssdkS3" }
 jacksonDatabind = { group = "com.fasterxml.jackson.core", name = "jackson-databind", version.ref = "jackson" }
 jacksonDataformatXml = { group = "com.fasterxml.jackson.dataformat", name = "jackson-dataformat-xml", version.ref = "jackson" }
 jacksonDatatypeJdk8 = { group = "com.fasterxml.jackson.datatype", name = "jackson-datatype-jdk8", version.ref = "jackson" }
