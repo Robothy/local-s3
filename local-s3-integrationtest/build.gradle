@@ -10,6 +10,6 @@ dependencies {
     testImplementation(project(":local-s3-rest"))
 
     testImplementation(libs.awssdkS3)
-    testImplementation(libs.awsJavaSdk)
+    testImplementation(libs.awss3ApacheClient)
     testRuntimeOnly(libs.logbackClassic)
 }

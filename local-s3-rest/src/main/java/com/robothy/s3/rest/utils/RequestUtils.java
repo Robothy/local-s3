@@ -101,4 +101,9 @@ public class RequestUtils {
     return userMetadata;
   }
 
+
+  public boolean isSdk1() {
+    return false;
+  }
+
 }

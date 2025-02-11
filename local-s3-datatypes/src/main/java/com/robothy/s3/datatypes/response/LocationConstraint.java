@@ -1,7 +1,7 @@
 package com.robothy.s3.datatypes.response;
 
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlText;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @JacksonXmlRootElement(localName = "LocationConstraint")
 public class LocationConstraint {
 
-  @JacksonXmlProperty(localName = "LocationConstraint")
+  @JacksonXmlText
   private String locationConstraint;
 
 }

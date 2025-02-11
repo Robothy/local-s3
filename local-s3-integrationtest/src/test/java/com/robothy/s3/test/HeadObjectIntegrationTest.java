@@ -1,43 +1,38 @@
 package com.robothy.s3.test;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.robothy.s3.jupiter.LocalS3;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 
 public class HeadObjectIntegrationTest {
 
   @Test
   @LocalS3
-  void testHeadObject(AmazonS3 s3) {
-    String bucketName = "my-bucket";
-    s3.createBucket(bucketName);
-    s3.putObject(bucketName, "a.txt",  "Hello");
+  void testHeadObject(S3Client s3Client) {
+    s3Client.createBucket(builder -> builder.bucket("my-bucket"));
+    s3Client.putObject(builder -> builder.bucket("my-bucket").key("a.txt"), RequestBody.fromString("Hello"));
 
-    ObjectMetadata metadata = new ObjectMetadata();
-    metadata.getUserMetadata().put("meta-key", "meta-value");
-    PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, "a.txt", "Hello")
-        .withMetadata(metadata);
+    PutObjectResponse putObjectResponse = s3Client.putObject(builder -> builder.bucket("my-bucket")
+            .key("a.txt")
+            .metadata(Map.of("meta-key", "meta-value")),
+        RequestBody.fromString("Hello"));
 
-    s3.putObject(putObjectRequest);
+    HeadObjectResponse headObjectResponse = s3Client.headObject(builder -> builder.bucket("my-bucket").key("a.txt"));
+    assertTrue(headObjectResponse.metadata().containsKey("meta-key"));
+    assertEquals("meta-value", headObjectResponse.metadata().get("meta-key"));
 
-    ObjectMetadata objectMetadata = s3.getObjectMetadata(bucketName, "a.txt");
-    assertTrue(objectMetadata.getUserMetadata().containsKey("meta-key"));
-    assertEquals("meta-value", objectMetadata.getUserMetadata().get("meta-key"));
-
-    assertTrue(s3.doesObjectExist(bucketName, "a.txt"));
-
-    s3.deleteObject(bucketName, "a.txt");
-    assertFalse(s3.doesObjectExist(bucketName, "a.txt"));
+    assertDoesNotThrow(() -> s3Client.headObject(builder -> builder.bucket("my-bucket").key("a.txt")));
+    s3Client.deleteObject(builder -> builder.bucket("my-bucket").key("a.txt"));
+    assertThrows(NoSuchKeyException.class, () -> s3Client.headObject(builder -> builder.bucket("my-bucket").key("a.txt")));
   }
 
   @Test
@@ -65,6 +60,5 @@ public class HeadObjectIntegrationTest {
     assertTrue(headObjectResponse2.metadata().containsKey("meta-k2"));
     assertEquals("meta-v2", headObjectResponse2.metadata().get("meta-k2"));
   }
-
 
 }

@@ -14,7 +14,7 @@ pluginManagement {
 }
 
 rootProject.name = 'local-s3'
-include 'local-s3-interationtest'
+include 'local-s3-integrationtest'
 include 'local-s3-core'
 include 'local-s3-rest'
 include 'local-s3-jupiter'
