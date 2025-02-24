@@ -122,6 +122,9 @@ public class LocalS3 {
 
     XMLInputFactory input = new WstxInputFactory();
     input.setProperty(XMLInputFactory.IS_NAMESPACE_AWARE, Boolean.FALSE);
+    input.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE); // Disable DTDs
+    input.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE); // Disable external entities
+
     XmlMapper xmlMapper = new XmlMapper(new XmlFactory(input, new WstxOutputFactory()));
     xmlMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     xmlMapper.registerModule(new Jdk8Module());
