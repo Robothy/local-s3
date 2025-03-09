@@ -1,6 +1,6 @@
 [versions]
 logback = "1.3.14"
-awsJavaSdk = "1.12.777"
+awsJavaSdk = "1.12.782"
 awssdkS3 = "2.30.11"
 jackson = "2.18.1"
 nettyHttpRouter = "1.15"
