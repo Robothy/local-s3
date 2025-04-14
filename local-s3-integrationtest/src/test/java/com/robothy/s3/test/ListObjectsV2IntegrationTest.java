@@ -33,7 +33,7 @@ public class ListObjectsV2IntegrationTest {
     assertNotEquals(Boolean.TRUE, result1.isTruncated());
     assertEquals(bucket, result1.name());
     assertNull(result1.nextContinuationToken());
-    assertNull(result1.prefix());
+    assertEquals("", result1.prefix());
     assertNull(result1.delimiter());
     assertEquals(1000, result1.maxKeys());
     assertNull(result1.encodingType());
@@ -65,7 +65,7 @@ public class ListObjectsV2IntegrationTest {
     assertFalse(Boolean.TRUE.equals(objectsV2Result.isTruncated()));
     assertEquals(bucket, objectsV2Result.name());
     assertNull(objectsV2Result.nextContinuationToken());
-    assertNull(objectsV2Result.prefix());
+    assertEquals("", objectsV2Result.prefix());
     assertNull(objectsV2Result.delimiter());
     assertEquals(1000, objectsV2Result.maxKeys());
     assertEquals(EncodingType.URL, objectsV2Result.encodingType());
@@ -93,7 +93,7 @@ public class ListObjectsV2IntegrationTest {
     assertEquals(bucketName, objectsV2Result.name());
     assertEquals(3, objectsV2Result.keyCount());
     assertNull(objectsV2Result.nextContinuationToken());
-    assertNull(objectsV2Result.prefix());
+    assertEquals("", objectsV2Result.prefix());
     assertEquals("/", objectsV2Result.delimiter());
     assertEquals(1000, objectsV2Result.maxKeys());
     assertNull(objectsV2Result.encodingType());
@@ -231,7 +231,7 @@ public class ListObjectsV2IntegrationTest {
     assertEquals(2, objectsV2Result2.contents().size());
     assertEquals(0, objectsV2Result2.commonPrefixes().size());
     assertEquals(2, objectsV2Result2.keyCount());
-    assertNull(objectsV2Result2.prefix());
+    assertEquals("", objectsV2Result2.prefix());
     assertEquals(1000, objectsV2Result2.maxKeys());
     assertNull(objectsV2Result2.startAfter());
     assertNull(objectsV2Result2.nextContinuationToken());
@@ -292,7 +292,7 @@ public class ListObjectsV2IntegrationTest {
     assertEquals(2, objectsV2Result.keyCount());
     assertEquals(2, objectsV2Result.maxKeys());
     assertNotNull(objectsV2Result.nextContinuationToken());
-    assertNull(objectsV2Result.prefix());
+    assertEquals("", objectsV2Result.prefix());
     assertNull(objectsV2Result.delimiter());
     assertNull(objectsV2Result.encodingType());
     assertNull(objectsV2Result.continuationToken());
@@ -308,7 +308,7 @@ public class ListObjectsV2IntegrationTest {
     assertEquals(2, objectsV2Result1.keyCount());
     assertEquals(1000, objectsV2Result1.maxKeys());
     assertNull(objectsV2Result1.nextContinuationToken());
-    assertNull(objectsV2Result1.prefix());
+    assertEquals("", objectsV2Result1.prefix());
     assertNull(objectsV2Result1.delimiter());
     assertNull(objectsV2Result1.encodingType());
     assertEquals(objectsV2Result.nextContinuationToken(), objectsV2Result1.continuationToken());
@@ -327,7 +327,7 @@ public class ListObjectsV2IntegrationTest {
     assertEquals(1, objectsV2Result2.keyCount());
     assertEquals(1, objectsV2Result2.maxKeys());
     assertNotNull(objectsV2Result2.nextContinuationToken());
-    assertNull(objectsV2Result2.prefix());
+    assertEquals("", objectsV2Result2.prefix());
     assertNull(objectsV2Result2.delimiter());
     assertNull(objectsV2Result2.encodingType());
     assertEquals(objectsV2Result.nextContinuationToken(), objectsV2Result2.continuationToken());
@@ -344,7 +344,7 @@ public class ListObjectsV2IntegrationTest {
     assertEquals(1, objectsV2Result3.keyCount());
     assertEquals(1000, objectsV2Result3.maxKeys());
     assertNull(objectsV2Result3.nextContinuationToken());
-    assertNull(objectsV2Result3.prefix());
+    assertEquals("", objectsV2Result3.prefix());
     assertNull(objectsV2Result3.delimiter());
     assertNull(objectsV2Result3.encodingType());
     assertEquals(objectsV2Result2.nextContinuationToken(), objectsV2Result3.continuationToken());
@@ -379,7 +379,7 @@ public class ListObjectsV2IntegrationTest {
     assertEquals(2, objectsV2Result1.keyCount());
     assertEquals(1000, objectsV2Result1.maxKeys());
     assertNull(objectsV2Result1.nextContinuationToken());
-    assertNull(objectsV2Result1.prefix());
+    assertEquals("", objectsV2Result1.prefix());
     assertNull(objectsV2Result1.delimiter());
     assertNull(objectsV2Result1.encodingType());
     assertEquals(objectsV2Result.nextContinuationToken(), objectsV2Result1.continuationToken());
@@ -402,7 +402,7 @@ public class ListObjectsV2IntegrationTest {
     assertEquals(1, objectsV2Result.keyCount());
     assertEquals(1, objectsV2Result.maxKeys());
     assertNotNull(objectsV2Result.nextContinuationToken());
-    assertNull(objectsV2Result.prefix());
+    assertEquals("", objectsV2Result.prefix());
     assertNull(objectsV2Result.delimiter());
     assertNull(objectsV2Result.encodingType());
     assertNull(objectsV2Result.continuationToken());
@@ -422,7 +422,7 @@ public class ListObjectsV2IntegrationTest {
     assertEquals(1, objectsV2Result1.keyCount());
     assertEquals(1, objectsV2Result1.maxKeys());
     assertNotNull(objectsV2Result1.nextContinuationToken());
-    assertNull(objectsV2Result1.prefix());
+    assertEquals("", objectsV2Result1.prefix());
     assertNull(objectsV2Result1.delimiter());
     assertNull(objectsV2Result1.encodingType());
     assertEquals(objectsV2Result.nextContinuationToken(), objectsV2Result1.continuationToken());
@@ -442,7 +442,7 @@ public class ListObjectsV2IntegrationTest {
     assertEquals(1, objectsV2Result2.keyCount());
     assertEquals(1, objectsV2Result2.maxKeys());
     assertNotNull(objectsV2Result2.nextContinuationToken());
-    assertNull(objectsV2Result2.prefix());
+    assertEquals("", objectsV2Result2.prefix());
     assertNull(objectsV2Result2.delimiter());
     assertNull(objectsV2Result2.encodingType());
     assertEquals(objectsV2Result1.nextContinuationToken(), objectsV2Result2.continuationToken());
@@ -450,7 +450,22 @@ public class ListObjectsV2IntegrationTest {
     assertEquals("dir2@key1", objectsV2Result2.contents().get(0).key());
   }
 
-  //@Test
+  @LocalS3
+  @Test
+  void testListObjectsWithSpecialCharsInPrefix(S3Client s3) throws Exception {
+    String bucketName = prepareKeys(s3, "é/key1");
+    ListObjectsV2Response objectsV2Result = s3.listObjectsV2(ListObjectsV2Request.builder()
+        .bucket(bucketName)
+        .prefix("é/")
+        .encodingType(EncodingType.URL)
+        .build());
+    assertEquals(1, objectsV2Result.contents().size());
+    assertEquals(0, objectsV2Result.commonPrefixes().size());
+    assertEquals(1, objectsV2Result.keyCount());
+    assertEquals("é/", objectsV2Result.prefix());
+  }
+
+//  @Test
   void test() {
     S3Client s3 = S3Client.builder()
       .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create("", "")))
