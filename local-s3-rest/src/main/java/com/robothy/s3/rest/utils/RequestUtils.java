@@ -27,18 +27,23 @@ public class RequestUtils {
   public static DecodedAmzRequestBody getBody(HttpRequest request) {
     DecodedAmzRequestBody result = new DecodedAmzRequestBody();
 
-    String amzContentSha256 = request.header(AmzHeaderNames.X_AMZ_CONTENT_SHA256).orElse("");
+    String amzContentSha256 = request.header(AmzHeaderNames.X_AMZ_CONTENT_SHA256).orElse("").trim();
     switch (amzContentSha256) {
       case AmzHeaderValues.STREAMING_AWS4_HMAC_SHA_256_PAYLOAD:
+      case AmzHeaderValues.STREAMING_AWS4_HMAC_SHA256_PAYLOAD_TRAILER:
         result.setDecodedBody(new AwsChunkedDecodingInputStream(new ByteBufInputStream(request.getBody())));
         result.setDecodedContentLength(request.header(AmzHeaderNames.X_AMZ_DECODED_CONTENT_LENGTH).map(Long::parseLong)
             .orElseThrow(() -> new IllegalArgumentException(AmzHeaderNames.X_AMZ_DECODED_CONTENT_LENGTH + "header not exist.")));
         break;
       case AmzHeaderValues.STREAMING_UNSIGNED_PAYLOAD_TRAILER:
+      case AmzHeaderValues.STREAMING_UNSIGNED_PAYLOAD:
         result.setDecodedBody(new AwsUnsignedChunkedDecodingInputStream(new ByteBufInputStream(request.getBody())));
         result.setDecodedContentLength(request.header(AmzHeaderNames.X_AMZ_DECODED_CONTENT_LENGTH).map(Long::parseLong)
             .orElseThrow(() -> new IllegalArgumentException(AmzHeaderNames.X_AMZ_DECODED_CONTENT_LENGTH + "header not exist.")));
         break;
+      case AmzHeaderValues.STREAMING_AWS4_ECDSA_P256_SHA256_PAYLOAD:
+      case AmzHeaderValues.STREAMING_AWS4_ECDSA_P256_SHA256_PAYLOAD_TRAILER:
+        throw new UnsupportedOperationException("Unsupported payload encoding: " + amzContentSha256);
       default:
         result.setDecodedBody(new ByteBufInputStream(request.getBody()));
         result.setDecodedContentLength(request.header(HttpHeaderNames.CONTENT_LENGTH.toString()).map(Long::parseLong)
