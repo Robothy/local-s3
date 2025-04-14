@@ -42,7 +42,7 @@ public interface ListObjectsV2Service extends ListObjectsService {
             .isTruncated(listObjectsAns.isTruncated())
             .keyCount(listObjectsAns.getObjects().size() + listObjectsAns.getCommonPrefixes().size())
             .maxKeys(listObjectsAns.getMaxKeys())
-            .prefix(StringUtils.isBlank(prefix) ? null : prefix)
+            .prefix(listObjectsAns.getPrefix())
             .startAfter(StringUtils.isBlank(startAfter) || StringUtils.isNotBlank(continuationToken) ? null : startAfter)
             .objects(listObjectsAns.getObjects())
             .commonPrefixes(listObjectsAns.getCommonPrefixes())
