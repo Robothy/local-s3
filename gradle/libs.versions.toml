@@ -13,7 +13,7 @@ junit5 = "5.11.4"
 mockito = "5.2.0"
 lombok = "1.18.36"
 slf4j = "2.0.16"
-testContainers = "1.20.4"
+testContainers = "1.20.6"
 apacheCommonsCompress = "1.27.1"
 
 robothyCnRepo = "1.18"
