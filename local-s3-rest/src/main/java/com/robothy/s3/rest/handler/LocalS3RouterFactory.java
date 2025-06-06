@@ -176,7 +176,7 @@ public class LocalS3RouterFactory {
         .method(HttpMethod.DELETE)
         .path(BUCKET_PATH)
         .paramMatcher(params -> params.containsKey("publicAccessBlock"))
-        .handler(new NotImplementedOperationController(serviceFactory, "DeletePublicAccessBlock"))
+        .handler(new DeletePublicAccessBlockController(serviceFactory))
         .build();
 
     Route GetBucketAccelerateConfiguration = Route.builder()
@@ -295,7 +295,7 @@ public class LocalS3RouterFactory {
         .method(HttpMethod.GET)
         .path(BUCKET_PATH)
         .paramMatcher(params -> params.containsKey("policyStatus"))
-        .handler(new NotImplementedOperationController(serviceFactory, "GetBucketPolicyStatus"))
+        .handler(new GetBucketPolicyStatusController(serviceFactory))
         .build();
 
     Route GetBucketReplication = Route.builder()
@@ -392,7 +392,7 @@ public class LocalS3RouterFactory {
         .method(HttpMethod.GET)
         .path(BUCKET_PATH)
         .paramMatcher(params -> params.containsKey("publicAccessBlock"))
-        .handler(new NotImplementedOperationController(serviceFactory, "GetPublicAccessBlock"))
+        .handler(new GetPublicAccessBlockController(serviceFactory))
         .build();
 
     Route HeadBucket = Route.builder()
@@ -658,7 +658,7 @@ public class LocalS3RouterFactory {
         .method(HttpMethod.PUT)
         .path(BUCKET_PATH)
         .paramMatcher(params -> params.containsKey("publicAccessBlock"))
-        .handler(new NotImplementedOperationController(serviceFactory, "PutPublicAccessBlock"))
+        .handler(new PutPublicAccessBlockController(serviceFactory))
         .build();
 
     Route RestoreObject = Route.builder()
