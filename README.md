@@ -50,7 +50,9 @@ and without heavy dependencies, it starts up quickly and handles requests effici
 + PutObject
 + PutObjectTagging
 + UploadPart
-
++ PubPublicAccessBlock
++ GetPublicAccessBlock
++ DeletePublicAccessBlock
 </details>
 
 

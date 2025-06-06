@@ -51,14 +51,14 @@ import org.testcontainers.utility.DockerImageName;
 
 public class ReachabilityMetadataGenerator {
 
+  private static final String NATIVE_IMAGE_TAG = "24-ol9";
+
   public static void main(String[] args) throws IOException {
     int port = 38080;
     File dataPath = Files.createTempDirectory("local-s3-data").toFile();
     dataPath.deleteOnExit();
 
-    try (CollectReachabilityMetadataContainer container = new CollectReachabilityMetadataContainer("ol9-java17-22.3.3")) {
-
-
+    try (CollectReachabilityMetadataContainer container = new CollectReachabilityMetadataContainer(NATIVE_IMAGE_TAG)) {
 
       container.port(port)
           .withFileSystemBind("build/reachability-metadata/META-INF/native-image", "/metadata", BindMode.READ_WRITE)
@@ -87,7 +87,7 @@ public class ReachabilityMetadataGenerator {
     }
 
     /*======== Load data from data path. ========*/
-    try (CollectReachabilityMetadataContainer container = new CollectReachabilityMetadataContainer("ol9-java17-22.3.3")) {
+    try (CollectReachabilityMetadataContainer container = new CollectReachabilityMetadataContainer(NATIVE_IMAGE_TAG)) {
       container.port(port)
           .withFileSystemBind("build/reachability-metadata/META-INF/native-image", "/metadata", BindMode.READ_WRITE)
           .withFileSystemBind("build/libs", "/app", BindMode.READ_WRITE)
@@ -214,7 +214,7 @@ public class ReachabilityMetadataGenerator {
    */
   static class CollectReachabilityMetadataContainer extends GenericContainer<CollectReachabilityMetadataContainer> {
     CollectReachabilityMetadataContainer(String tag) {
-      super(DockerImageName.parse("ghcr.io/graalvm/native-image").withTag(tag));
+      super(DockerImageName.parse("ghcr.io/graalvm/native-image-community").withTag(tag));
       this.waitingFor(Wait.forLogMessage("^.{1,}LocalS3 started.\n$", 1));
     }
 

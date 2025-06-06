@@ -5,6 +5,7 @@ import com.robothy.s3.core.asserionts.ObjectAssertions;
 import com.robothy.s3.core.converters.deserializer.ObjectMetadataMapConverter;
 import com.robothy.s3.core.converters.deserializer.UploadMetadataMapConverter;
 import com.robothy.s3.datatypes.AccessControlPolicy;
+import com.robothy.s3.datatypes.PublicAccessBlockConfiguration;
 import java.util.Collection;
 import java.util.Map;
 import java.util.NavigableMap;
@@ -56,6 +57,8 @@ public class BucketMetadata {
   private String replication;
 
   private String encryption;
+  
+  private PublicAccessBlockConfiguration publicAccessBlock;
 
   /**
    * Get metadata of the specified object.
@@ -163,6 +166,24 @@ public class BucketMetadata {
    */
   public void setEncryption(String encryption) {
     this.encryption = encryption;
+  }
+
+  /**
+   * Get public access block configuration.
+   *
+   * @return the public access block configuration.
+   */
+  public Optional<PublicAccessBlockConfiguration> getPublicAccessBlock() {
+    return Optional.ofNullable(publicAccessBlock);
+  }
+
+  /**
+   * Set public access block configuration.
+   *
+   * @param publicAccessBlock public access block configuration.
+   */
+  public void setPublicAccessBlock(PublicAccessBlockConfiguration publicAccessBlock) {
+    this.publicAccessBlock = publicAccessBlock;
   }
 
 }
