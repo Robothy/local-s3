@@ -2,10 +2,12 @@ package com.robothy.s3.test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.robothy.s3.jupiter.LocalS3;
 import java.io.IOException;
 import java.util.Date;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -13,7 +15,11 @@ import software.amazon.awssdk.services.s3.model.BucketVersioningStatus;
 import software.amazon.awssdk.services.s3.model.CopyObjectRequest;
 import software.amazon.awssdk.services.s3.model.CopyObjectResponse;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
+import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
+import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
 import software.amazon.awssdk.services.s3.model.ListObjectVersionsResponse;
+import software.amazon.awssdk.services.s3.model.MetadataDirective;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 import software.amazon.awssdk.core.ResponseInputStream;
 
@@ -98,8 +104,103 @@ public class CopyObjectIntegrationTest {
     String objectKeyWithPlusSign = "a%2Bb";
     s3Client.putObject(b -> b.bucket(bucketName).key(objectKeyWithPlusSign), RequestBody.fromString("Hello, World!"));
     s3Client.copyObject(b -> b.sourceBucket(bucketName).sourceKey(objectKeyWithPlusSign)
-        .destinationBucket(bucketName).destinationKey("c d"));
-
+        .destinationBucket(bucketName).destinationKey("destination"));
   }
 
+  @LocalS3
+  @Test
+  void testCopyObjectWithMetadataDirectiveReplace(S3Client s3) {
+    // Create bucket and source object with metadata
+    String bucketName = "metadata-test-bucket";
+    String sourceKey = "source";
+    String destKey = "destination";
+    
+    s3.createBucket(b -> b.bucket(bucketName));
+    
+    // Put source object with metadata
+    Map<String, String> sourceMetadata = Map.of(
+        "key1", "value1",
+        "key2", "value2"
+    );
+    
+    s3.putObject(PutObjectRequest.builder()
+        .bucket(bucketName)
+        .key(sourceKey)
+        .metadata(sourceMetadata)
+        .build(), 
+        RequestBody.fromString("test content"));
+    
+    // Verify the source object metadata
+    HeadObjectResponse sourceHead = s3.headObject(HeadObjectRequest.builder()
+        .bucket(bucketName)
+        .key(sourceKey)
+        .build());
+    
+    assertEquals("value1", sourceHead.metadata().get("key1"));
+    assertEquals("value2", sourceHead.metadata().get("key2"));
+    
+    // Case 1: Copy with MetadataDirective.COPY (default)
+    s3.copyObject(CopyObjectRequest.builder()
+        .sourceBucket(bucketName)
+        .sourceKey(sourceKey)
+        .destinationBucket(bucketName)
+        .destinationKey(destKey)
+        .build());
+    
+    // Verify metadata is copied
+    HeadObjectResponse destHeadDefault = s3.headObject(HeadObjectRequest.builder()
+        .bucket(bucketName)
+        .key(destKey)
+        .build());
+    
+    assertEquals("value1", destHeadDefault.metadata().get("key1"));
+    assertEquals("value2", destHeadDefault.metadata().get("key2"));
+    
+    // Case 2: Copy with MetadataDirective.REPLACE and new metadata
+    Map<String, String> newMetadata = Map.of(
+        "key3", "value3",
+        "key4", "value4"
+    );
+    
+    s3.copyObject(CopyObjectRequest.builder()
+        .sourceBucket(bucketName)
+        .sourceKey(sourceKey)
+        .destinationBucket(bucketName)
+        .destinationKey(destKey)
+        .metadataDirective(MetadataDirective.REPLACE)
+        .metadata(newMetadata)
+        .build());
+    
+    // Verify metadata is replaced
+    HeadObjectResponse destHeadReplace = s3.headObject(HeadObjectRequest.builder()
+        .bucket(bucketName)
+        .key(destKey)
+        .build());
+    
+    // Original metadata should be gone
+    assertNull(destHeadReplace.metadata().get("key1"));
+    assertNull(destHeadReplace.metadata().get("key2"));
+    
+    // New metadata should be present
+    assertEquals("value3", destHeadReplace.metadata().get("key3"));
+    assertEquals("value4", destHeadReplace.metadata().get("key4"));
+    
+    // Case 3: Copy with MetadataDirective.REPLACE and empty metadata (clearing all metadata)
+    s3.copyObject(CopyObjectRequest.builder()
+        .sourceBucket(bucketName)
+        .sourceKey(sourceKey)
+        .destinationBucket(bucketName)
+        .destinationKey(destKey)
+        .metadataDirective(MetadataDirective.REPLACE)
+        .build());
+    
+    // Verify all metadata is cleared
+    HeadObjectResponse destHeadClear = s3.headObject(HeadObjectRequest.builder()
+        .bucket(bucketName)
+        .key(destKey)
+        .build());
+    
+    assertTrue(destHeadClear.metadata().isEmpty() || 
+        (destHeadClear.metadata().keySet().stream().noneMatch(key -> key.startsWith("key"))));
+  }
 }
