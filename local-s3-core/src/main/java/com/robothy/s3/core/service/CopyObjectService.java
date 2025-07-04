@@ -8,6 +8,7 @@ import com.robothy.s3.core.model.answers.PutObjectAns;
 import com.robothy.s3.core.model.request.CopyObjectOptions;
 import com.robothy.s3.core.model.request.GetObjectOptions;
 import com.robothy.s3.core.model.request.PutObjectOptions;
+import java.util.Map;
 
 public interface CopyObjectService extends GetObjectService, PutObjectService, LocalS3MetadataApplicable, StorageApplicable {
 
@@ -30,11 +31,21 @@ public interface CopyObjectService extends GetObjectService, PutObjectService, L
       throw new IllegalArgumentException("The source of a copy request may not specifically refer to a delete marker by version id.");
     }
 
+    // Determine which metadata to use based on the metadata directive
+    Map<String, String> metadataToUse;
+    if (options.getMetadataDirective() == CopyObjectOptions.MetadataDirective.REPLACE) {
+      // Use the metadata provided in the request
+      metadataToUse = options.getUserMetadata();
+    } else {
+      // Use the metadata from the source object
+      metadataToUse = srcObjectAns.getUserMetadata();
+    }
+
     PutObjectAns putObjectAns = putObject(bucket, key, PutObjectOptions.builder()
         .content(srcObjectAns.getContent())
         .contentType(srcObjectAns.getContentType())
         .size(srcObjectAns.getSize())
-        .userMetadata(srcObjectAns.getUserMetadata())
+        .userMetadata(metadataToUse)
         .build());
 
     return CopyObjectAns.builder()
