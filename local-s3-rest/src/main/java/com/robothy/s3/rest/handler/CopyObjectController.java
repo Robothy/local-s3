@@ -21,6 +21,10 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -59,10 +63,48 @@ class CopyObjectController implements HttpRequestHandler {
     ResponseUtils.addServerHeader(response);
   }
 
+  /**
+   * Parse the request and build CopyObjectOptions.
+   *
+   * @param request The HTTP request
+   * @return CopyObjectOptions instance
+   */
   CopyObjectOptions parseCopyOptions(HttpRequest request) {
-    String copySource = request.header(AmzHeaderNames.X_AMZ_COPY_SOURCE).orElseThrow(() ->
-        new IllegalArgumentException(AmzHeaderNames.X_AMZ_COPY_SOURCE + " header is required."));
+    // Parse copy source information (bucket, key, version)
+    String copySource = extractCopySourceHeader(request);
+    SourceObjectInfo sourceInfo = parseCopySourcePath(copySource);
 
+    // Parse metadata directive and user metadata
+    CopyObjectOptions.MetadataDirective metadataDirective = parseMetadataDirective(request);
+    Map<String, String> userMetadata = extractUserMetadata(request, metadataDirective);
+
+    return CopyObjectOptions.builder()
+        .sourceBucket(urlDecode(sourceInfo.bucket))
+        .sourceKey(urlDecode(sourceInfo.key))
+        .sourceVersion(urlDecode(sourceInfo.versionId))
+        .metadataDirective(metadataDirective)
+        .userMetadata(userMetadata)
+        .build();
+  }
+
+  /**
+   * Extract the x-amz-copy-source header from the request.
+   *
+   * @param request The HTTP request
+   * @return Copy source string
+   */
+  private String extractCopySourceHeader(HttpRequest request) {
+    return request.header(AmzHeaderNames.X_AMZ_COPY_SOURCE).orElseThrow(() ->
+        new IllegalArgumentException(AmzHeaderNames.X_AMZ_COPY_SOURCE + " header is required."));
+  }
+
+  /**
+   * Parse the copy source path to extract bucket, key and version.
+   *
+   * @param copySource The copy source string
+   * @return SourceObjectInfo containing bucket, key and version
+   */
+  private SourceObjectInfo parseCopySourcePath(String copySource) {
     String[] slices = copySource.split("\\?");
     String path = slices[0];
 
@@ -76,19 +118,76 @@ class CopyObjectController implements HttpRequestHandler {
     String srcKey = path.charAt(path.length() - 1) == '/' ? path.substring(delimiterIndex + 1, path.length() - 1)
         : path.substring(delimiterIndex + 1);
 
-    String srcVersionId = null;
-    if (slices.length > 1) {
-      String queryParams = slices[1];
-      String[] pairs = queryParams.split("\\&");
-      srcVersionId = Stream.of(pairs).filter(pair -> pair.startsWith("versionId") && pair.contains("="))
-          .map(pair -> pair.split("=")[1]).findAny().orElse(null);
-    }
+    String srcVersionId = extractVersionId(slices);
+    
+    return new SourceObjectInfo(srcBucket, srcKey, srcVersionId);
+  }
 
-    return CopyObjectOptions.builder()
-        .sourceBucket(urlDecode(srcBucket))
-        .sourceKey(urlDecode(srcKey))
-        .sourceVersion(urlDecode(srcVersionId))
-        .build();
+  /**
+   * Extract version ID from query parameters if present.
+   *
+   * @param pathSlices Array containing path and optional query string
+   * @return Version ID or null if not present
+   */
+  private String extractVersionId(String[] pathSlices) {
+    if (pathSlices.length <= 1) {
+      return null;
+    }
+    
+    String queryParams = pathSlices[1];
+    String[] pairs = queryParams.split("\\&");
+    return Stream.of(pairs)
+        .filter(pair -> pair.startsWith("versionId") && pair.contains("="))
+        .map(pair -> pair.split("=")[1])
+        .findAny()
+        .orElse(null);
+  }
+  
+  /**
+   * Parse the x-amz-metadata-directive header.
+   *
+   * @param request The HTTP request
+   * @return MetadataDirective enum value (defaults to COPY)
+   */
+  private CopyObjectOptions.MetadataDirective parseMetadataDirective(HttpRequest request) {
+    String metadataDirectiveHeader = request.header(AmzHeaderNames.X_AMZ_METADATA_DIRECTIVE).orElse(null);
+    if (metadataDirectiveHeader == null) {
+      return CopyObjectOptions.MetadataDirective.COPY;
+    }
+    
+    try {
+      return CopyObjectOptions.MetadataDirective.valueOf(metadataDirectiveHeader);
+    } catch (IllegalArgumentException e) {
+      throw new LocalS3InvalidArgumentException(AmzHeaderNames.X_AMZ_METADATA_DIRECTIVE, 
+          metadataDirectiveHeader, "Invalid metadata directive.");
+    }
+  }
+  
+  /**
+   * Extract user metadata from request headers if directive is REPLACE.
+   *
+   * @param request The HTTP request
+   * @param metadataDirective The metadata directive
+   * @return Map of user metadata key-value pairs
+   */
+  private Map<String, String> extractUserMetadata(HttpRequest request, 
+                                                  CopyObjectOptions.MetadataDirective metadataDirective) {
+    if (metadataDirective != CopyObjectOptions.MetadataDirective.REPLACE) {
+      return Collections.emptyMap();
+    }
+    
+    Map<String, String> userMetadata = new HashMap<>();
+    for (Map.Entry<CharSequence, String> entry : request.getHeaders().entrySet()) {
+      String name = entry.getKey().toString();
+      String value = entry.getValue();
+      
+      if (name != null && name.startsWith(AmzHeaderNames.X_AMZ_META_PREFIX)) {
+        String key = name.substring(AmzHeaderNames.X_AMZ_META_PREFIX.length());
+        userMetadata.put(key, value);
+      }
+    }
+    
+    return userMetadata;
   }
 
   private String urlDecode(String value) {
@@ -99,8 +198,22 @@ class CopyObjectController implements HttpRequestHandler {
 
       return URLDecoder.decode(value, StandardCharsets.UTF_8.displayName());
     } catch (UnsupportedEncodingException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     }
   }
-
+  
+  /**
+   * Immutable class to hold source object information.
+   */
+  private static class SourceObjectInfo {
+    private final String bucket;
+    private final String key;
+    private final String versionId;
+    
+    public SourceObjectInfo(String bucket, String key, String versionId) {
+      this.bucket = bucket;
+      this.key = key;
+      this.versionId = versionId;
+    }
+  }
 }
