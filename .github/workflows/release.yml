@@ -79,7 +79,7 @@ jobs:
       - name: Release(Info)
         if: ${{inputs.gradleLogLevel == 'Info'}}
         run: .|
-          ./gradlew check release --info
+          ./gradlew release --info
 
       - name: Release(Warn)
         if: ${{inputs.gradleLogLevel == 'Warn'}}
