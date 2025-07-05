@@ -63,6 +63,8 @@ jobs:
           echo "signing.password=${{ secrets.SING_PASSWORD }}" >> ~/.gradle/gradle.properties
           echo "OSSRH_USERNAME=${{ secrets.OSSRH_USERNAME }}" >> ~/.gradle/gradle.properties
           echo "OSSRH_PASSWORD=${{ secrets.OSSRH_PASSWORD }}" >> ~/.gradle/gradle.properties
+          echo "MAVEN_CENTRAL_PORTAL_USERNAME=${{ secrets.OSSRH_USERNAME }}" >> ~/.gradle/gradle.properties
+          echo "MAVEN_CENTRAL_PORTAL_PASSWORD=${{ secrets.OSSRH_PASSWORD }}" >> ~/.gradle/gradle.properties
           chmod +x gradlew
           pwd
           ls -l

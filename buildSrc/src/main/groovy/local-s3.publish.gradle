@@ -6,6 +6,7 @@ plugins {
     id 'maven-publish'
     id 'io.franzbecker.gradle-lombok'
     id 'signing'
+    id 'local-s3.central-portal'
 }
 
 java {
