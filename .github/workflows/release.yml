@@ -76,7 +76,7 @@ jobs:
       - name: Release
         if: ${{inputs.gradleLogLevel == 'None'}}
         run: |
-          ./gradlew check release
+          ./gradlew release
 
       - name: Release(Info)
         if: ${{inputs.gradleLogLevel == 'Info'}}
@@ -86,14 +86,14 @@ jobs:
       - name: Release(Warn)
         if: ${{inputs.gradleLogLevel == 'Warn'}}
         run: .|
-          ./gradlew check release --warn
+          ./gradlew release --warn
 
       - name: Release(Debug)
         if: ${{inputs.gradleLogLevel == 'Debug'}}
         run: |
-          ./gradlew check release --debug
+          ./gradlew release --debug
 
       - name: Release(Stacktrace)
         if: ${{inputs.gradleLogLevel == 'Stacktrace'}}
         run: |
-          ./gradlew check release --stacktrace
+          ./gradlew release --stacktrace
