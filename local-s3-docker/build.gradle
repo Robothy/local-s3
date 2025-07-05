@@ -141,4 +141,4 @@ tasks.register('pushLatestImage', Exec) {
 }
 
 
-//rootProject.tasks.release.dependsOn(pushLatestImage, pushJava17BasedDockerImage, pushGraalVMNativeBasedDockerImage)
+rootProject.tasks.release.dependsOn(pushLatestImage, pushJava17BasedDockerImage, pushGraalVMNativeBasedDockerImage)

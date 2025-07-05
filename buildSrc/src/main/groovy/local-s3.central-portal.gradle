@@ -2,25 +2,21 @@ plugins {
     id 'org.danilopianini.publish-on-central'
 }
 
-// The plugin automatically creates a Maven Central–compatible publication
-// and configures tasks to generate Javadoc and source JARs
+ext {
+    set('mavenCentralPortalUsername', project.findProperty("MAVEN_CENTRAL_PORTAL_USERNAME") ?: System.getenv("MAVEN_CENTRAL_PORTAL_USERNAME"))
+    set('mavenCentralPortalPassword', project.findProperty("MAVEN_CENTRAL_PORTAL_PASSWORD") ?: System.getenv("MAVEN_CENTRAL_PORTAL_PASSWORD"))
+}
+
 publishOnCentral {
-    // Required: GitHub repository owner (used to populate default values)
     repoOwner.set('Robothy')
-    
-    // Required: Project description for Maven Central
+    projectLongName.set("LocalS3")
     projectDescription.set('An AmazonS3 service implementation for local development and testing')
-    
-    // Optional: Override defaults (these are automatically derived from repoOwner if not set)
-    projectUrl.set("https://github.com/Robothy/${project.name}")
-    scmConnection.set("scm:git:https://github.com/Robothy/${project.name}")
-    
-    // Optional: License information (defaults shown below)
+    projectUrl.set("https://github.com/Robothy/local-s3")
+    scmConnection.set("scm:git:https://github.com/Robothy/local-s3")
     licenseName.set('Apache License, Version 2.0')
     licenseUrl.set('http://www.apache.org/licenses/LICENSE-2.0')
 }
 
-// Required: Configure developers in the POM (must be done manually)
 publishing {
     publications {
         withType(MavenPublication) {
@@ -34,20 +30,5 @@ publishing {
                 }
             }
         }
-    }
-}
-
-// Required: Configure signing (plugin automatically adds publications to signing)
-// The plugin looks for credentials in this order:
-// 1. Environment variables: MAVEN_CENTRAL_PORTAL_USERNAME, MAVEN_CENTRAL_PORTAL_PASSWORD
-// 2. Fallback env vars: MAVEN_CENTRAL_USERNAME, MAVEN_CENTRAL_PASSWORD  
-// 3. Gradle properties: mavenCentralPortalUsername, mavenCentralPortalPassword
-// 4. Legacy properties: ossrhUsername, ossrhPassword
-signing {
-    def signingKey = project.findProperty('signingKey') ?: project.findProperty('signing.secretKey')
-    def signingPassword = project.findProperty('signingPassword') ?: project.findProperty('signing.password')
-    
-    if (signingKey && signingPassword) {
-        useInMemoryPgpKeys(signingKey, signingPassword)
     }
 }

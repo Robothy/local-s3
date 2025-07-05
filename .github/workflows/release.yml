@@ -5,10 +5,9 @@ on:
       gradleLogLevel:
         description: 'Gradle logging level.'
         required: false
-        default: None
+        default: Info
         type: choice
         options:
-          - None
           - Info
           - Warn
           - Debug
@@ -54,11 +53,6 @@ jobs:
           docker --version      
 
       - name: Prepare parameters
-        env:
-          MAVEN_CENTRAL_PORTAL_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-          MAVEN_CENTRAL_PORTAL_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
-          MAVEN_CENTRAL_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-          MAVEN_CENTRAL_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
         run: |
           git log --pretty=format:"%H - %an, %aI : %s" -5
           mkdir -p ~/.gradle
@@ -68,8 +62,8 @@ jobs:
           echo "signing.password=${{ secrets.SING_PASSWORD }}" >> ~/.gradle/gradle.properties
           echo "OSSRH_USERNAME=${{ secrets.OSSRH_USERNAME }}" >> ~/.gradle/gradle.properties
           echo "OSSRH_PASSWORD=${{ secrets.OSSRH_PASSWORD }}" >> ~/.gradle/gradle.properties
-          echo "mavenCentralPortalUsername=${{ secrets.OSSRH_USERNAME }}" >> ~/.gradle/gradle.properties
-          echo "mavenCentralPortalPassword=${{ secrets.OSSRH_PASSWORD }}" >> ~/.gradle/gradle.properties
+          echo "MAVEN_CENTRAL_PORTAL_USERNAME=${{ secrets.OSSRH_USERNAME }}" >> ~/.gradle/gradle.properties
+          echo "MAVEN_CENTRAL_PORTAL_PASSWORD=${{ secrets.OSSRH_PASSWORD }}" >> ~/.gradle/gradle.properties
           chmod +x gradlew
           pwd
           ls -l
@@ -78,27 +72,22 @@ jobs:
         run: |
           ./gradlew releaseVersion
 
-      - name: Release
-        if: ${{inputs.gradleLogLevel == 'None'}}
-        run: |
-          ./gradlew release
-
       - name: Release(Info)
         if: ${{inputs.gradleLogLevel == 'Info'}}
         run: .|
-          ./gradlew release --info
+          ./gradlew check release --info
 
       - name: Release(Warn)
         if: ${{inputs.gradleLogLevel == 'Warn'}}
         run: .|
-          ./gradlew release --warn
+          ./gradlew check release --warn
 
       - name: Release(Debug)
         if: ${{inputs.gradleLogLevel == 'Debug'}}
         run: |
-          ./gradlew release --debug
+          ./gradlew check release --debug
 
       - name: Release(Stacktrace)
         if: ${{inputs.gradleLogLevel == 'Stacktrace'}}
         run: |
-          ./gradlew release --stacktrace
+          ./gradlew check release --stacktrace

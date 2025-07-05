@@ -19,6 +19,6 @@ include 'local-s3-core'
 include 'local-s3-rest'
 include 'local-s3-jupiter'
 include 'local-s3-datatypes'
-//include 'local-s3-docker'
+include 'local-s3-docker'
 include 'local-s3-testcontainers'
 
