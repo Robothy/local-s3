@@ -54,6 +54,11 @@ jobs:
           docker --version      
 
       - name: Prepare parameters
+        env:
+          MAVEN_CENTRAL_PORTAL_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          MAVEN_CENTRAL_PORTAL_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+          MAVEN_CENTRAL_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          MAVEN_CENTRAL_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
         run: |
           git log --pretty=format:"%H - %an, %aI : %s" -5
           mkdir -p ~/.gradle
