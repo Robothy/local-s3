@@ -6,6 +6,7 @@ plugins {
     id 'maven-publish'
     id 'io.franzbecker.gradle-lombok'
     id 'signing'
+    id 'local-s3.central-portal'
 }
 
 java {
@@ -50,32 +51,29 @@ publishing {
     }
 
     repositories {
-        mavenLocal()
 
-        repositories {
-            mavenLocal()
-            maven {
-                name = "GitHubPackages"
-                url = uri("https://maven.pkg.github.com/Robothy/local-s3")
-                credentials {
-                    username = project.findProperty("GITHUB_USERNAME") ?: System.getenv("GITHUB_USERNAME")
-                    password = project.findProperty("GITHUB_TOKEN") ?: System.getenv("GITHUB_TOKEN")
-                }
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/Robothy/local-s3")
+            credentials {
+                username = project.findProperty("GITHUB_USERNAME") ?: System.getenv("GITHUB_USERNAME")
+                password = project.findProperty("GITHUB_TOKEN") ?: System.getenv("GITHUB_TOKEN")
             }
-
-            maven {
-                name = "MavenCentral"
-                url = uri('https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/')
-                credentials {
-                    username = findProperty("OSSRH_USERNAME")
-                    password = findProperty("OSSRH_PASSWORD")
-                }
-            }
-
         }
+
+//            maven {
+//                name = "MavenCentral"
+//                //url = uri('https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/')
+//                url = uri('https://central.sonatype.com/api/v1/publisher/upload')
+//                credentials {
+//                    username = findProperty("OSSRH_USERNAME")
+//                    password = findProperty("OSSRH_PASSWORD")
+//                }
+//            }
+
+
     }
 }
-
 
 
 task delombok(type: DelombokTask, dependsOn: compileJava) {
