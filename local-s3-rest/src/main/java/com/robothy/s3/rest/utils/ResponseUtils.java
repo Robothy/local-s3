@@ -15,6 +15,9 @@ import java.util.Objects;
  */
 public class ResponseUtils {
 
+  static final DateTimeFormatter RFC_1123_DATE_TIME =
+      DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss 'GMT'");
+
   /**
    * Add 'date' header.
    *
@@ -22,7 +25,7 @@ public class ResponseUtils {
    */
   public static void addDateHeader(HttpResponse response) {
     response.putHeader(HttpHeaderNames.DATE.toString(),
-        DateTimeFormatter.RFC_1123_DATE_TIME.format(ZonedDateTime.now(ZoneOffset.UTC)));
+        RFC_1123_DATE_TIME.format(ZonedDateTime.now(ZoneOffset.UTC)));
   }
 
   /**
