@@ -5,6 +5,8 @@ import com.robothy.s3.core.util.IdUtils;
 import com.robothy.s3.rest.constants.AmzHeaderNames;
 import com.robothy.s3.rest.constants.LocalS3Constants;
 import io.netty.handler.codec.http.HttpHeaderNames;
+
+import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -26,6 +28,10 @@ public class ResponseUtils {
   public static void addDateHeader(HttpResponse response) {
     response.putHeader(HttpHeaderNames.DATE.toString(),
         RFC_1123_DATE_TIME.format(ZonedDateTime.now(ZoneOffset.UTC)));
+  }
+
+  public static String toRfc1123DateTime(long unixTimestamp) {
+    return RFC_1123_DATE_TIME.format(Instant.ofEpochMilli(unixTimestamp).atOffset(ZoneOffset.UTC));
   }
 
   /**
