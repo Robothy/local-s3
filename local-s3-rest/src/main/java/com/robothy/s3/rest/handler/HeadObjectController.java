@@ -36,8 +36,7 @@ class HeadObjectController implements HttpRequestHandler {
     String versionId = request.parameter("versionId").orElse(null);
     GetObjectAns object = objectService.headObject(bucket, key, GetObjectOptions.builder().versionId(versionId).build());
     response.putHeader(AmzHeaderNames.X_AMZ_DELETE_MARKER, object.isDeleteMarker())
-        .putHeader(HttpHeaderNames.LAST_MODIFIED.toString(),
-            DateTimeFormatter.RFC_1123_DATE_TIME.format(Instant.ofEpochMilli(object.getLastModified()).atOffset(ZoneOffset.UTC)))
+        .putHeader(HttpHeaderNames.LAST_MODIFIED.toString(), ResponseUtils.toRfc1123DateTime(object.getLastModified()))
         .putHeader(AmzHeaderNames.X_AMZ_VERSION_ID, object.getVersionId());
 
     if (!object.isDeleteMarker()) {
