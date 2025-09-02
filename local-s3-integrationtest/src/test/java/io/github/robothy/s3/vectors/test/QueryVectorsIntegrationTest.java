@@ -91,6 +91,7 @@ public class QueryVectorsIntegrationTest {
     }
   }
 
+  @LocalS3
   @Test
   void testQueryVectorsWithMetadataFilter(S3VectorsClient vectorsClient) {
     String bucketName = "test-filter-bucket" + UUID.randomUUID();
