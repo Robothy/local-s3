@@ -13,6 +13,7 @@ dependencies {
     implementation(libs.junit5JupiterEngine)
     implementation(libs.logbackClassic)
     implementation(libs.awssdkS3)
+    implementation(libs.awssdkS3vectors)
     implementation(libs.awsJavaSdk)
 }
 

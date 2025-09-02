@@ -33,14 +33,16 @@ final class FileSystemLocalS3Manager implements LocalS3Manager {
   @Override
   public BucketService bucketService() {
     BucketService delegated = InMemoryBucketService.create(s3Metadata);
-    LocalS3ServicesInvocationHandler invocationHandler = new LocalS3ServicesInvocationHandler(delegated, s3Metadata, bucketMetaStore);
+    LocalS3ServicesInvocationHandler<BucketMetadata> invocationHandler =
+        new LocalS3ServicesInvocationHandler<>(delegated, bucketName -> s3Metadata.getBucketMetadata(bucketName).get(), bucketMetaStore);
     return (BucketService) Proxy.newProxyInstance(BucketService.class.getClassLoader(), new Class[] {BucketService.class}, invocationHandler);
   }
 
   @Override
   public ObjectService objectService() {
     ObjectService delegated = InMemoryObjectService.create(s3Metadata, storage);
-    LocalS3ServicesInvocationHandler invocationHandler = new LocalS3ServicesInvocationHandler(delegated, s3Metadata, bucketMetaStore);
+    LocalS3ServicesInvocationHandler<BucketMetadata> invocationHandler =
+        new LocalS3ServicesInvocationHandler<>(delegated, bucketName -> s3Metadata.getBucketMetadata(bucketName).get(), bucketMetaStore);
     return (ObjectService) Proxy.newProxyInstance(ObjectService.class.getClassLoader(), new Class[] {ObjectService.class}, invocationHandler);
   }
 

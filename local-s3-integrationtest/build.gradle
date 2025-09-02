@@ -4,12 +4,19 @@ plugins {
 
 dependencies {
 
+    // Main source dependencies for RealS3 annotation and extensions
+    implementation(libs.junit5)
+    implementation(libs.awssdkS3)
+    implementation(libs.awssdkS3vectors)
+    implementation(libs.slf4jApi)
+
     testImplementation(project(":local-s3-jupiter"))
     testImplementation (project(":local-s3-datatypes"))
     testImplementation(project(":local-s3-core"))
     testImplementation(project(":local-s3-rest"))
 
     testImplementation(libs.awssdkS3)
+    testImplementation(libs.awssdkS3vectors)
     testImplementation(libs.awss3ApacheClient)
     testRuntimeOnly(libs.logbackClassic)
 }

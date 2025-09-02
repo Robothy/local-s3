@@ -1,7 +1,7 @@
 [versions]
 logback = "1.3.14"
 awsJavaSdk = "1.12.782"
-awssdkS3 = "2.30.11"
+awssdkS3 = "2.32.4"
 jackson = "2.18.2"
 nettyHttpRouter = "1.15"
 apacheCommonsCodec = "1.17.1"
@@ -10,7 +10,7 @@ apacheCommonsCollections4 = "4.4"
 commonsIo = "2.18.0"
 apacheCommonsLang3 = "3.17.0"
 junit5 = "5.11.4"
-mockito = "5.2.0"
+mockito = "5.12.0"
 lombok = "1.18.36"
 slf4j = "2.0.16"
 testContainers = "1.20.4"
@@ -23,6 +23,7 @@ gradleLombok = "5.0.0"
 logbackClassic = { group = "ch.qos.logback", name = "logback-classic", version.ref = "logback" }
 awsJavaSdk = { group = "com.amazonaws", name = "aws-java-sdk", version.ref = "awsJavaSdk" }
 awssdkS3 = { group = "software.amazon.awssdk", name = "s3", version.ref = "awssdkS3" }
+awssdkS3vectors = { group = "software.amazon.awssdk", name = "s3vectors", version.ref = "awssdkS3" }
 awss3ApacheClient = { group = "software.amazon.awssdk", name = "apache-client", version.ref = "awssdkS3" }
 jacksonDatabind = { group = "com.fasterxml.jackson.core", name = "jackson-databind", version.ref = "jackson" }
 jacksonDataformatXml = { group = "com.fasterxml.jackson.dataformat", name = "jackson-dataformat-xml", version.ref = "jackson" }
@@ -36,7 +37,8 @@ commonsIo = { group = "commons-io", name = "commons-io", version.ref = "commonsI
 apacheCommonsLang3 = { group = "org.apache.commons", name = "commons-lang3", version.ref = "apacheCommonsLang3" }
 junit5 = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junit5" }
 junit5JupiterEngine = { group = "org.junit.jupiter", name = "junit-jupiter-engine", version.ref = "junit5" }
-mockitoInline = { group = "org.mockito", name = "mockito-inline", version.ref = "mockito" }
+#mockitoInline = { group = "org.mockito", name = "mockito-inline", version.ref = "mockito" }
+mockitoCore = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
 lombok = { group = "org.projectlombok", name = "lombok", version.ref = "lombok" }
 slf4jApi = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
 testContainers = { group = "org.testcontainers", name = "testcontainers", version.ref = "testContainers" }
