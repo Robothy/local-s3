@@ -11,20 +11,21 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Objects;
+import java.util.function.Function;
 
 
-final class LocalS3ServicesInvocationHandler implements InvocationHandler {
+public final class LocalS3ServicesInvocationHandler<T> implements InvocationHandler {
 
   private final Object proxy;
 
-  private final MetadataStore<BucketMetadata> bucketMetaStore;
+  private final MetadataStore<T> bucketMetaStore;
 
-  private final LocalS3Metadata s3Metadata;
+  private final Function<String, T> bucketMetadataLoader;
 
-  LocalS3ServicesInvocationHandler(Object proxy, LocalS3Metadata s3Metadata, MetadataStore<BucketMetadata> bucketMetaStore) {
+  public LocalS3ServicesInvocationHandler(Object proxy, Function<String, T> bucketMetadataLoader, MetadataStore<T> bucketMetaStore) {
     this.proxy = proxy;
     this.bucketMetaStore = bucketMetaStore;
-    this.s3Metadata = s3Metadata;
+    this.bucketMetadataLoader = bucketMetadataLoader;
   }
 
   @Override
@@ -82,7 +83,7 @@ final class LocalS3ServicesInvocationHandler implements InvocationHandler {
     switch (bucketChanged.type()) {
       case UPDATE:
       case CREATE:
-        bucketMetaStore.store(bucketName, s3Metadata.getBucketMetadata(bucketName).get());
+        bucketMetaStore.store(bucketName, bucketMetadataLoader.apply(bucketName));
         break;
       case DELETE:
         bucketMetaStore.delete(bucketName);

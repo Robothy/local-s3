@@ -2,7 +2,10 @@ package com.robothy.s3.rest;
 
 import com.ctc.wstx.stax.WstxInputFactory;
 import com.ctc.wstx.stax.WstxOutputFactory;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.xml.XmlFactory;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
@@ -11,6 +14,8 @@ import com.robothy.netty.initializer.HttpServerInitializer;
 import com.robothy.s3.core.service.BucketService;
 import com.robothy.s3.core.service.ObjectService;
 import com.robothy.s3.core.service.manager.LocalS3Manager;
+import com.robothy.s3.core.service.manager.vectors.LocalS3VectorsManager;
+import com.robothy.s3.core.service.s3vectors.S3VectorsService;
 import com.robothy.s3.rest.bootstrap.LocalS3Mode;
 import com.robothy.s3.rest.handler.LocalS3RouterFactory;
 import com.robothy.s3.rest.service.DefaultServiceFactory;
@@ -105,18 +110,11 @@ public class LocalS3 {
 
   private ServiceFactory createServiceFactory() {
 
-    LocalS3Manager manager;
-    if (mode == LocalS3Mode.IN_MEMORY) {
-      log.info("Created in-memory LocalS3 manager.");
-      manager = LocalS3Manager.createInMemoryS3Manager(dataPath, initialDataCacheEnabled);
-    } else {
-      log.info("Created file system LocalS3 manager.");
-      manager = LocalS3Manager.createFileSystemS3Manager(dataPath);
-    }
+    LocalS3Manager s3Manager = createLocalS3Manager();
 
     ServiceFactory serviceFactory = new DefaultServiceFactory();
-    BucketService bucketService = manager.bucketService();
-    ObjectService objectService = manager.objectService();
+    BucketService bucketService = s3Manager.bucketService();
+    ObjectService objectService = s3Manager.objectService();
     serviceFactory.register(BucketService.class, () -> bucketService);
     serviceFactory.register(ObjectService.class, () -> objectService);
 
@@ -130,7 +128,42 @@ public class LocalS3 {
     xmlMapper.registerModule(new Jdk8Module());
     xmlMapper.registerModule(new JavaTimeModule());
     serviceFactory.register(XmlMapper.class, () -> xmlMapper);
+
+    // Register ObjectMapper for JSON handling (used by S3 Vectors API)
+    ObjectMapper objectMapper = new ObjectMapper();
+    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+    objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+    objectMapper.registerModule(new Jdk8Module());
+    objectMapper.registerModule(new JavaTimeModule());
+    serviceFactory.register(ObjectMapper.class, () -> objectMapper);
+
+    // Register S3 Vectors services
+    S3VectorsService s3VectorsService = createLocalS3VectorsManager().s3VectorsService();
+    serviceFactory.register(S3VectorsService.class, () -> s3VectorsService);
+
     return serviceFactory;
+  }
+
+  LocalS3Manager createLocalS3Manager() {
+    if (mode == LocalS3Mode.IN_MEMORY) {
+      log.info("Created in-memory LocalS3 manager.");
+      return LocalS3Manager.createInMemoryS3Manager(dataPath, initialDataCacheEnabled);
+    } else {
+      log.info("Created file system LocalS3 manager.");
+      return LocalS3Manager.createFileSystemS3Manager(dataPath);
+    }
+  }
+
+  LocalS3VectorsManager createLocalS3VectorsManager() {
+    if (mode == LocalS3Mode.IN_MEMORY) {
+      log.info("Created in-memory LocalS3 Vectors manager.");
+      return LocalS3VectorsManager.createInMemory();
+    } else {
+      Path vectorsDataPath = dataPath.resolve("vectors");
+      log.info("Created file system LocalS3 Vectors manager.");
+      return LocalS3VectorsManager.createFileSystem(vectorsDataPath);
+    }
   }
 
   /**

@@ -26,7 +26,7 @@ class FileSystemLocalS3MetadataLoaderTest {
     bucket2.setCreationDate(System.currentTimeMillis());
     bucketMetaStore.store(bucket2.getBucketName(), bucket2);
 
-    LocalS3Metadata s3Metadata = FileSystemS3MetadataLoader.create().load(tempDirectory);
+    LocalS3Metadata s3Metadata = MetadataLoader.create(LocalS3Metadata.class).load(tempDirectory);
     Optional<BucketMetadata> loadedBucket1 = s3Metadata.getBucketMetadata(bucket1.getBucketName());
     Optional<BucketMetadata> loadedBucket2 = s3Metadata.getBucketMetadata(bucket2.getBucketName());
     assertTrue(loadedBucket1.isPresent());

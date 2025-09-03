@@ -25,7 +25,7 @@ dependencies {
     annotationProcessor(libs.lombok)
     testCompileOnly(libs.lombok)
     testAnnotationProcessor(libs.lombok)
-    testImplementation(libs.mockitoInline)
+    testImplementation(libs.mockitoCore)
     testImplementation(libs.junit5JupiterEngine)
     testImplementation(libs.junit5)
 }
@@ -57,6 +57,6 @@ java {
 //    toolchain {
 //        languageVersion = JavaLanguageVersion.of(8)
 //    }
-    sourceCompatibility(8)
-    targetCompatibility(8)
+    sourceCompatibility(17)
+    targetCompatibility(17)
 }

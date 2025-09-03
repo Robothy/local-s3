@@ -52,6 +52,12 @@ jobs:
       - name: Build
         run: ./gradlew mergeReports
 
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v5
+        if: success() || failure()
+        with:
+          report_paths: '**/build/test-results/test/TEST-*.xml'
+
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:

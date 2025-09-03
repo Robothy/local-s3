@@ -6,7 +6,9 @@ import com.robothy.netty.router.Route;
 import com.robothy.netty.router.Router;
 import com.robothy.s3.core.exception.LocalS3Exception;
 import com.robothy.s3.core.exception.LocalS3InvalidArgumentException;
+import com.robothy.s3.core.exception.vectors.LocalS3VectorException;
 import com.robothy.s3.rest.constants.AmzHeaderNames;
+import com.robothy.s3.rest.handler.s3vectors.LocalS3VectorExceptionHandler;
 import com.robothy.s3.rest.service.ServiceFactory;
 import io.netty.handler.codec.http.HttpMethod;
 import java.util.Objects;
@@ -696,6 +698,105 @@ public class LocalS3RouterFactory {
         .handler(new NotImplementedOperationController(serviceFactory, "WriteGetObjectResponse"))
         .build();
 
+    // S3 Vectors routes
+    Route CreateVectorBucket = Route.builder()
+        .method(HttpMethod.POST)
+        .path("/CreateVectorBucket")
+        .handler(new com.robothy.s3.rest.handler.s3vectors.CreateVectorBucketController(serviceFactory))
+        .build();
+
+    Route GetVectorBucket = Route.builder()
+        .method(HttpMethod.POST)
+        .path("/GetVectorBucket")
+        .handler(new com.robothy.s3.rest.handler.s3vectors.GetVectorBucketController(serviceFactory))
+        .build();
+
+    Route DeleteVectorBucket = Route.builder()
+        .method(HttpMethod.POST)
+        .path("/DeleteVectorBucket")
+        .handler(new com.robothy.s3.rest.handler.s3vectors.DeleteVectorBucketController(serviceFactory))
+        .build();
+
+    Route ListVectorBuckets = Route.builder()
+        .method(HttpMethod.POST)
+        .path("/ListVectorBuckets")
+        .handler(new com.robothy.s3.rest.handler.s3vectors.ListVectorBucketsController(serviceFactory))
+        .build();
+
+    Route PutVectorBucketPolicy = Route.builder()
+        .method(HttpMethod.POST)
+        .path("/PutVectorBucketPolicy")
+        .handler(new com.robothy.s3.rest.handler.s3vectors.PutVectorBucketPolicyController(serviceFactory))
+        .build();
+
+    Route GetVectorBucketPolicy = Route.builder()
+        .method(HttpMethod.POST)
+        .path("/GetVectorBucketPolicy")
+        .handler(new com.robothy.s3.rest.handler.s3vectors.GetVectorBucketPolicyController(serviceFactory))
+        .build();
+
+    Route DeleteVectorBucketPolicy = Route.builder()
+        .method(HttpMethod.POST)
+        .path("/DeleteVectorBucketPolicy")
+        .handler(new com.robothy.s3.rest.handler.s3vectors.DeleteVectorBucketPolicyController(serviceFactory))
+        .build();
+
+    // S3 Vectors Index routes
+    Route CreateIndex = Route.builder()
+        .method(HttpMethod.POST)
+        .path("/CreateIndex")
+        .handler(new com.robothy.s3.rest.handler.s3vectors.CreateIndexController(serviceFactory))
+        .build();
+
+    Route GetIndex = Route.builder()
+        .method(HttpMethod.POST)
+        .path("/GetIndex")
+        .handler(new com.robothy.s3.rest.handler.s3vectors.GetIndexController(serviceFactory))
+        .build();
+
+    Route ListIndexes = Route.builder()
+        .method(HttpMethod.POST)
+        .path("/ListIndexes")
+        .handler(new com.robothy.s3.rest.handler.s3vectors.ListIndexesController(serviceFactory))
+        .build();
+
+    Route DeleteIndex = Route.builder()
+        .method(HttpMethod.POST)
+        .path("/DeleteIndex")
+        .handler(new com.robothy.s3.rest.handler.s3vectors.DeleteIndexController(serviceFactory))
+        .build();
+
+    // S3 Vectors Vector operations routes
+    Route PutVectors = Route.builder()
+        .method(HttpMethod.POST)
+        .path("/PutVectors")
+        .handler(new com.robothy.s3.rest.handler.s3vectors.PutVectorsController(serviceFactory))
+        .build();
+
+    Route QueryVectors = Route.builder()
+        .method(HttpMethod.POST)
+        .path("/QueryVectors")
+        .handler(new com.robothy.s3.rest.handler.s3vectors.QueryVectorsController(serviceFactory))
+        .build();
+
+    Route GetVectors = Route.builder()
+        .method(HttpMethod.POST)
+        .path("/GetVectors")
+        .handler(new com.robothy.s3.rest.handler.s3vectors.GetVectorsController(serviceFactory))
+        .build();
+
+    Route DeleteVectors = Route.builder()
+        .method(HttpMethod.POST)
+        .path("/DeleteVectors")
+        .handler(new com.robothy.s3.rest.handler.s3vectors.DeleteVectorsController(serviceFactory))
+        .build();
+
+    Route ListVectors = Route.builder()
+        .method(HttpMethod.POST)
+        .path("/ListVectors")
+        .handler(new com.robothy.s3.rest.handler.s3vectors.ListVectorsController(serviceFactory))
+        .build();
+
 
 //    Route GetBucket = Route.builder()
 //        .method(HttpMethod.GET)
@@ -801,12 +902,29 @@ public class LocalS3RouterFactory {
         .route(UploadPart)
         .route(UploadPartCopy)
         .route(WriteGetObjectResponse)
+        .route(CreateVectorBucket)
+        .route(GetVectorBucket)
+        .route(DeleteVectorBucket)
+        .route(ListVectorBuckets)
+        .route(PutVectorBucketPolicy)
+        .route(GetVectorBucketPolicy)
+        .route(DeleteVectorBucketPolicy)
+        .route(CreateIndex)
+        .route(GetIndex)
+        .route(ListIndexes)
+        .route(DeleteIndex)
+        .route(PutVectors)
+        .route(QueryVectors)
+        .route(GetVectors)
+        .route(DeleteVectors)
+        .route(ListVectors)
         //.route(GetBucket)
 
         .notFound(new NotFoundHandler())
         .exceptionHandler(LocalS3Exception.class, new LocalS3ExceptionHandler(serviceFactory))
         .exceptionHandler(IllegalArgumentException.class, new IllegalArgumentExceptionHandler())
         .exceptionHandler(LocalS3InvalidArgumentException.class, new LocalS3InvalidArgumentExceptionHandler())
+        .exceptionHandler(LocalS3VectorException.class, new LocalS3VectorExceptionHandler(serviceFactory))
         .exceptionHandler(Exception.class, new ExceptionHandler())
         ;
   }

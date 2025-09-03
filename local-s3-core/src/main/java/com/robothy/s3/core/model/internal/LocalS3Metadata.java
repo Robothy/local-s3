@@ -2,6 +2,7 @@ package com.robothy.s3.core.model.internal;
 
 import com.robothy.s3.core.asserionts.BucketAssertions;
 import com.robothy.s3.core.exception.BucketAlreadyExistsException;
+import com.robothy.s3.core.model.internal.s3vectors.LocalS3VectorsMetadata;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -22,7 +23,9 @@ public class LocalS3Metadata {
 
   private static final Comparator<BucketMetadata> DEFAULT_BUCKET_METADATA_COMPARATOR = Comparator
       .comparing(BucketMetadata::getCreationDate);
+  
   private final Map<String, BucketMetadata> bucketMetadataMap = new ConcurrentHashMap<>();
+  private final LocalS3VectorsMetadata vectorsMetadata = new LocalS3VectorsMetadata();
 
   /**
    * List ordered buckets with a comparator.
@@ -54,6 +57,15 @@ public class LocalS3Metadata {
    */
   public Map<String, BucketMetadata> getBucketMetadataMap() {
     return bucketMetadataMap;
+  }
+
+  /**
+   * Get the vectors metadata instance.
+   *
+   * @return the vectors metadata instance.
+   */
+  public LocalS3VectorsMetadata getVectorsMetadata() {
+    return vectorsMetadata;
   }
 
   /**
