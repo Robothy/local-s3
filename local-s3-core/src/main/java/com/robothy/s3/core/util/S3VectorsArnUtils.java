@@ -61,6 +61,12 @@ public class S3VectorsArnUtils {
           "Invalid index ARN format");
     }
     
+    // Check for extra segments after the index name
+    if (parts[1].contains("/")) {
+      throw new LocalS3VectorException(LocalS3VectorErrorType.INVALID_REQUEST, 
+          "Invalid index ARN format");
+    }
+    
     return new String[]{parts[0], parts[1]};
   }
 }

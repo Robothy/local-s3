@@ -67,7 +67,6 @@ class BasicVectorSearchEngine implements VectorSearchEngine {
     List<VectorObjectMetadata> filteredVectors = MetadataFilter.applyFilter(candidateVectors, metadataFilter);
 
     if (filteredVectors.isEmpty()) {
-      log.debug("No vectors remaining after metadata filtering");
       return List.of();
     }
 
@@ -166,32 +165,4 @@ class BasicVectorSearchEngine implements VectorSearchEngine {
     return 1.0 - cosineSimilarity;
   }
 
-  /**
-   * Apply metadata filters to candidate vectors.
-   * Only includes vectors that match all specified metadata key-value pairs.
-   * @deprecated Use MetadataFilter.applyFilter() instead
-   */
-  @Deprecated
-  private List<VectorObjectMetadata> applyMetadataFilters(
-      List<VectorObjectMetadata> candidateVectors,
-      Map<String, String> metadataFilters) {
-
-    if (metadataFilters == null || metadataFilters.isEmpty()) {
-      return candidateVectors;
-    }
-
-    return candidateVectors.stream()
-        .filter(vector -> matchesMetadataFilters(vector, metadataFilters))
-        .collect(Collectors.toList());
-  }
-
-  /**
-   * Check if a vector matches all metadata filters.
-   * @deprecated Use MetadataFilter.applyFilter() instead
-   */
-  @Deprecated
-  private boolean matchesMetadataFilters(VectorObjectMetadata vector, Map<String, String> filters) {
-    // TODO: implement metadata filtering logic.
-    return true;
-  }
 }

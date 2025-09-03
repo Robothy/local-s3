@@ -54,10 +54,6 @@ public interface CreateIndexService extends S3VectorsMetadataAware {
     if (distanceMetric == null) {
       throw new LocalS3VectorException(LocalS3VectorErrorType.INVALID_REQUEST, "Distance metric is required");
     }
-    if (distanceMetric != DistanceMetric.EUCLIDEAN && distanceMetric != DistanceMetric.COSINE) {
-      throw new LocalS3VectorException(LocalS3VectorErrorType.INVALID_REQUEST,
-          "Only EUCLIDEAN and COSINE distance metrics are supported");
-    }
   }
 
   private VectorIndexMetadata createIndexMetadata(String indexName, int dimension, VectorDataType dataType,

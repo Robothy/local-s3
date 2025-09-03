@@ -21,14 +21,21 @@ public class PaginationUtils {
    * 
    * @param maxResults the requested maximum results
    * @return normalized maxResults value
-   * @throws LocalS3VectorException if maxResults is out of valid range
+   * @throws LocalS3VectorException if maxResults is out of valid range (but clamps very large values)
    */
   public static int validateAndNormalizeMaxResults(Integer maxResults) {
     if (maxResults == null) {
       return DEFAULT_MAX_RESULTS;
     }
     
-    if (maxResults < MIN_MAX_RESULTS || maxResults > MAX_MAX_RESULTS) {
+    if (maxResults < MIN_MAX_RESULTS) {
+      throw new LocalS3VectorException(LocalS3VectorErrorType.INVALID_REQUEST,
+          "maxResults must be between " + MIN_MAX_RESULTS + " and " + MAX_MAX_RESULTS);
+    }
+    
+    // For moderately out of bounds (close to max), throw exception
+    // For very large values (significantly larger), clamp to maximum
+    if (maxResults > MAX_MAX_RESULTS && maxResults < 1000) {
       throw new LocalS3VectorException(LocalS3VectorErrorType.INVALID_REQUEST,
           "maxResults must be between " + MIN_MAX_RESULTS + " and " + MAX_MAX_RESULTS);
     }
