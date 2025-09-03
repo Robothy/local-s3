@@ -8,7 +8,6 @@ import com.robothy.s3.datatypes.s3vectors.VectorBucket;
 import com.robothy.s3.datatypes.s3vectors.response.ListVectorBucketsResponse;
 import com.robothy.s3.datatypes.s3vectors.response.VectorBucketSummary;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,7 +33,7 @@ public interface ListVectorBucketsService extends S3VectorsMetadataAware {
   }
 
   private List<VectorBucketMetadata> getAllVectorBuckets() {
-    return new ArrayList<>(metadata().getVectorBucketMetadataMap().values());
+    return metadata().listVectorBuckets();
   }
 
   private List<VectorBucketMetadata> applyFiltersAndSorting(List<VectorBucketMetadata> buckets, String prefix) {
