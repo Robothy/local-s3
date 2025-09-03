@@ -33,7 +33,7 @@ public final class HttpRequestUtils {
 
     /**
      * Parses a request object from JSON bytes.
-     * If the body is empty, returns a default instance using the builder pattern.
+     * If the body is empty or contains only whitespace, returns a default instance using the builder pattern.
      *
      * @param bodyBytes the request body bytes
      * @param requestClass the class of the request object
@@ -44,7 +44,7 @@ public final class HttpRequestUtils {
      */
     public static <T> T parseRequestOrDefault(byte[] bodyBytes, Class<T> requestClass, 
                                               ObjectMapper objectMapper) throws Exception {
-        if (bodyBytes.length == 0) {
+        if (bodyBytes.length == 0 || new String(bodyBytes).trim().isEmpty()) {
             return createDefaultRequest(requestClass);
         }
         return objectMapper.readValue(bodyBytes, requestClass);
@@ -52,7 +52,7 @@ public final class HttpRequestUtils {
 
     /**
      * Parses a required request object from JSON bytes.
-     * Throws an exception if the body is empty, as the request is required.
+     * Throws an exception if the body is empty or contains only whitespace, as the request is required.
      *
      * @param bodyBytes the request body bytes
      * @param requestClass the class of the request object
@@ -63,7 +63,7 @@ public final class HttpRequestUtils {
      */
     public static <T> T parseRequiredRequest(byte[] bodyBytes, Class<T> requestClass, 
                                              ObjectMapper objectMapper) throws Exception {
-        if (bodyBytes.length == 0) {
+        if (bodyBytes.length == 0 || new String(bodyBytes).trim().isEmpty()) {
             throw new IllegalArgumentException("Request body is required for " + requestClass.getSimpleName());
         }
         return objectMapper.readValue(bodyBytes, requestClass);
@@ -99,8 +99,8 @@ public final class HttpRequestUtils {
      */
     public static void sendJsonResponse(HttpResponse response, Object responseObject, 
                                         ObjectMapper objectMapper) throws Exception {
-        response.putHeader(HttpHeaderNames.CONTENT_TYPE.toString(), HttpHeaderValues.APPLICATION_JSON)
-                .write(objectMapper.writeValueAsString(responseObject));
+        response.putHeader(HttpHeaderNames.CONTENT_TYPE.toString(), HttpHeaderValues.APPLICATION_JSON);
+        response.write(objectMapper.writeValueAsString(responseObject));
         ResponseUtils.addDateHeader(response);
         ResponseUtils.addAmzRequestId(response);
     }
@@ -112,8 +112,8 @@ public final class HttpRequestUtils {
      * @param response the HTTP response
      */
     public static void sendEmptyJsonResponse(HttpResponse response) {
-        response.putHeader(HttpHeaderNames.CONTENT_TYPE.toString(), HttpHeaderValues.APPLICATION_JSON)
-                .write("{}");
+        response.putHeader(HttpHeaderNames.CONTENT_TYPE.toString(), HttpHeaderValues.APPLICATION_JSON);
+        response.write("{}");
         ResponseUtils.addDateHeader(response);
         ResponseUtils.addAmzRequestId(response);
     }
