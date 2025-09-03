@@ -93,6 +93,80 @@ public class QueryVectorsIntegrationTest {
 
   @LocalS3
   @Test
+  void testQueryVectorsWithEuclideanDistance(S3VectorsClient vectorsClient) {
+    String bucketName = "test-euclidean-bucket" + UUID.randomUUID();
+    String indexName = "test-euclidean-index" + UUID.randomUUID();
+
+    vectorsClient.createVectorBucket(b -> b.vectorBucketName(bucketName));
+    int dimension = 5;
+    vectorsClient.createIndex(index -> index.vectorBucketName(bucketName).indexName(indexName)
+        .dimension(dimension)
+        .dataType(DataType.FLOAT32)
+        .distanceMetric(DistanceMetric.EUCLIDEAN)
+    );
+
+    try {
+      List<Float> vector1Data = List.of(1.1f, 1.2f, 1.0f, 1.2f, 1.3f);
+      List<Float> vector2Data = List.of(2.1f, 2.2f, 2.0f, 2.2f, 2.3f);
+      List<Float> vector3Data = List.of(3.1f, 3.2f, 3.0f, 3.2f, 3.3f);
+
+      Document vector1Metadata = Document.mapBuilder()
+          .putString("name", "Alice")
+          .putNumber("score", 95)
+          .build();
+
+      vectorsClient.putVectors(b -> b.vectorBucketName(bucketName).indexName(indexName)
+          .vectors(
+              v -> v.key("euclidean1")
+                  .data(d -> d.float32(vector1Data))
+                  .metadata(vector1Metadata)
+                  .build(),
+
+              v -> v.key("euclidean2")
+                  .data(d -> d.float32(vector2Data)).build(),
+
+              v -> v.key("euclidean3")
+                  .data(d -> d.float32(vector3Data)).build()
+          ));
+
+      List<Float> queryVector = List.of(1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+      QueryVectorsResponse queryVectorsResponse =
+          vectorsClient.queryVectors(b -> b.vectorBucketName(bucketName).indexName(indexName)
+              .queryVector(q -> q.float32(queryVector))
+              .topK(3)
+              .returnMetadata(true)
+              .returnDistance(true)
+          );
+
+      queryVectorsResponse.vectors().forEach(vector -> {
+        System.out.println(vector.key() + " - euclidean distance - " + vector.distance());
+      });
+
+      assertEquals(3, queryVectorsResponse.vectors().size());
+      // With Euclidean distance, vector1 (euclidean1) should be closest to the query vector [1,1,1,1,1]
+      QueryOutputVector queryOutputVector1 = queryVectorsResponse.vectors().get(0);
+      assertEquals("euclidean1", queryOutputVector1.key());
+      assertNotNull(queryOutputVector1.distance());
+      assertEquals(0.4242641f, queryOutputVector1.distance(), 0.01f);
+      assertEquals(vector1Metadata, queryOutputVector1.metadata());
+
+      QueryOutputVector queryOutputVector2 = queryVectorsResponse.vectors().get(1);
+      assertEquals("euclidean2", queryOutputVector2.key());
+      assertNotNull(queryOutputVector2.distance());
+      assertEquals(2.6038435f, queryOutputVector2.distance(), 0.01f);
+
+      QueryOutputVector queryOutputVector3 = queryVectorsResponse.vectors().get(2);
+      assertEquals("euclidean3", queryOutputVector3.key());
+      assertNotNull(queryOutputVector3.distance());
+      assertEquals(4.835165f, queryOutputVector3.distance(), 0.01f);
+    } finally {
+      vectorsClient.deleteIndex(b -> b.vectorBucketName(bucketName).indexName(indexName));
+      vectorsClient.deleteVectorBucket(b -> b.vectorBucketName(bucketName));
+    }
+  }
+
+  @LocalS3
+  @Test
   void testQueryVectorsWithMetadataFilter(S3VectorsClient vectorsClient) {
     String bucketName = "test-filter-bucket" + UUID.randomUUID();
     String indexName = "test-filter-index" + UUID.randomUUID();

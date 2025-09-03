@@ -14,13 +14,6 @@ public class VectorIndexMetadataMapConverter extends StdConverter<ConcurrentSkip
     if (value == null) {
       return new ConcurrentSkipListMap<>();
     }
-    // Ensure we have a proper ConcurrentSkipListMap instance
-    if (value instanceof ConcurrentSkipListMap) {
-      return value;
-    }
-    // Convert to ConcurrentSkipListMap if it's a different map type
-    ConcurrentSkipListMap<String, VectorIndexMetadata> result = new ConcurrentSkipListMap<>();
-    result.putAll(value);
-    return result;
+    return value;
   }
 }

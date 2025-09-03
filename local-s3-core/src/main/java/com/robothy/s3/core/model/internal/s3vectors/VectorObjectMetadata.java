@@ -75,15 +75,4 @@ public class VectorObjectMetadata {
       );
     }
   }
-
-  /**
-   * Check if this vector has the specified metadata key-value pair.
-   *
-   * @param key   the metadata key
-   * @param value the metadata value
-   * @return true if the metadata matches
-   */
-  public boolean hasMetadata(String key, String value) {
-    return metadata != null && value.equals(metadata.get(key));
-  }
 }

@@ -116,14 +116,13 @@ public class VectorIndexMetadata {
 
   /**
    * Add a vector object to this index.
-   * 
+   *
    * @param vectorObject the vector object metadata to add
-   * @return the previous vector object with the same ID, or null if none existed
    */
-  public VectorObjectMetadata addVectorObject(VectorObjectMetadata vectorObject) {
+  public void addVectorObject(VectorObjectMetadata vectorObject) {
     // Validate dimension compatibility
     vectorObject.validateDimension(this.dimension);
-    return vectorObjects.put(vectorObject.getVectorId(), vectorObject);
+    vectorObjects.put(vectorObject.getVectorId(), vectorObject);
   }
 
   /**

@@ -1,10 +1,15 @@
 package com.robothy.s3.core.service.s3vectors;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.robothy.s3.core.model.internal.s3vectors.VectorObjectMetadata;
 import com.robothy.s3.core.storage.s3vectors.VectorStorage;
 import com.robothy.s3.datatypes.s3vectors.DistanceMetric;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,12 +22,144 @@ class VectorSearchEngineTest {
 
   private VectorSearchEngine searchEngine;
   private VectorStorage vectorStorage;
+  private ObjectMapper objectMapper;
 
   @BeforeEach
   void setUp() {
     searchEngine = VectorSearchEngine.createBasic();
     vectorStorage = VectorStorage.createInMemory();
+    objectMapper = new ObjectMapper();
   }
+
+  @Test
+  void createBasic_returnsBasicVectorSearchEngineInstance() {
+    VectorSearchEngine engine = VectorSearchEngine.createBasic();
+
+    assertNotNull(engine);
+    assertInstanceOf(BasicVectorSearchEngine.class, engine);
+  }
+
+  @Test
+  void createBasic_multipleCallsReturnNewInstances() {
+    VectorSearchEngine engine1 = VectorSearchEngine.createBasic();
+    VectorSearchEngine engine2 = VectorSearchEngine.createBasic();
+
+    assertNotNull(engine1);
+    assertNotNull(engine2);
+    assertNotSame(engine1, engine2);
+  }
+
+  // ========== Default Method Tests ==========
+
+  @Test
+  void findNearestVectors_defaultMethod_delegatesToMainMethod() throws Exception {
+    VectorStorage mockStorage = mock(VectorStorage.class);
+    float[] queryVector = {1.0f, 2.0f, 3.0f};
+    float[] storedVector = {1.0f, 2.0f, 3.0f};
+    
+    VectorObjectMetadata vectorMetadata = new VectorObjectMetadata("vector1", 3, 1L, null);
+    when(mockStorage.getVectorData(1L)).thenReturn(storedVector);
+
+    List<VectorSearchEngine.VectorSearchResult> results = searchEngine.findNearestVectors(
+        queryVector, List.of(vectorMetadata), mockStorage, DistanceMetric.EUCLIDEAN, 5, null);
+
+    assertEquals(1, results.size());
+    assertEquals("vector1", results.get(0).vectorMetadata().getVectorId());
+    verify(mockStorage).getVectorData(1L);
+  }
+
+  // ========== VectorSearchResult Record Tests ==========
+
+  @Test
+  void vectorSearchResult_toString_returnsFormattedString() {
+    VectorObjectMetadata metadata = new VectorObjectMetadata("test-vector", 3, 1L, null);
+    VectorSearchEngine.VectorSearchResult result = new VectorSearchEngine.VectorSearchResult(metadata, 0.123456);
+
+    String toString = result.toString();
+
+    assertEquals("VectorSearchResult{vectorId='test-vector', distance=0.123456}", toString);
+  }
+
+  @Test
+  void vectorSearchResult_withHighPrecisionDistance_formatsCorrectly() {
+    VectorObjectMetadata metadata = new VectorObjectMetadata("precise-vector", 3, 1L, null);
+    VectorSearchEngine.VectorSearchResult result = new VectorSearchEngine.VectorSearchResult(metadata, 0.123456789);
+
+    String toString = result.toString();
+
+    assertEquals("VectorSearchResult{vectorId='precise-vector', distance=0.123457}", toString);
+  }
+
+  @Test
+  void vectorSearchResult_recordProperties_workCorrectly() {
+    VectorObjectMetadata metadata = new VectorObjectMetadata("record-test", 3, 1L, null);
+    VectorSearchEngine.VectorSearchResult result = new VectorSearchEngine.VectorSearchResult(metadata, 0.5);
+
+    assertEquals(metadata, result.vectorMetadata());
+    assertEquals(0.5, result.distance());
+  }
+
+  @Test
+  void vectorSearchResult_equality_worksCorrectly() {
+    VectorObjectMetadata metadata1 = new VectorObjectMetadata("vector1", 3, 1L, null);
+    VectorObjectMetadata metadata2 = new VectorObjectMetadata("vector1", 3, 1L, null);
+    
+    VectorSearchEngine.VectorSearchResult result1 = new VectorSearchEngine.VectorSearchResult(metadata1, 0.5);
+    VectorSearchEngine.VectorSearchResult result2 = new VectorSearchEngine.VectorSearchResult(metadata2, 0.5);
+
+    assertEquals(result1, result2);
+    assertEquals(result1.hashCode(), result2.hashCode());
+  }
+
+  // ========== Additional Edge Case Tests ==========
+
+  @Test
+  void findNearestVectors_withEmptyCollection_returnsEmptyList() throws Exception {
+    float[] queryVector = {1.0f, 2.0f, 3.0f};
+    Function<Long, float[]> dataLookup = id -> new float[]{1.0f, 2.0f, 3.0f};
+
+    List<VectorSearchEngine.VectorSearchResult> results = searchEngine.findNearestVectors(
+        queryVector, Collections.emptyList(), dataLookup, DistanceMetric.EUCLIDEAN, 5, null);
+
+    assertTrue(results.isEmpty());
+  }
+
+  @Test
+  void findNearestVectors_withMetadataFilter_filtersCorrectly() throws Exception {
+    float[] queryVector = {0.0f, 0.0f, 0.0f};
+    
+    JsonNode metadata1 = objectMapper.readTree("{\"category\": \"A\"}");
+    JsonNode metadata2 = objectMapper.readTree("{\"category\": \"B\"}");
+    JsonNode filter = objectMapper.readTree("{\"category\": \"A\"}");
+    
+    VectorObjectMetadata vector1 = new VectorObjectMetadata("vector1", 3, 1L, metadata1);
+    VectorObjectMetadata vector2 = new VectorObjectMetadata("vector2", 3, 2L, metadata2);
+    
+    Function<Long, float[]> dataLookup = id -> new float[]{1.0f, 0.0f, 0.0f};
+
+    List<VectorSearchEngine.VectorSearchResult> results = searchEngine.findNearestVectors(
+        queryVector, Arrays.asList(vector1, vector2), dataLookup, DistanceMetric.EUCLIDEAN, 5, filter);
+
+    assertEquals(1, results.size());
+    assertEquals("vector1", results.get(0).vectorMetadata().getVectorId());
+  }
+
+  @Test
+  void findNearestVectors_withKLargerThanAvailable_returnsAllResults() throws Exception {
+    float[] queryVector = {0.0f, 0.0f, 0.0f};
+    
+    VectorObjectMetadata vector1 = new VectorObjectMetadata("vector1", 3, 1L, null);
+    VectorObjectMetadata vector2 = new VectorObjectMetadata("vector2", 3, 2L, null);
+    
+    Function<Long, float[]> dataLookup = id -> new float[]{(float) id, 0.0f, 0.0f};
+
+    List<VectorSearchEngine.VectorSearchResult> results = searchEngine.findNearestVectors(
+        queryVector, Arrays.asList(vector1, vector2), dataLookup, DistanceMetric.EUCLIDEAN, 10, null);
+
+    assertEquals(2, results.size());
+  }
+
+  // ========== Original Tests (Preserved) ==========
 
   @Test
   void testEuclideanDistance() {
