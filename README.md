@@ -55,10 +55,39 @@ and without heavy dependencies, it starts up quickly and handles requests effici
 + DeletePublicAccessBlock
 </details>
 
+<details>
+<summary><b>Supported Amazon S3 Vectors APIs</b></summary>
+
+**Vector Bucket Operations:**
++ CreateVectorBucket
++ GetVectorBucket
++ ListVectorBuckets
++ DeleteVectorBucket
+
+**Vector Index Operations:**
++ CreateIndex
++ GetIndex
++ ListIndexes
++ DeleteIndex
+
+**Vector Data Operations:**
++ PutVectors
++ QueryVectors
++ GetVectors
++ ListVectors
++ DeleteVectors
+
+**Vector Bucket Policy Operations:**
++ PutVectorBucketPolicy
++ GetVectorBucketPolicy
++ DeleteVectorBucketPolicy
+</details>
+
 
 ## Features
 
 + Support S3 object versioning.
++ Support S3 Vectors for vector storage and similarity search.
 + In memory and persistence mode.
 
 ## Usages
@@ -142,6 +171,7 @@ the following parameter types of test methods or lifecycle methods.
 
 + `AmazonS3`
 + `S3Client`
++ `S3VectorsClient`
 + `LocalS3Endpoint`
 
 Example 1: Inject a `AmazonS3` object to the test method parameter.
@@ -169,7 +199,19 @@ class AppTest {
 }
 ```
 
-Example 3: Inject instances to junit5 lifecycle methods.
+Example 3: Inject a `S3VectorsClient` object to the test method parameter
+
+```java
+class AppTest {
+  @Test
+  @LocalS3
+  void test(S3VectorsClient vectorsClient) {
+    vectorsClient.createVectorBucket(b -> b.vectorBucketName("my-vector-bucket"));
+  }
+}
+```
+
+Example 4: Inject instances to junit5 lifecycle methods.
 
 ```java
 @LocalS3
@@ -233,23 +275,49 @@ public class AppTest {
       .withRandomHttpPort();
   
   @Test
-  void test() {
+  void testS3Operations() {
     assertTrue(container.isRunning());
     int port = container.getPort();
-    AmazonS3 s3 = AmazonS3ClientBuilder.standard()
-        .enablePathStyleAccess()
-        .withClientConfiguration(new ClientConfiguration().withSocketTimeout(1000).withConnectionTimeout(1000))
-        .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(
-            "http://localhost:" + port, "local"
-        )).build();
-    s3.createBucket("my-bucket");
+    
+    // Create S3Client for regular S3 operations
+    S3Client s3Client = S3Client.builder()
+        .endpointOverride(URI.create("http://localhost:" + port))
+        .region(Region.US_EAST_1)
+        .credentialsProvider(StaticCredentialsProvider.create(
+            AwsBasicCredentials.create("test", "test")))
+        .serviceConfiguration(S3Configuration.builder()
+            .pathStyleAccessEnabled(true)
+            .build())
+        .build();
+    
+    // Test regular S3 operations
+    s3Client.createBucket(b -> b.bucket("my-bucket"));
+    s3Client.putObject(b -> b.bucket("my-bucket").key("test.txt"), 
+        RequestBody.fromString("Hello World"));
+  }
+  
+  @Test
+  void testS3VectorOperations() {
+    assertTrue(container.isRunning());
+    int port = container.getPort();
+    
+    // Create S3VectorsClient for vector operations
+    S3VectorsClient vectorsClient = S3VectorsClient.builder()
+        .endpointOverride(URI.create("http://localhost:" + port))
+        .region(Region.US_EAST_1)
+        .credentialsProvider(StaticCredentialsProvider.create(
+            AwsBasicCredentials.create("test", "test")))
+        .build();
+    
+    // Test vector operations
+    vectorsClient.createVectorBucket(b -> b.vectorBucketName("my-vector-bucket"));
+    vectorsClient.createIndex(b -> b
+        .vectorBucketName("my-vector-bucket")
+        .indexName("my-index")
+        .dimension(128)
+        .dataType(DataType.FLOAT32)
+        .distanceMetric(DistanceMetric.COSINE));
   }
   
 }
 ```
-
-## Sponsors
-
-[![JetBrains](https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg)](https://jb.gg/OpenSourceSupport)
-
-
