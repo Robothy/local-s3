@@ -1,5 +1,6 @@
 package com.robothy.s3.core.service.manager;
 
+import com.robothy.s3.core.model.internal.BucketMetadata;
 import com.robothy.s3.core.model.internal.LocalS3Metadata;
 import com.robothy.s3.core.service.BucketService;
 import com.robothy.s3.core.service.InMemoryBucketService;
@@ -81,14 +82,16 @@ final class InMemoryLocalS3Manager implements LocalS3Manager {
   @Override
   public BucketService bucketService() {
     BucketService bucketService = InMemoryBucketService.create(s3Metadata);
-    LocalS3ServicesInvocationHandler invocationHandler = new LocalS3ServicesInvocationHandler(bucketService, s3Metadata, null);
+    LocalS3ServicesInvocationHandler<BucketMetadata> invocationHandler =
+        new LocalS3ServicesInvocationHandler<>(bucketService, bucketName -> s3Metadata.getBucketMetadata(bucketName).get(), null);
     return (BucketService) Proxy.newProxyInstance(BucketService.class.getClassLoader(), new Class[] {BucketService.class}, invocationHandler);
   }
 
   @Override
   public ObjectService objectService() {
     ObjectService objectService = InMemoryObjectService.create(s3Metadata, storage);
-    LocalS3ServicesInvocationHandler invocationHandler = new LocalS3ServicesInvocationHandler(objectService, s3Metadata, null);
+    LocalS3ServicesInvocationHandler<BucketMetadata> invocationHandler =
+        new LocalS3ServicesInvocationHandler<>(objectService, bucketName -> s3Metadata.getBucketMetadata(bucketName).get(), null);
     return (ObjectService) Proxy.newProxyInstance(ObjectService.class.getClassLoader(), new Class[] {ObjectService.class}, invocationHandler);
   }
 

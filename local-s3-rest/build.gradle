@@ -17,5 +17,5 @@ dependencies {
     implementation(libs.nettyHttpRouter) {
         exclude(group: "org.springframework", module: "spring-web")
     }
-    implementation(libs.mockitoInline)
+    testImplementation(libs.mockitoCore)
 }

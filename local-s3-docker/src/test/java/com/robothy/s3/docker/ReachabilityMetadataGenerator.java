@@ -42,12 +42,34 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
+import software.amazon.awssdk.auth.credentials.AnonymousCredentialsProvider;
+import software.amazon.awssdk.core.document.Document;
+import software.amazon.awssdk.services.s3vectors.S3VectorsClient;
+import software.amazon.awssdk.services.s3vectors.model.CreateIndexRequest;
+import software.amazon.awssdk.services.s3vectors.model.CreateVectorBucketRequest;
+import software.amazon.awssdk.services.s3vectors.model.DataType;
+import software.amazon.awssdk.services.s3vectors.model.DeleteIndexRequest;
+import software.amazon.awssdk.services.s3vectors.model.DeleteVectorBucketRequest;
+import software.amazon.awssdk.services.s3vectors.model.DeleteVectorsRequest;
+import software.amazon.awssdk.services.s3vectors.model.DistanceMetric;
+import software.amazon.awssdk.services.s3vectors.model.GetIndexRequest;
+import software.amazon.awssdk.services.s3vectors.model.GetVectorBucketRequest;
+import software.amazon.awssdk.services.s3vectors.model.GetVectorsRequest;
+import software.amazon.awssdk.services.s3vectors.model.ListIndexesRequest;
+import software.amazon.awssdk.services.s3vectors.model.ListVectorBucketsRequest;
+import software.amazon.awssdk.services.s3vectors.model.ListVectorsRequest;
+import software.amazon.awssdk.services.s3vectors.model.PutInputVector;
+import software.amazon.awssdk.services.s3vectors.model.PutVectorsRequest;
+import software.amazon.awssdk.services.s3vectors.model.QueryVectorsRequest;
+import software.amazon.awssdk.services.s3vectors.model.VectorData;
+import java.net.URI;
 
 public class ReachabilityMetadataGenerator {
 
@@ -79,6 +101,9 @@ public class ReachabilityMetadataGenerator {
       // Hit all LocalS3 APIs, cover as many classes as possible to generate reachability metadata.
       run(s3);
 
+      // Hit all S3 Vectors APIs to generate reachability metadata.
+      runS3Vectors(port);
+
       // Stop the container.
       try(StopContainerCmd cmd = container.getDockerClient().stopContainerCmd(container.getContainerId())) {
         cmd.exec();
@@ -109,7 +134,7 @@ public class ReachabilityMetadataGenerator {
    */
   static void run(AmazonS3 s3) {
     String bucketName = "my-bucket";
-    s3.createBucket(new CreateBucketRequest(bucketName, Region.AF_CapeTown));
+    s3.createBucket(new CreateBucketRequest(bucketName, com.amazonaws.services.s3.model.Region.AF_CapeTown));
     s3.listBuckets();
     s3.getBucketLocation(bucketName);
     s3.putObject(bucketName, "my-object", "Hello World!");
@@ -207,6 +232,148 @@ public class ReachabilityMetadataGenerator {
           .withDestinationBucketName(bucketName)
           .withDestinationKey("my-object-copy"));
     }); // not implemented yet
+  }
+
+  /**
+   * Hit all S3 Vectors APIs, cover as many classes as possible.
+   */
+  static void runS3Vectors(int port) {
+    S3VectorsClient vectorsClient = S3VectorsClient.builder()
+        .region(software.amazon.awssdk.regions.Region.US_EAST_1)
+        .credentialsProvider(AnonymousCredentialsProvider.create())
+        .endpointOverride(URI.create("http://localhost:" + port))
+        .build();
+
+    String vectorBucketName = "test-vector-bucket";
+    String indexName = "test-index";
+
+    try {
+      // Vector Bucket operations
+      vectorsClient.createVectorBucket(CreateVectorBucketRequest.builder()
+          .vectorBucketName(vectorBucketName)
+          .build());
+
+      vectorsClient.getVectorBucket(GetVectorBucketRequest.builder()
+          .vectorBucketName(vectorBucketName)
+          .build());
+
+      vectorsClient.listVectorBuckets(ListVectorBucketsRequest.builder()
+          .maxResults(10)
+          .build());
+
+      // Index operations
+      vectorsClient.createIndex(CreateIndexRequest.builder()
+          .vectorBucketName(vectorBucketName)
+          .indexName(indexName)
+          .dimension(5)
+          .dataType(DataType.FLOAT32)
+          .distanceMetric(DistanceMetric.COSINE)
+          .metadataConfiguration(m -> m.nonFilterableMetadataKeys("nf1", "nf2"))
+          .build());
+
+      vectorsClient.getIndex(GetIndexRequest.builder()
+          .vectorBucketName(vectorBucketName)
+          .indexName(indexName)
+          .build());
+
+      vectorsClient.listIndexes(ListIndexesRequest.builder()
+          .vectorBucketName(vectorBucketName)
+          .maxResults(10)
+          .build());
+
+      // Vector operations with metadata
+      Document vectorMetadata = Document.mapBuilder()
+          .putString("category", "test")
+          .putNumber("priority", 1)
+          .putBoolean("active", true)
+          .putList("tags", listBuilder -> listBuilder
+              .addString("tag1")
+              .addString("tag2"))
+          .build();
+
+      List<PutInputVector> vectors = List.of(
+          PutInputVector.builder()
+              .key("vector1")
+              .data(VectorData.builder()
+                  .float32(List.of(1.0f, 2.0f, 3.0f, 4.0f, 5.0f))
+                  .build())
+              .metadata(vectorMetadata)
+              .build(),
+          PutInputVector.builder()
+              .key("vector2")
+              .data(VectorData.builder()
+                  .float32(List.of(2.0f, 3.0f, 4.0f, 5.0f, 6.0f))
+                  .build())
+              .build()
+      );
+
+      vectorsClient.putVectors(PutVectorsRequest.builder()
+          .vectorBucketName(vectorBucketName)
+          .indexName(indexName)
+          .vectors(vectors)
+          .build());
+
+      vectorsClient.getVectors(GetVectorsRequest.builder()
+          .vectorBucketName(vectorBucketName)
+          .indexName(indexName)
+          .keys("vector1", "vector2")
+          .returnData(true)
+          .returnMetadata(true)
+          .build());
+
+      vectorsClient.listVectors(ListVectorsRequest.builder()
+          .vectorBucketName(vectorBucketName)
+          .indexName(indexName)
+          .returnData(true)
+          .returnMetadata(true)
+          .maxResults(10)
+          .build());
+
+      // Query vectors with filter
+      Document metadataFilter = Document.mapBuilder()
+          .putString("category", "test")
+          .build();
+
+      vectorsClient.queryVectors(QueryVectorsRequest.builder()
+          .vectorBucketName(vectorBucketName)
+          .indexName(indexName)
+          .queryVector(VectorData.builder()
+              .float32(List.of(1.5f, 2.5f, 3.5f, 4.5f, 5.5f))
+              .build())
+          .topK(5)
+          .returnMetadata(true)
+          .returnDistance(true)
+          .filter(metadataFilter)
+          .build());
+
+      // List vectors with segmentation
+      vectorsClient.listVectors(ListVectorsRequest.builder()
+          .vectorBucketName(vectorBucketName)
+          .indexName(indexName)
+          .segmentCount(2)
+          .segmentIndex(0)
+          .build());
+
+      // Cleanup operations
+      vectorsClient.deleteVectors(DeleteVectorsRequest.builder()
+          .vectorBucketName(vectorBucketName)
+          .indexName(indexName)
+          .keys("vector1")
+          .build());
+
+      vectorsClient.deleteIndex(DeleteIndexRequest.builder()
+          .vectorBucketName(vectorBucketName)
+          .indexName(indexName)
+          .build());
+
+      vectorsClient.deleteVectorBucket(DeleteVectorBucketRequest.builder()
+          .vectorBucketName(vectorBucketName)
+          .build());
+
+    } catch (Exception e) {
+      // Expected for some operations in development
+      System.err.println("S3 Vectors operation failed (expected): " + e.getMessage());
+    }
   }
 
   /**
