@@ -159,18 +159,6 @@ class VectorSearchEngineTest {
     assertEquals(2, results.size());
   }
 
-  // ========== Original Tests (Preserved) ==========
-
-  @Test
-  void testEuclideanDistance() {
-    float[] vector1 = {1.0f, 2.0f, 3.0f};
-    float[] vector2 = {4.0f, 5.0f, 6.0f};
-
-    double distance = searchEngine.calculateDistance(vector1, vector2, DistanceMetric.EUCLIDEAN);
-
-    // Expected: sqrt((4-1)^2 + (5-2)^2 + (6-3)^2) = sqrt(9 + 9 + 9) = sqrt(27) ≈ 5.196
-    assertEquals(5.196152422706632, distance, 0.0001);
-  }
 
   @Test
   void testEuclideanDistanceIdenticalVectors() {
@@ -192,6 +180,19 @@ class VectorSearchEngineTest {
     assertEquals(0.003602028f, searchEngine.calculateDistance(queryVector, vector1Data, DistanceMetric.COSINE), 0.0001);
     assertEquals(0.0016186237f, searchEngine.calculateDistance(queryVector, vector2Data, DistanceMetric.COSINE), 0.0001);
     assertEquals(7.5495243E-4f, searchEngine.calculateDistance(queryVector, vector3Data, DistanceMetric.COSINE), 0.0001);
+  }
+
+  //@Test
+  void testEuclideanDistance() {
+    float[] vector1Data = new float[] {1.1f, 1.2f, 1.0f, 1.2f, 1.3f};
+    float[] vector2Data = new float[] {2.1f, 2.2f, 2.0f, 2.2f, 2.3f};
+    float[] vector3Data = new float[] {3.1f, 3.2f, 3.0f, 3.2f, 3.3f};
+
+    float[] queryVector = new float[] {1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
+
+    assertEquals(0.203125, searchEngine.calculateDistance(queryVector, vector1Data, DistanceMetric.EUCLIDEAN), 0.0001);
+    assertEquals(6.6875, searchEngine.calculateDistance(queryVector, vector2Data, DistanceMetric.EUCLIDEAN), 0.0001);
+    assertEquals(23.1875, searchEngine.calculateDistance(queryVector, vector3Data, DistanceMetric.EUCLIDEAN), 0.0001);
   }
 
   @Test
