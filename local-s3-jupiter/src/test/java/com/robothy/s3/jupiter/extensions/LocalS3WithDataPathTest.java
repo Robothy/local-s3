@@ -2,11 +2,6 @@ package com.robothy.s3.jupiter.extensions;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import com.amazonaws.AmazonClientException;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.HeadBucketRequest;
-import com.amazonaws.services.s3.model.S3Object;
 import com.robothy.s3.jupiter.LocalS3;
 import com.robothy.s3.jupiter.supplier.DataPathSupplier;
 import com.robothy.s3.rest.bootstrap.LocalS3Mode;
@@ -20,6 +15,8 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.io.TempDir;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class LocalS3WithDataPathTest {
@@ -32,49 +29,49 @@ public class LocalS3WithDataPathTest {
   @Test
   @LocalS3(mode = LocalS3Mode.PERSISTENCE, dataPathSupplier = DataPathSupplierImpl.class)
   @DisplayName("Create a bucket and a object in PERSISTENCE mode.")
-  void test1(AmazonS3 client) {
-    assertDoesNotThrow(() -> client.createBucket("my-bucket"));
-    assertDoesNotThrow(() -> client.putObject("my-bucket", "a.txt", "LocalS3"));
+  void test1(S3Client client) {
+    assertDoesNotThrow(() -> client.createBucket(b -> b.bucket("my-bucket")));
+    assertDoesNotThrow(() -> client.putObject(b -> b.bucket("my-bucket").key("a.txt").build(), RequestBody.fromString("LocalS3")));
   }
 
   @Order(2)
   @Test
   @LocalS3(mode = LocalS3Mode.IN_MEMORY, dataPathSupplier = DataPathSupplierImpl.class)
   @DisplayName("Create a bucket and a object in IN_MEMORY mode.")
-  void test2(AmazonS3 client) throws IOException {
-    assertDoesNotThrow(() -> client.headBucket(new HeadBucketRequest("my-bucket")));
-    S3Object object = client.getObject("my-bucket", "a.txt");
-    assertEquals("LocalS3", new String(object.getObjectContent().readAllBytes()));
-    assertDoesNotThrow(() -> client.createBucket("your-bucket"));
-    assertDoesNotThrow(() -> client.putObject("your-bucket", "b.txt", "Robothy"));
+  void test2(S3Client client) throws IOException {
+    assertDoesNotThrow(() -> client.headBucket(b -> b.bucket("my-bucket")));
+    var objectResponse = client.getObjectAsBytes(b -> b.bucket("my-bucket").key("a.txt"));
+    assertEquals("LocalS3", objectResponse.asUtf8String());
+    assertDoesNotThrow(() -> client.createBucket(b -> b.bucket("your-bucket")));
+    assertDoesNotThrow(() -> client.putObject(b -> b.bucket("your-bucket").key("b.txt"), RequestBody.fromString("Robothy")));
   }
 
   @Order(3)
   @Test
   @LocalS3(mode = LocalS3Mode.PERSISTENCE, dataPathSupplier = DataPathSupplierImpl.class)
   @DisplayName("Changes in IN_MEMORY mode won't affect data in the disk.")
-  void test3(AmazonS3 client) throws IOException {
-    assertDoesNotThrow(() -> client.headBucket(new HeadBucketRequest("my-bucket")));
-    S3Object object = client.getObject("my-bucket", "a.txt");
-    assertEquals("LocalS3", new String(object.getObjectContent().readAllBytes()));
+  void test3(S3Client client) throws IOException {
+    assertDoesNotThrow(() -> client.headBucket(b -> b.bucket("my-bucket")));
+    var objectResponse = client.getObjectAsBytes(b -> b.bucket("my-bucket").key("a.txt"));
+    assertEquals("LocalS3", objectResponse.asUtf8String());
     // todo https://github.com/Robothy/local-s3/issues/10
     //assertThrows(AmazonClientException.class, () -> client.headBucket(new HeadBucketRequest("your-bucket")));
-    assertDoesNotThrow(() -> client.createBucket("her-bucket"));
-    assertDoesNotThrow(() -> client.putObject("her-bucket", "c.txt", "Hello"));
+    assertDoesNotThrow(() -> client.createBucket(b -> b.bucket("her-bucket")));
+    assertDoesNotThrow(() -> client.putObject(b -> b.bucket("her-bucket").key("c.txt"), RequestBody.fromString("Hello")));
   }
 
   @Order(4)
   @Test
   @LocalS3(mode = LocalS3Mode.IN_MEMORY, dataPathSupplier = DataPathSupplierImpl.class, initialDataCacheEnabled = false)
   @DisplayName("Change in PERSISTENCE mode will be persisted.")
-  void test4(AmazonS3 client) throws IOException {
-    assertDoesNotThrow(() -> client.headBucket(new HeadBucketRequest("my-bucket")));
-    S3Object object = client.getObject("my-bucket", "a.txt");
-    assertEquals("LocalS3", new String(object.getObjectContent().readAllBytes()));
+  void test4(S3Client client) throws IOException {
+    assertDoesNotThrow(() -> client.headBucket(b -> b.bucket("my-bucket")));
+    var objectResponse = client.getObjectAsBytes(b -> b.bucket("my-bucket").key("a.txt"));
+    assertEquals("LocalS3", objectResponse.asUtf8String());
 
-    assertDoesNotThrow(() -> client.headBucket(new HeadBucketRequest("her-bucket")));
-    S3Object object1 = client.getObject("her-bucket", "c.txt");
-    assertEquals("Hello", new String(object1.getObjectContent().readAllBytes()));
+    assertDoesNotThrow(() -> client.headBucket(b -> b.bucket("her-bucket")));
+    var objectResponse1 = client.getObjectAsBytes(b -> b.bucket("her-bucket").key("c.txt"));
+    assertEquals("Hello", objectResponse1.asUtf8String());
   }
 
   static class DataPathSupplierImpl implements DataPathSupplier {

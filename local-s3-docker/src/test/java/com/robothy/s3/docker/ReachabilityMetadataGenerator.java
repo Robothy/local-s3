@@ -2,41 +2,6 @@ package com.robothy.s3.docker;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import com.amazonaws.ClientConfiguration;
-import com.amazonaws.client.builder.AwsClientBuilder;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.model.AbortMultipartUploadRequest;
-import com.amazonaws.services.s3.model.AmazonS3Exception;
-import com.amazonaws.services.s3.model.BucketReplicationConfiguration;
-import com.amazonaws.services.s3.model.BucketTaggingConfiguration;
-import com.amazonaws.services.s3.model.BucketVersioningConfiguration;
-import com.amazonaws.services.s3.model.CompleteMultipartUploadRequest;
-import com.amazonaws.services.s3.model.CopyPartRequest;
-import com.amazonaws.services.s3.model.CreateBucketRequest;
-import com.amazonaws.services.s3.model.DeleteMarkerReplication;
-import com.amazonaws.services.s3.model.DeleteObjectTaggingRequest;
-import com.amazonaws.services.s3.model.DeleteObjectsRequest;
-import com.amazonaws.services.s3.model.GetObjectTaggingRequest;
-import com.amazonaws.services.s3.model.HeadBucketRequest;
-import com.amazonaws.services.s3.model.InitiateMultipartUploadRequest;
-import com.amazonaws.services.s3.model.InitiateMultipartUploadResult;
-import com.amazonaws.services.s3.model.ListPartsRequest;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.ObjectTagging;
-import com.amazonaws.services.s3.model.PartETag;
-import com.amazonaws.services.s3.model.Region;
-import com.amazonaws.services.s3.model.ReplicationDestinationConfig;
-import com.amazonaws.services.s3.model.ReplicationRule;
-import com.amazonaws.services.s3.model.ServerSideEncryptionByDefault;
-import com.amazonaws.services.s3.model.ServerSideEncryptionConfiguration;
-import com.amazonaws.services.s3.model.ServerSideEncryptionRule;
-import com.amazonaws.services.s3.model.SetBucketEncryptionRequest;
-import com.amazonaws.services.s3.model.SetBucketVersioningConfigurationRequest;
-import com.amazonaws.services.s3.model.SetObjectTaggingRequest;
-import com.amazonaws.services.s3.model.Tag;
-import com.amazonaws.services.s3.model.TagSet;
-import com.amazonaws.services.s3.model.UploadPartRequest;
 import com.github.dockerjava.api.command.StopContainerCmd;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -51,6 +16,10 @@ import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
 import software.amazon.awssdk.auth.credentials.AnonymousCredentialsProvider;
 import software.amazon.awssdk.core.document.Document;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3vectors.S3VectorsClient;
 import software.amazon.awssdk.services.s3vectors.model.CreateIndexRequest;
 import software.amazon.awssdk.services.s3vectors.model.CreateVectorBucketRequest;
@@ -90,12 +59,10 @@ public class ReachabilityMetadataGenerator {
           .withCommand( "java -DMODE=PERSISTENCE -agentlib:native-image-agent=config-output-dir=/metadata -jar /app/s3.jar")
           .start();
 
-      AmazonS3 s3 = AmazonS3ClientBuilder.standard()
-          .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration("http://localhost:" + port, "local"))
-          .enablePathStyleAccess()
-          .withClientConfiguration(new ClientConfiguration()
-              .withConnectionTimeout(5000)
-              .withSocketTimeout(5000))
+      S3Client s3 = S3Client.builder()
+          .endpointOverride(URI.create("http://localhost:" + port))
+          .forcePathStyle(true)
+          .region(Region.AP_EAST_1)
           .build();
 
       // Hit all LocalS3 APIs, cover as many classes as possible to generate reachability metadata.
@@ -132,105 +99,155 @@ public class ReachabilityMetadataGenerator {
   /**
    * Hit all LocalS3 APIs, cover as many classes as possible.
    */
-  static void run(AmazonS3 s3) {
+  static void run(S3Client s3) {
     String bucketName = "my-bucket";
-    s3.createBucket(new CreateBucketRequest(bucketName, com.amazonaws.services.s3.model.Region.AF_CapeTown));
+    s3.createBucket(CreateBucketRequest.builder()
+        .bucket(bucketName)
+        .createBucketConfiguration(CreateBucketConfiguration.builder()
+            .locationConstraint(BucketLocationConstraint.AF_SOUTH_1)
+            .build())
+        .build());
     s3.listBuckets();
-    s3.getBucketLocation(bucketName);
-    s3.putObject(bucketName, "my-object", "Hello World!");
-    s3.getObject(bucketName, "my-object");
-    s3.listObjects(bucketName);
-    s3.deleteObject(bucketName, "my-object");
-    s3.setBucketVersioningConfiguration(new SetBucketVersioningConfigurationRequest(bucketName, new BucketVersioningConfiguration("Enabled")));
-    s3.listObjectsV2(bucketName);
+    s3.getBucketLocation(GetBucketLocationRequest.builder().bucket(bucketName).build());
+    s3.putObject(PutObjectRequest.builder().bucket(bucketName).key("my-object").build(), 
+        RequestBody.fromString("Hello World!"));
+    s3.getObject(GetObjectRequest.builder().bucket(bucketName).key("my-object").build());
+    s3.listObjects(ListObjectsRequest.builder().bucket(bucketName).build());
+    s3.deleteObject(DeleteObjectRequest.builder().bucket(bucketName).key("my-object").build());
+    s3.putBucketVersioning(PutBucketVersioningRequest.builder()
+        .bucket(bucketName)
+        .versioningConfiguration(VersioningConfiguration.builder()
+            .status(BucketVersioningStatus.ENABLED)
+            .build())
+        .build());
+    s3.listObjectsV2(ListObjectsV2Request.builder().bucket(bucketName).build());
 
-    s3.putObject(bucketName, "my-object", "Hello World!");
-    s3.deleteObject(bucketName, "my-object");
-    s3.putObject(bucketName, "my-object", "Hello World!");
-    s3.listVersions(bucketName, "my-object");
-    s3.copyObject(bucketName, "my-object", bucketName, "my-object-copy");
-    s3.setObjectTagging(new SetObjectTaggingRequest(bucketName, "my-object",
-        new ObjectTagging(List.of(new Tag("k1", "v1")))));
-    s3.getObjectTagging(new GetObjectTaggingRequest(bucketName, "my-object"));
-    s3.deleteObjectTagging(new DeleteObjectTaggingRequest(bucketName, "my-object"));
+    s3.putObject(PutObjectRequest.builder().bucket(bucketName).key("my-object").build(), 
+        RequestBody.fromString("Hello World!"));
+    s3.deleteObject(DeleteObjectRequest.builder().bucket(bucketName).key("my-object").build());
+    s3.putObject(PutObjectRequest.builder().bucket(bucketName).key("my-object").build(), 
+        RequestBody.fromString("Hello World!"));
+    s3.listObjectVersions(ListObjectVersionsRequest.builder().bucket(bucketName).prefix("my-object").build());
+    s3.copyObject(CopyObjectRequest.builder()
+        .sourceBucket(bucketName).sourceKey("my-object")
+        .destinationBucket(bucketName).destinationKey("my-object-copy")
+        .build());
+    s3.putObjectTagging(PutObjectTaggingRequest.builder()
+        .bucket(bucketName).key("my-object")
+        .tagging(Tagging.builder()
+            .tagSet(Tag.builder().key("k1").value("v1").build())
+            .build())
+        .build());
+    s3.getObjectTagging(GetObjectTaggingRequest.builder().bucket(bucketName).key("my-object").build());
+    s3.deleteObjectTagging(DeleteObjectTaggingRequest.builder().bucket(bucketName).key("my-object").build());
 
-    s3.initiateMultipartUpload(new InitiateMultipartUploadRequest(bucketName, "my-object"));
+    s3.createMultipartUpload(CreateMultipartUploadRequest.builder()
+        .bucket(bucketName).key("my-object").build());
 
-    ObjectMetadata objectMetadata1 = new ObjectMetadata();
-    objectMetadata1.setContentType("plain/text");
-    InitiateMultipartUploadResult initResult =
-        s3.initiateMultipartUpload(new InitiateMultipartUploadRequest(bucketName, "my-object", objectMetadata1));
+    CreateMultipartUploadResponse initResult = s3.createMultipartUpload(CreateMultipartUploadRequest.builder()
+        .bucket(bucketName).key("my-object")
+        .contentType("plain/text")
+        .build());
 
-    UploadPartRequest part1 = new UploadPartRequest()
-        .withBucketName(bucketName)
-        .withKey("my-object")
-        .withUploadId(initResult.getUploadId())
-        .withPartNumber(1)
-        .withInputStream(new ByteArrayInputStream("Hello".getBytes()))
-        .withPartSize(5L)
-        .withLastPart(true);
+    UploadPartResponse part1Response = s3.uploadPart(UploadPartRequest.builder()
+        .bucket(bucketName)
+        .key("my-object")
+        .uploadId(initResult.uploadId())
+        .partNumber(1)
+        .build(), RequestBody.fromBytes("Hello".getBytes()));
 
-    UploadPartRequest part2 = new UploadPartRequest()
-        .withBucketName(bucketName)
-        .withKey("my-object")
-        .withUploadId(initResult.getUploadId())
-        .withPartNumber(2)
-        .withInputStream(new ByteArrayInputStream("World".getBytes()))
-        .withPartSize(5L)
-        .withLastPart(true);
+    UploadPartResponse part2Response = s3.uploadPart(UploadPartRequest.builder()
+        .bucket(bucketName)
+        .key("my-object")
+        .uploadId(initResult.uploadId())
+        .partNumber(2)
+        .build(), RequestBody.fromBytes("World".getBytes()));
 
-    s3.uploadPart(part1);
-    s3.uploadPart(part2);
-    s3.listParts(new ListPartsRequest(bucketName, "my-object", initResult.getUploadId()));
-    s3.completeMultipartUpload(new CompleteMultipartUploadRequest(bucketName, "my-object", initResult.getUploadId(), List.of(
-        new PartETag(1, ""),
-        new PartETag(2, "")
-    )));
-    s3.initiateMultipartUpload(new InitiateMultipartUploadRequest(bucketName, "my-object"));
-    s3.abortMultipartUpload(new AbortMultipartUploadRequest(bucketName, "my-object", initResult.getUploadId()));
+    s3.listParts(ListPartsRequest.builder()
+        .bucket(bucketName).key("my-object").uploadId(initResult.uploadId()).build());
+    s3.completeMultipartUpload(CompleteMultipartUploadRequest.builder()
+        .bucket(bucketName).key("my-object").uploadId(initResult.uploadId())
+        .multipartUpload(CompletedMultipartUpload.builder()
+            .parts(
+                CompletedPart.builder().partNumber(1).eTag(part1Response.eTag()).build(),
+                CompletedPart.builder().partNumber(2).eTag(part2Response.eTag()).build()
+            )
+            .build())
+        .build());
+    CreateMultipartUploadResponse newInitResult = s3.createMultipartUpload(CreateMultipartUploadRequest.builder()
+        .bucket(bucketName).key("my-object").build());
+    s3.abortMultipartUpload(AbortMultipartUploadRequest.builder()
+        .bucket(bucketName).key("my-object").uploadId(newInitResult.uploadId()).build());
 
-    SetBucketEncryptionRequest setBucketEncryptionRequest = new SetBucketEncryptionRequest();
-    setBucketEncryptionRequest.setBucketName(bucketName);
-    setBucketEncryptionRequest.setServerSideEncryptionConfiguration(new ServerSideEncryptionConfiguration()
-        .withRules(new ServerSideEncryptionRule().withBucketKeyEnabled(true)
-            .withApplyServerSideEncryptionByDefault(new ServerSideEncryptionByDefault()
-                .withSSEAlgorithm("AES256").withKMSMasterKeyID("arn:aws:kms:us-east-1:1234/5678example"))));
+    assertDoesNotThrow(() -> s3.putBucketEncryption(PutBucketEncryptionRequest.builder()
+        .bucket(bucketName)
+        .serverSideEncryptionConfiguration(ServerSideEncryptionConfiguration.builder()
+            .rules(ServerSideEncryptionRule.builder()
+                .bucketKeyEnabled(true)
+                .applyServerSideEncryptionByDefault(ServerSideEncryptionByDefault.builder()
+                    .sseAlgorithm(ServerSideEncryption.AES256)
+                    .kmsMasterKeyID("arn:aws:kms:us-east-1:1234/5678example")
+                    .build())
+                .build())
+            .build())
+        .build()));
+    s3.getBucketEncryption(GetBucketEncryptionRequest.builder().bucket(bucketName).build());
+    s3.deleteBucketEncryption(DeleteBucketEncryptionRequest.builder().bucket(bucketName).build());
 
-    assertDoesNotThrow(() -> s3.setBucketEncryption(setBucketEncryptionRequest));
-    s3.setBucketEncryption(setBucketEncryptionRequest);
-    s3.getBucketEncryption(bucketName);
-    s3.deleteBucketEncryption(bucketName);
+    s3.putBucketPolicy(PutBucketPolicyRequest.builder().bucket(bucketName).policy("policy").build());
+    s3.getBucketPolicy(GetBucketPolicyRequest.builder().bucket(bucketName).build());
+    s3.deleteBucketPolicy(DeleteBucketPolicyRequest.builder().bucket(bucketName).build());
 
-    s3.setBucketPolicy(bucketName, "policy");
-    s3.getBucketPolicy(bucketName);
-    s3.deleteBucketPolicy(bucketName);
+    s3.putBucketReplication(PutBucketReplicationRequest.builder()
+        .bucket(bucketName)
+        .replicationConfiguration(ReplicationConfiguration.builder()
+            .role("arn:aws:iam::123456789012:role/replication-role")
+            .rules(ReplicationRule.builder()
+                .id("1")
+                .priority(1)
+                .status(ReplicationRuleStatus.ENABLED)
+                .deleteMarkerReplication(DeleteMarkerReplication.builder()
+                    .status(DeleteMarkerReplicationStatus.DISABLED)
+                    .build())
+                .destination(Destination.builder()
+                    .bucket("arn:aws:s3:::exampletargetbucket")
+                    .build())
+                .build())
+            .build())
+        .build());
+    s3.getBucketReplication(GetBucketReplicationRequest.builder().bucket(bucketName).build());
+    s3.deleteBucketReplication(DeleteBucketReplicationRequest.builder().bucket(bucketName).build());
 
-    ReplicationDestinationConfig destinationConfig =
-        new ReplicationDestinationConfig().withBucketARN("arn:aws:s3:::exampletargetbucket");
-    s3.setBucketReplicationConfiguration(bucketName, new BucketReplicationConfiguration()
-        .addRule("1", new ReplicationRule().withDestinationConfig(destinationConfig)
-            .withPriority(1).withDeleteMarkerReplication(new DeleteMarkerReplication().withStatus("Disabled"))));
-    s3.getBucketReplicationConfiguration(bucketName);
-    s3.deleteBucketReplicationConfiguration(bucketName);
+    s3.putBucketTagging(PutBucketTaggingRequest.builder()
+        .bucket(bucketName)
+        .tagging(Tagging.builder()
+            .tagSet(Tag.builder().key("key").value("value").build())
+            .build())
+        .build());
+    s3.getBucketTagging(GetBucketTaggingRequest.builder().bucket(bucketName).build());
+    s3.deleteBucketTagging(DeleteBucketTaggingRequest.builder().bucket(bucketName).build());
 
-    s3.setBucketTaggingConfiguration(bucketName, new BucketTaggingConfiguration(List.of(new TagSet(Map.of("key", "value")))));
-    s3.getBucketTaggingConfiguration(bucketName);
-    s3.deleteBucketTaggingConfiguration(bucketName);
+    s3.headBucket(HeadBucketRequest.builder().bucket(bucketName).build());
+    s3.headObject(HeadObjectRequest.builder().bucket(bucketName).key("my-object").build());
 
-    s3.headBucket(new HeadBucketRequest(bucketName));
-    s3.getObjectMetadata(bucketName, "my-object");
+    s3.deleteObjects(DeleteObjectsRequest.builder()
+        .bucket(bucketName)
+        .delete(Delete.builder()
+            .objects(ObjectIdentifier.builder().key("my-object").versionId("version").build())
+            .build())
+        .build());
 
-    s3.deleteObjects(new DeleteObjectsRequest(bucketName).withKeys(List.of(new DeleteObjectsRequest.KeyVersion("my-object", "version"))));
+    assertThrows(S3Exception.class, () -> s3.deleteBucket(DeleteBucketRequest.builder().bucket("not-exist-bucket").build()));
 
-    assertThrows(AmazonS3Exception.class, () -> s3.deleteBucket("not-exist-bucket"));
-
-    assertThrows(AmazonS3Exception.class, () -> {
-      s3.copyPart(new CopyPartRequest().withUploadId(initResult.getUploadId())
-          .withPartNumber(1)
-          .withSourceBucketName(bucketName)
-          .withSourceKey("my-object")
-          .withDestinationBucketName(bucketName)
-          .withDestinationKey("my-object-copy"));
+    assertThrows(S3Exception.class, () -> {
+      s3.uploadPartCopy(UploadPartCopyRequest.builder()
+          .uploadId(newInitResult.uploadId())
+          .partNumber(1)
+          .sourceBucket(bucketName)
+          .sourceKey("my-object")
+          .destinationBucket(bucketName)
+          .destinationKey("my-object-copy")
+          .build());
     }); // not implemented yet
   }
 

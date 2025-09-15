@@ -1,7 +1,5 @@
 package com.robothy.s3.jupiter;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.robothy.s3.jupiter.extensions.AmazonS3Resolver;
 import com.robothy.s3.jupiter.extensions.LocalS3EndpointResolver;
 import com.robothy.s3.jupiter.extensions.LocalS3Extension;
 import com.robothy.s3.jupiter.extensions.LocalS3VectorsClientResolver;
@@ -22,7 +20,6 @@ import software.amazon.awssdk.services.s3vectors.S3VectorsClient;
  * the following parameter types in test methods.
  *
  * <ul>
- *   <li>{@linkplain AmazonS3}</li>
  *   <li>{@linkplain S3Client}</li>
  *   <li>{@linkplain S3VectorsClient}</li>
  *   <li>{@linkplain LocalS3Endpoint}</li>
@@ -65,7 +62,6 @@ import software.amazon.awssdk.services.s3vectors.S3VectorsClient;
 @Target({ElementType.TYPE, ElementType.METHOD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 @ExtendWith(LocalS3Extension.class)
-@ExtendWith(AmazonS3Resolver.class)
 @ExtendWith(S3ClientResolver.class)
 @ExtendWith(LocalS3VectorsClientResolver.class)
 @ExtendWith(LocalS3EndpointResolver.class)
