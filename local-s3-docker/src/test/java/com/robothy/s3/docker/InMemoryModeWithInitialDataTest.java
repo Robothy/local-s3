@@ -17,6 +17,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.shaded.com.google.common.io.Files;
+import software.amazon.awssdk.auth.credentials.AnonymousCredentialsProvider;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -43,6 +44,7 @@ public class InMemoryModeWithInitialDataTest {
         .endpointOverride(URI.create("http://localhost:" + localS3.getPort()))
         .forcePathStyle(true)
         .region(Region.AP_EAST_1)
+        .credentialsProvider(AnonymousCredentialsProvider.create())
         .build();
 
     String bucketName = "init-bucket";
@@ -60,32 +62,41 @@ public class InMemoryModeWithInitialDataTest {
       .withDataPath(tmpDir.getAbsolutePath())
       .withMode(LocalS3Container.Mode.IN_MEMORY);
 
-  private final S3Client s3 = S3Client.builder()
-      .endpointOverride(URI.create("http://localhost:" + localS3Container.getPort()))
-      .forcePathStyle(true)
-      .region(Region.AP_EAST_1)
-      .build();
+  S3Client createS3Client() {
+    return S3Client.builder()
+        .endpointOverride(URI.create("http://localhost:" + localS3Container.getPort()))
+        .forcePathStyle(true)
+        .region(Region.AP_EAST_1)
+        .credentialsProvider(AnonymousCredentialsProvider.create())
+        .build();
+  }
 
   @Order(1)
   @Test
   @DisplayName("Read initial data.")
   public void testInMemoryModeWithInitialData() throws IOException {
-    assertDoesNotThrow(() -> s3.headBucket(builder -> builder.bucket("init-bucket")));
-    var objectResponse = s3.getObjectAsBytes(builder -> builder.bucket("init-bucket").key("a.txt"));
-    assertEquals("Hello", objectResponse.asUtf8String());
+    try (S3Client s3 = createS3Client()) {
+      assertDoesNotThrow(() -> s3.headBucket(builder -> builder.bucket("init-bucket")));
+      var objectResponse = s3.getObjectAsBytes(builder -> builder.bucket("init-bucket").key("a.txt"));
+      assertEquals("Hello", objectResponse.asUtf8String());
 
-    assertDoesNotThrow(() -> s3.createBucket(builder -> builder.bucket("my-bucket")));
-    assertDoesNotThrow(() -> s3.putObject(builder -> builder.bucket("my-bucket").key("b.txt"), RequestBody.fromString("Robothy")));
+      assertDoesNotThrow(() -> s3.createBucket(builder -> builder.bucket("my-bucket")));
+      assertDoesNotThrow(
+          () -> s3.putObject(builder -> builder.bucket("my-bucket").key("b.txt"), RequestBody.fromString("Robothy")));
+    }
   }
 
   @Order(2)
   @Test
   @DisplayName("Initial data shouldn't be affected.")
   public void inMemoryLocalS3ShouldNotAffectInitialData() throws IOException {
-    assertDoesNotThrow(() -> s3.headBucket(builder -> builder.bucket("init-bucket"))); // bucket from initial data.
-    assertThrows(NoSuchBucketException.class, () -> s3.headBucket(builder -> builder.bucket("my-bucket"))); // bucket created in the previous test.
-    var objectResponse = s3.getObjectAsBytes(builder -> builder.bucket("init-bucket").key("a.txt"));
-    assertEquals("Hello", objectResponse.asUtf8String());
+    try (S3Client s3 = createS3Client()) {
+      assertDoesNotThrow(() -> s3.headBucket(builder -> builder.bucket("init-bucket"))); // bucket from initial data.
+      assertThrows(NoSuchBucketException.class,
+          () -> s3.headBucket(builder -> builder.bucket("my-bucket"))); // bucket created in the previous test.
+      var objectResponse = s3.getObjectAsBytes(builder -> builder.bucket("init-bucket").key("a.txt"));
+      assertEquals("Hello", objectResponse.asUtf8String());
+    }
   }
 
 }

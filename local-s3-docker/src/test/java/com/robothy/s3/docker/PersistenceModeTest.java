@@ -14,6 +14,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.shaded.com.google.common.io.Files;
+import software.amazon.awssdk.auth.credentials.AnonymousCredentialsProvider;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -35,34 +36,36 @@ public class PersistenceModeTest {
     tmpDir.deleteOnExit();
   }
 
+  S3Client createS3Client() {
+    return S3Client.builder()
+        .endpointOverride(URI.create("http://localhost:" + container.getPort()))
+        .forcePathStyle(true)
+        .region(Region.AP_EAST_1)
+        .credentialsProvider(AnonymousCredentialsProvider.create())
+        .build();
+  }
+
   @Order(1)
   @Test
   public void create() {
     assertTrue(container.isRunning());
-    S3Client s3 = S3Client.builder()
-        .endpointOverride(URI.create("http://localhost:" + container.getPort()))
-        .forcePathStyle(true)
-        .region(Region.AP_EAST_1)
-        .build();
-    String bucket = "my-bucket";
-    assertDoesNotThrow(() -> s3.createBucket(builder -> builder.bucket("my-bucket")));
-    assertDoesNotThrow(() -> s3.putObject(builder -> builder.bucket(bucket).key("a.txt"), RequestBody.fromString("Hello World")));
-    s3.close();
+    try (S3Client s3 = createS3Client()) {
+      String bucket = "my-bucket";
+      assertDoesNotThrow(() -> s3.createBucket(builder -> builder.bucket("my-bucket")));
+      assertDoesNotThrow(
+          () -> s3.putObject(builder -> builder.bucket(bucket).key("a.txt"), RequestBody.fromString("Hello World")));
+    }
   }
 
   @Order(2)
   @Test
   public void read() throws IOException {
     assertTrue(container.isRunning());
-    S3Client s3 = S3Client.builder()
-        .endpointOverride(URI.create("http://localhost:" + container.getPort()))
-        .forcePathStyle(true)
-        .region(Region.AP_EAST_1)
-        .build();
-    String bucket = "my-bucket";
-    var objectResponse = s3.getObjectAsBytes(builder -> builder.bucket(bucket).key("a.txt"));
-    assertEquals("Hello World", objectResponse.asUtf8String());
-    s3.close();
+    try (S3Client s3 = createS3Client()) {
+      String bucket = "my-bucket";
+      var objectResponse = s3.getObjectAsBytes(builder -> builder.bucket(bucket).key("a.txt"));
+      assertEquals("Hello World", objectResponse.asUtf8String());
+    }
   }
 
 }
