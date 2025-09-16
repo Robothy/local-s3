@@ -6,7 +6,6 @@ plugins {
 dependencies {
     implementation project(":local-s3-rest")
     compileOnly(libs.awssdkS3)
-    compileOnly(libs.awsJavaSdk)
     implementation(libs.commonsIo)
     implementation(libs.apacheCommonsLang3)
     implementation(libs.jacksonDataformatXml)
@@ -14,6 +13,5 @@ dependencies {
     implementation(libs.logbackClassic)
     implementation(libs.awssdkS3)
     implementation(libs.awssdkS3vectors)
-    implementation(libs.awsJavaSdk)
 }
 

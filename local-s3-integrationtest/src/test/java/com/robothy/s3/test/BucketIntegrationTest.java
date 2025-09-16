@@ -211,10 +211,9 @@ public class BucketIntegrationTest {
     
     ListBucketsResponse buckets1 = s3.listBuckets();
     assertEquals(2, buckets1.buckets().size());
-    assertEquals("test-bucket1", buckets1.buckets().get(0).name());
-    assertTrue(buckets1.buckets().get(0).creationDate().isBefore(Instant.now()));
-    assertEquals("test-bucket2", buckets1.buckets().get(1).name());
-    assertTrue(buckets1.buckets().get(1).creationDate().isBefore(Instant.now()));
+    assertTrue(buckets1.buckets().stream().allMatch(bucket -> bucket.creationDate().isBefore(Instant.now())));
+    assertTrue(buckets1.buckets().stream().map(Bucket::name).anyMatch("test-bucket1"::equals));
+    assertTrue(buckets1.buckets().stream().map(Bucket::name).anyMatch("test-bucket2"::equals));
 
     s3.deleteBucket(DeleteBucketRequest.builder().bucket("test-bucket1").build());
     ListBucketsResponse buckets2 = s3.listBuckets();

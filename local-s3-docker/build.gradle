@@ -13,7 +13,6 @@ dependencies {
     testImplementation(libs.testContainersJunit)
     testImplementation(libs.awssdkS3)
     testImplementation(libs.awssdkS3vectors)
-    testImplementation(libs.awsJavaSdk)
 }
 
 jar {

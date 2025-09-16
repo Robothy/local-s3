@@ -1,6 +1,5 @@
 package com.robothy.s3.jupiter;
 
-import com.amazonaws.client.builder.AwsClientBuilder;
 import java.util.Objects;
 
 /**
@@ -30,16 +29,6 @@ public class LocalS3Endpoint {
 
   public String region() {
     return region;
-  }
-
-  /**
-   * Create an {@linkplain com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration} instance by
-   * {@linkplain LocalS3Endpoint}.
-   *
-   * @return a {@code EndpointConfiguration} instance.
-   */
-  public AwsClientBuilder.EndpointConfiguration toAmazonS3EndpointConfiguration() {
-    return new AwsClientBuilder.EndpointConfiguration(endpoint, region);
   }
 
   @Override
