@@ -19,6 +19,8 @@ public class PutObjectOptions {
 
   private InputStream content;
 
+  private String contentMd5;
+
   private String[][] tagging;
 
   private Map<String, String> userMetadata;
