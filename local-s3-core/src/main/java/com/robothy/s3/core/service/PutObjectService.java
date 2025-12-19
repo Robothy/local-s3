@@ -50,7 +50,7 @@ public interface PutObjectService extends LocalS3MetadataApplicable, StorageAppl
     versionedObjectMetadata.setFileId(fileId);
 
     versionedObjectMetadata.setEtag(S3ObjectUtils.etag(storage().getInputStream(fileId)));
-    checkRequestingMd5Header(options, fileId);
+    checkRequestingMd5Header(options, fileId, versionedObjectMetadata.getEtag());
     options.getTagging().ifPresent(versionedObjectMetadata::setTagging);
 
     ObjectMetadata objectMetadata;
@@ -88,12 +88,11 @@ public interface PutObjectService extends LocalS3MetadataApplicable, StorageAppl
         .build();
   }
 
-  private void checkRequestingMd5Header(PutObjectOptions options, Long fileId) {
+  private void checkRequestingMd5Header(PutObjectOptions options, Long fileId, String etag) {
     // Validate Content-MD5 header if present.
     if (Objects.nonNull(options.getContentMd5())) {
       try {
-        String computedHex = S3ObjectUtils.etag(storage().getInputStream(fileId));
-        byte[] md5Bytes = org.apache.commons.codec.binary.Hex.decodeHex(computedHex);
+        byte[] md5Bytes = org.apache.commons.codec.binary.Hex.decodeHex(etag);
         String computedBase64 = Base64.getEncoder().encodeToString(md5Bytes);
         if (!computedBase64.equals(options.getContentMd5())) {
           storage().delete(fileId);
