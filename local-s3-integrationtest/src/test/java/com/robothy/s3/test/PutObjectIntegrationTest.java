@@ -25,6 +25,8 @@ import software.amazon.awssdk.services.s3.model.*;
 import java.io.IOException;
 import java.util.Map;
 import software.amazon.awssdk.utils.AttributeMap;
+import java.security.MessageDigest;
+import java.util.Base64;
 
 public class PutObjectIntegrationTest {
 
@@ -72,6 +74,53 @@ public class PutObjectIntegrationTest {
     Tag tag2 = objectTaggingResult.tagSet().get(1);
     assertEquals("key2", tag2.key());
     assertEquals("value2", tag2.value());
+  }
+
+  @Test
+  @LocalS3
+  void testPutObjectWithContentMD5_headerValidated(S3Client s3) throws Exception {
+    String bucketName = "md5-bucket";
+    s3.createBucket(b -> b.bucket(bucketName));
+
+    byte[] content = "Hello MD5".getBytes();
+    MessageDigest md = MessageDigest.getInstance("MD5");
+    byte[] digest = md.digest(content);
+    String base64Md5 = Base64.getEncoder().encodeToString(digest);
+
+    PutObjectRequest req = PutObjectRequest.builder()
+        .bucket(bucketName)
+        .key("hello-md5.txt")
+        .contentMD5(base64Md5)
+        .contentLength((long) content.length)
+        .build();
+
+    s3.putObject(req, RequestBody.fromBytes(content));
+
+    ResponseBytes<GetObjectResponse> got = s3.getObjectAsBytes(b -> b.bucket(bucketName).key("hello-md5.txt"));
+    assertArrayEquals(content, got.asByteArray());
+  }
+
+  @Test
+  @LocalS3
+  void testPutObjectWithContentMD5_invalidShouldFail(S3Client s3) throws Exception {
+    String bucketName = "md5-bucket-invalid";
+    s3.createBucket(b -> b.bucket(bucketName));
+
+    byte[] content = "Hello MD5".getBytes();
+
+    // intentionally wrong base64 MD5
+    String badMd5 = "AAAAAAAAAAAAAAAAAAAAAA==";
+
+    PutObjectRequest req = PutObjectRequest.builder()
+        .bucket(bucketName)
+        .key("hello-md5-invalid.txt")
+        .contentMD5(badMd5)
+        .contentLength((long) content.length)
+        .build();
+
+    S3Exception ex = assertThrows(S3Exception.class, () -> s3.putObject(req, RequestBody.fromBytes(content)));
+    assertEquals(400, ex.statusCode());
+    assertEquals("BadDigest", ex.awsErrorDetails().errorCode());
   }
 
   @Test

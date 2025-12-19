@@ -3,6 +3,7 @@ package com.robothy.s3.core.service;
 import com.robothy.s3.core.annotations.BucketChanged;
 import com.robothy.s3.core.annotations.BucketWriteLock;
 import com.robothy.s3.core.asserionts.BucketAssertions;
+import com.robothy.s3.core.exception.LocalS3BadDigestException;
 import com.robothy.s3.core.model.answers.PutObjectAns;
 import com.robothy.s3.core.model.internal.BucketMetadata;
 import com.robothy.s3.core.model.internal.ObjectMetadata;
@@ -11,6 +12,7 @@ import com.robothy.s3.core.model.request.PutObjectOptions;
 import com.robothy.s3.core.util.IdUtils;
 import com.robothy.s3.core.util.S3ObjectUtils;
 
+import java.util.Base64;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -48,7 +50,7 @@ public interface PutObjectService extends LocalS3MetadataApplicable, StorageAppl
     versionedObjectMetadata.setFileId(fileId);
 
     versionedObjectMetadata.setEtag(S3ObjectUtils.etag(storage().getInputStream(fileId)));
-
+    checkRequestingMd5Header(options, fileId, versionedObjectMetadata.getEtag());
     options.getTagging().ifPresent(versionedObjectMetadata::setTagging);
 
     ObjectMetadata objectMetadata;
@@ -84,6 +86,23 @@ public interface PutObjectService extends LocalS3MetadataApplicable, StorageAppl
         .creationDate(versionedObjectMetadata.getCreationDate())
         .etag(versionedObjectMetadata.getEtag())
         .build();
+  }
+
+  private void checkRequestingMd5Header(PutObjectOptions options, Long fileId, String etag) {
+    // Validate Content-MD5 header if present.
+    if (Objects.nonNull(options.getContentMd5())) {
+      try {
+        byte[] md5Bytes = org.apache.commons.codec.binary.Hex.decodeHex(etag);
+        String computedBase64 = Base64.getEncoder().encodeToString(md5Bytes);
+        if (!computedBase64.equals(options.getContentMd5())) {
+          storage().delete(fileId);
+          throw new LocalS3BadDigestException("The Content-MD5 you specified did not match what we received.");
+        }
+      } catch (org.apache.commons.codec.DecoderException e) {
+        storage().delete(fileId);
+        throw new LocalS3BadDigestException("Invalid Content-MD5 header.");
+      }
+    }
   }
 
 }

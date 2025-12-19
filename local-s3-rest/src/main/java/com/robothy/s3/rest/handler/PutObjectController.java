@@ -14,8 +14,6 @@ import com.robothy.s3.rest.utils.RequestUtils;
 import com.robothy.s3.rest.utils.ResponseUtils;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -40,6 +38,7 @@ class PutObjectController implements HttpRequestHandler {
         .contentType(request.header(HttpHeaderNames.CONTENT_TYPE).orElse(null))
         .size(decodedBody.getDecodedContentLength())
         .content(decodedBody.getDecodedBody())
+        .contentMd5(request.header("Content-MD5").orElse(null))
         .tagging(RequestUtils.extractTagging(request).orElse(null))
         .userMetadata(RequestUtils.extractUserMetadata(request))
         .build();
