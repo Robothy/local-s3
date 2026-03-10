@@ -1,7 +1,5 @@
 package com.robothy.s3.core.service;
 
-import com.robothy.s3.core.model.internal.ObjectMetadata;
-import java.util.Iterator;
 import java.util.NavigableMap;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -16,6 +14,13 @@ public class ListItemUtils {
   private static <T> ConcurrentSkipListMap<String, T> emptyItemMap() {
     //noinspection unchecked
     return (ConcurrentSkipListMap<String, T>) EMPTY_OBJECT_MAP;
+  }
+
+  public static <T> NavigableMap<String, T> filterByKeyMarker(NavigableMap<String, T> keyToItems, String keyMarker) {
+    if (Objects.isNull(keyMarker)) {
+      return keyToItems;
+    }
+    return keyToItems.tailMap(keyMarker, false);
   }
 
   public static <T> NavigableMap<String, T> filterByKeyMarkerAndDelimiter(NavigableMap<String, T> keyToItems, String keyMarker, String delimiter) {
