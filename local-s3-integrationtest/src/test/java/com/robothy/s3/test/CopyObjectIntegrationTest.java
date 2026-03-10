@@ -1,6 +1,7 @@
 package com.robothy.s3.test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -42,7 +43,7 @@ public class CopyObjectIntegrationTest {
     /*-- Copy from a versioning disabled bucket to another versioning disabled bucket. --*/
     CopyObjectResponse copyObjectResult1 = s3.copyObject(b -> b.sourceBucket(bucket1).sourceKey(key1).destinationBucket(bucket2).destinationKey(key2));
     assertEquals("null", copyObjectResult1.versionId());
-    assertTrue(copyObjectResult1.copyObjectResult().lastModified().isBefore(new Date().toInstant()));
+    assertFalse(copyObjectResult1.copyObjectResult().lastModified().isAfter(new Date().toInstant()));
     try (ResponseInputStream<GetObjectResponse> response1 = s3.getObject(b -> b.bucket(bucket2).key(key2))) {
       GetObjectResponse object1 = response1.response();
       assertEquals(text.length(), object1.contentLength());

@@ -38,11 +38,12 @@ public interface ListObjectsService extends LocalS3MetadataApplicable {
   default ListObjectsAns listObjects(String bucket, String delimiter, String encodingType,
                                      String marker, int maxKeys, String prefix) {
     BucketMetadata bucketMetadata = BucketAssertions.assertBucketExists(localS3Metadata(), bucket);
+    String effectivePrefix = Objects.toString(prefix, "");
 
-    NavigableMap<String, ObjectMetadata> objectsAfterMarker = ListItemUtils.filterByKeyMarker(bucketMetadata.getObjectMap(), marker);
+    NavigableMap<String, ObjectMetadata> objectsAfterMarker =
+            ListItemUtils.filterByKeyMarkerAndDelimiterForListObjects(bucketMetadata.getObjectMap(), marker, effectivePrefix, delimiter);
     NavigableMap<String, ObjectMetadata> filteredByPrefix = ListItemUtils.filterByPrefix(objectsAfterMarker, prefix);
 
-    String effectivePrefix = Objects.toString(prefix, "");
     ListObjectsAns listObjectsAns = listObjectsAndCommonPrefixes(filteredByPrefix, effectivePrefix, delimiter, maxKeys);
     listObjectsAns.setDelimiter(delimiter);
     listObjectsAns.setMarker(Objects.isNull(marker) ? "" : marker);
@@ -70,17 +71,14 @@ public interface ListObjectsService extends LocalS3MetadataApplicable {
         continue;
       }
 
-      String suffix = key.substring(effectivePrefix.length());
-      if (Objects.nonNull(delimiter) && suffix.contains(delimiter)) {
-        commonPrefixes.add(effectivePrefix + suffix.substring(0, suffix.indexOf(delimiter) + 1));
-      } else {
-        objects.add(fetchLatestObject(key, filteredObjects.get(key)));
-      }
+      ListItemUtils.commonPrefix(key, effectivePrefix, delimiter).ifPresentOrElse(
+              commonPrefixes::add,
+              () -> objects.add(fetchLatestObject(key, filteredObjects.get(key))));
 
       int keyCount = commonPrefixes.size() + objects.size();
 
       if (keyCount == maxKeys) {
-        nextMarker = calculateNextMarker(filteredObjects, key, keyIterator, delimiter);
+        nextMarker = calculateNextMarker(filteredObjects, key, keyIterator, effectivePrefix, delimiter);
         break;
       }
 
@@ -97,13 +95,14 @@ public interface ListObjectsService extends LocalS3MetadataApplicable {
   }
 
   static String calculateNextMarker(NavigableMap<String, ObjectMetadata> filteredObjects,
-                                    String currentKey, Iterator<String> keyIterator, String delimiter) {
-    if (Objects.isNull(delimiter) || !currentKey.contains(delimiter)) {
+          String currentKey, Iterator<String> keyIterator, String effectivePrefix, String delimiter) {
+
+    Optional<String> commonPrefixOpt = ListItemUtils.commonPrefix(currentKey, effectivePrefix, delimiter);
+    if (commonPrefixOpt.isEmpty()) {
       return keyIterator.hasNext() ? currentKey : null;
     }
 
-    String commonPrefix = ListItemUtils.calculateCommonPrefix(currentKey, delimiter);
-
+    String commonPrefix = commonPrefixOpt.get();
     while (keyIterator.hasNext()) {
       String key = keyIterator.next();
       if (!key.startsWith(commonPrefix) && !filteredObjects.get(key).getLatest().isDeleted()) {
