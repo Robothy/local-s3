@@ -1,17 +1,20 @@
 package com.robothy.s3.test;
 
 import com.robothy.s3.jupiter.LocalS3;
+import java.util.List;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.jupiter.api.Test;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.CommonPrefix;
 import software.amazon.awssdk.services.s3.model.EncodingType;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.model.ObjectStorageClass;
+import software.amazon.awssdk.services.s3.model.S3Object;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -448,6 +451,27 @@ public class ListObjectsV2IntegrationTest {
     assertEquals(objectsV2Result1.nextContinuationToken(), objectsV2Result2.continuationToken());
     assertNull(objectsV2Result1.startAfter());
     assertEquals("dir2@key1", objectsV2Result2.contents().get(0).key());
+  }
+
+  @Test
+  @LocalS3
+  void testDelimiter(S3Client s3) {
+    String bucketName = prepareKeys(s3, "base/key1", "base/dir1/a", "base/dir1/b/c", "base/dir2/a", "base/dir2/b");
+    ListObjectsV2Response result1 = s3.listObjectsV2(ListObjectsV2Request.builder()
+            .bucket(bucketName)
+            .prefix("base/")
+            .delimiter("/")
+            .build());
+    assertEquals(List.of("base/key1"), result1.contents().stream().map(S3Object::key).toList());
+    assertEquals(List.of("base/dir1/", "base/dir2/"), result1.commonPrefixes().stream().map(CommonPrefix::prefix).toList());
+
+    ListObjectsV2Response result2 = s3.listObjectsV2(ListObjectsV2Request.builder()
+            .bucket(bucketName)
+            .prefix("base/dir1/")
+            .delimiter("/")
+            .build());
+    assertEquals(List.of("base/dir1/a"), result2.contents().stream().map(S3Object::key).toList());
+    assertEquals(List.of("base/dir1/b/"), result2.commonPrefixes().stream().map(CommonPrefix::prefix).toList());
   }
 
   @LocalS3
