@@ -203,6 +203,61 @@ public class ObjectIntegrationTest {
 
   @LocalS3
   @Test
+  void testGetObjectWithByteRange(S3Client s3) throws IOException {
+    String bucket = "range-bucket";
+    s3.createBucket(CreateBucketRequest.builder().bucket(bucket).build());
+    // "Hello, World!" = 13 bytes (indices 0-12)
+    String key = "data.txt";
+    s3.putObject(PutObjectRequest.builder().bucket(bucket).key(key).build(),
+        RequestBody.fromString("Hello, World!"));
+
+    // bytes=0-4  →  "Hello"
+    ResponseBytes<GetObjectResponse> r1 = s3.getObject(
+        GetObjectRequest.builder().bucket(bucket).key(key).range("bytes=0-4").build(),
+        ResponseTransformer.toBytes());
+    assertEquals("Hello", r1.asUtf8String());
+    assertEquals(5L, r1.response().contentLength());
+    assertEquals("bytes 0-4/13", r1.response().contentRange());
+
+    // bytes=7-11  →  "World"
+    ResponseBytes<GetObjectResponse> r2 = s3.getObject(
+        GetObjectRequest.builder().bucket(bucket).key(key).range("bytes=7-11").build(),
+        ResponseTransformer.toBytes());
+    assertEquals("World", r2.asUtf8String());
+    assertEquals(5L, r2.response().contentLength());
+    assertEquals("bytes 7-11/13", r2.response().contentRange());
+
+    // bytes=7-  →  "World!"
+    ResponseBytes<GetObjectResponse> r3 = s3.getObject(
+        GetObjectRequest.builder().bucket(bucket).key(key).range("bytes=7-").build(),
+        ResponseTransformer.toBytes());
+    assertEquals("World!", r3.asUtf8String());
+    assertEquals(6L, r3.response().contentLength());
+    assertEquals("bytes 7-12/13", r3.response().contentRange());
+
+    // bytes=-6  →  last 6 bytes "World!"
+    ResponseBytes<GetObjectResponse> r4 = s3.getObject(
+        GetObjectRequest.builder().bucket(bucket).key(key).range("bytes=-6").build(),
+        ResponseTransformer.toBytes());
+    assertEquals("World!", r4.asUtf8String());
+    assertEquals(6L, r4.response().contentLength());
+    assertEquals("bytes 7-12/13", r4.response().contentRange());
+
+    // No Range header  →  full object, HTTP 200
+    ResponseBytes<GetObjectResponse> full = s3.getObject(
+        GetObjectRequest.builder().bucket(bucket).key(key).build(),
+        ResponseTransformer.toBytes());
+    assertEquals("Hello, World!", full.asUtf8String());
+    assertEquals(13L, full.response().contentLength());
+
+    // Range start beyond object size  →  416 InvalidRange
+    assertThrows(Exception.class, () -> s3.getObject(
+        GetObjectRequest.builder().bucket(bucket).key(key).range("bytes=100-200").build(),
+        ResponseTransformer.toBytes()));
+  }
+
+  @LocalS3
+  @Test
   void testDeleteObjects(S3Client s3) {
     String bucketName = "my-bucket";
     s3.createBucket(CreateBucketRequest.builder().bucket(bucketName).build());
