@@ -61,4 +61,31 @@ public class HeadObjectIntegrationTest {
     assertEquals("meta-v2", headObjectResponse2.metadata().get("meta-k2"));
   }
 
+  @Test
+  @LocalS3
+  void testHeadObjectWithByteRange(S3Client s3Client) {
+    s3Client.createBucket(builder -> builder.bucket("range-bucket"));
+    // "Hello, World!" = 13 bytes
+    s3Client.putObject(
+        builder -> builder.bucket("range-bucket").key("data.txt"),
+        RequestBody.fromString("Hello, World!"));
+
+    // bytes=0-4  →  Content-Length = 5
+    HeadObjectResponse head1 = s3Client.headObject(
+        builder -> builder.bucket("range-bucket").key("data.txt").range("bytes=0-4"));
+    assertEquals(5L, head1.contentLength());
+    assertEquals("bytes 0-4/13", head1.contentRange());
+
+    // bytes=-6  →  last 6 bytes, Content-Length = 6
+    HeadObjectResponse head2 = s3Client.headObject(
+        builder -> builder.bucket("range-bucket").key("data.txt").range("bytes=-6"));
+    assertEquals(6L, head2.contentLength());
+    assertEquals("bytes 7-12/13", head2.contentRange());
+
+    // No Range header  →  full object size
+    HeadObjectResponse headFull = s3Client.headObject(
+        builder -> builder.bucket("range-bucket").key("data.txt"));
+    assertEquals(13L, headFull.contentLength());
+  }
+
 }

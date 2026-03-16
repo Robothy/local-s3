@@ -9,6 +9,7 @@ import com.robothy.s3.core.service.ObjectService;
 import com.robothy.s3.rest.assertions.RequestAssertions;
 import com.robothy.s3.rest.constants.AmzHeaderNames;
 import com.robothy.s3.rest.service.ServiceFactory;
+import com.robothy.s3.core.model.request.Range;
 import com.robothy.s3.rest.utils.ByteBufUtils;
 import com.robothy.s3.rest.utils.ResponseUtils;
 import io.netty.buffer.ByteBuf;
@@ -34,6 +35,7 @@ class GetObjectController implements HttpRequestHandler {
 
     GetObjectOptions options = GetObjectOptions.builder()
         .versionId(request.parameter("versionId").orElse(null))
+        .range(request.header(HttpHeaderNames.RANGE.toString()).map(Range::parse).orElse(null))
         .build();
     GetObjectAns getObjectAns = objectService.getObject(bucket, key, options);
 
@@ -45,10 +47,18 @@ class GetObjectController implements HttpRequestHandler {
       ByteBuf content = ByteBufUtils.fromInputStream(getObjectAns.getContent());
       ResponseUtils.addCommonHeaders(response);
       ResponseUtils.addETag(response, getObjectAns.getEtag());
-      response.status(HttpResponseStatus.OK)
-          .write(content)
+
+      if (getObjectAns.getContentRange() != null) {
+        response.status(HttpResponseStatus.PARTIAL_CONTENT)
+            .putHeader(HttpHeaderNames.CONTENT_RANGE.toString(), getObjectAns.getContentRange());
+      } else {
+        response.status(HttpResponseStatus.OK);
+      }
+
+      response.write(content)
           .putHeader(HttpHeaderNames.CONTENT_TYPE.toString(), getObjectAns.getContentType())
-          .putHeader(HttpHeaderNames.CONTENT_LENGTH.toString(), getObjectAns.getSize());
+          .putHeader(HttpHeaderNames.CONTENT_LENGTH.toString(), getObjectAns.getSize())
+          .putHeader("Accept-Ranges", "bytes");
 
       if (0 != getObjectAns.getTaggingCount()) {
         response.putHeader(AmzHeaderNames.X_AMZ_TAGGING_COUNT, getObjectAns.getTaggingCount());

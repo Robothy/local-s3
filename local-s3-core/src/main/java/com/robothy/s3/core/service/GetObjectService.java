@@ -13,6 +13,8 @@ import com.robothy.s3.core.model.internal.ObjectMetadata;
 import com.robothy.s3.core.model.internal.VersionedObjectMetadata;
 import com.robothy.s3.core.model.request.GetObjectOptions;
 import com.robothy.s3.core.storage.Storage;
+import com.robothy.s3.core.util.RangeUtils;
+import java.io.InputStream;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -38,15 +40,32 @@ public interface GetObjectService extends StorageApplicable, LocalS3MetadataAppl
     }
 
     VersionedObjectMetadata latestObject = objectMetadata.getLatest();
+    long fullSize = latestObject.getSize();
+    long contentLength = fullSize;
+    String contentRange = null;
+    InputStream content = null;
+
+    if (options.getRange().isPresent()) {
+      long[] range = options.getRange().get().resolve(fullSize);
+      long start = range[0], end = range[1];
+      contentLength = end - start + 1;
+      contentRange = "bytes " + start + "-" + end + "/" + fullSize;
+      if (!metadataOnly) {
+        content = RangeUtils.applyRange(storage.getInputStream(latestObject.getFileId()), start, contentLength);
+      }
+    } else if (!metadataOnly) {
+      content = storage.getInputStream(latestObject.getFileId());
+    }
 
     return GetObjectAns.builder()
         .bucketName(bucketName)
         .key(key)
         .contentType(latestObject.getContentType())
         .lastModified(latestObject.getCreationDate())
-        .size(latestObject.getSize())
-        .content(metadataOnly ? null : storage.getInputStream(latestObject.getFileId()))
+        .size(contentLength)
+        .content(content)
         .etag(latestObject.getEtag())
+        .contentRange(contentRange)
         .userMetadata(latestObject.getUserMetadata())
         .taggingCount(latestObject.getTagging().map(tagging -> tagging.length).orElse(0))
         .build();
@@ -100,15 +119,33 @@ public interface GetObjectService extends StorageApplicable, LocalS3MetadataAppl
           .lastModified(versionedObjectMetadata.getCreationDate())
           .build();
     } else {
+      long fullSize = versionedObjectMetadata.getSize();
+      long contentLength = fullSize;
+      String contentRange = null;
+      InputStream content = null;
+
+      if (options.getRange().isPresent()) {
+        long[] range = options.getRange().get().resolve(fullSize);
+        long start = range[0], end = range[1];
+        contentLength = end - start + 1;
+        contentRange = "bytes " + start + "-" + end + "/" + fullSize;
+        if (!metadataOnly) {
+          content = RangeUtils.applyRange(storage.getInputStream(versionedObjectMetadata.getFileId()), start, contentLength);
+        }
+      } else if (!metadataOnly) {
+        content = storage.getInputStream(versionedObjectMetadata.getFileId());
+      }
+
       return GetObjectAns.builder()
           .bucketName(bucketName)
           .key(key)
           .versionId(returnedVersionId)
           .contentType(versionedObjectMetadata.getContentType())
           .lastModified(versionedObjectMetadata.getCreationDate())
-          .size(versionedObjectMetadata.getSize())
-          .content(metadataOnly ? null : storage.getInputStream(versionedObjectMetadata.getFileId()))
+          .size(contentLength)
+          .content(content)
           .etag(versionedObjectMetadata.getEtag())
+          .contentRange(contentRange)
           .taggingCount(versionedObjectMetadata.getTagging().map(tagging -> tagging.length).orElse(0))
           .userMetadata(versionedObjectMetadata.getUserMetadata())
           .build();

@@ -31,4 +31,10 @@ public class GetObjectAns {
   private Map<String, String> userMetadata;
 
   private int taggingCount;
+
+  /**
+   * Value of the {@code Content-Range} response header, e.g. {@code "bytes 0-9/443"}.
+   * {@code null} when the response is not a ranged result.
+   */
+  private String contentRange;
 }

@@ -19,6 +19,7 @@ import com.robothy.s3.core.model.internal.LocalS3Metadata;
 import com.robothy.s3.core.model.internal.ObjectMetadata;
 import com.robothy.s3.core.model.request.GetObjectOptions;
 import com.robothy.s3.core.model.request.PutObjectOptions;
+import com.robothy.s3.core.model.request.Range;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Optional;
@@ -117,6 +118,21 @@ class GetObjectServiceTest extends LocalS3ServiceTestBase {
     assertEquals("Hello", new String(getObjectAns5.getContent().readAllBytes()));
     assertEquals(putObjectAns.getVersionId(), getObjectAns5.getVersionId());
 
+    GetObjectAns rangeGetAns = objectService.getObject(bucketName, key1, GetObjectOptions.builder()
+        .versionId(putObjectAns.getVersionId())
+        .range(Range.of(1, 99))
+        .build());
+    assertEquals(5, rangeGetAns.getSize());
+    assertEquals("bytes 1-5/6", rangeGetAns.getContentRange());
+
+    GetObjectAns rangeHeadAns = objectService.headObject(bucketName, key1, GetObjectOptions.builder()
+        .versionId(putObjectAns.getVersionId())
+        .range(Range.last(2))
+        .build());
+    assertEquals(2, rangeHeadAns.getSize());
+    assertEquals("bytes 4-5/6", rangeHeadAns.getContentRange());
+    assertNull(rangeHeadAns.getContent());
+
     /*-- Disable bucket versioning --*/
     bucketService.setVersioningEnabled(bucketName, false);
     GetObjectAns getObjectAns6 = objectService.getObject(bucketName, key1, GetObjectOptions.builder().build());
@@ -187,6 +203,20 @@ class GetObjectServiceTest extends LocalS3ServiceTestBase {
     assertTrue(System.currentTimeMillis() - getObjectAns2.getLastModified() < 1000);
     assertFalse(getObjectAns2.isDeleteMarker());
     assertNull(getObjectAns2.getContent());
+
+    GetObjectAns rangedGet = objectService.getObject(bucketName, "a.txt", GetObjectOptions.builder()
+        .range(Range.from(1))
+        .build());
+    assertEquals("ello", new String(rangedGet.getContent().readAllBytes()));
+    assertEquals(4, rangedGet.getSize());
+    assertEquals("bytes 1-4/5", rangedGet.getContentRange());
+
+    GetObjectAns rangedHead = objectService.headObject(bucketName, "a.txt", GetObjectOptions.builder()
+        .range(Range.of(0, 1))
+        .build());
+    assertEquals(2, rangedHead.getSize());
+    assertEquals("bytes 0-1/5", rangedHead.getContentRange());
+    assertNull(rangedHead.getContent());
 
   }
 

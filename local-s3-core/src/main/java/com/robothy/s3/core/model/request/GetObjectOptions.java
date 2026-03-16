@@ -16,8 +16,14 @@ public class GetObjectOptions {
 
   private String versionId;
 
+  private Range range;
+
   public Optional<String> getVersionId() {
     return Optional.ofNullable(versionId);
+  }
+
+  public Optional<Range> getRange() {
+    return Optional.ofNullable(range);
   }
 
 }
