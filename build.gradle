@@ -26,7 +26,7 @@ project.subprojects.each {
         if (it.plugins.hasPlugin('local-s3.publish')) {
             rootProject.tasks.release.dependsOn(it.tasks['publishAllPublicationsToProjectLocalRepository'])
             rootProject.tasks.release.dependsOn(it.tasks['zipMavenCentralPortalPublication'])
-            rootProject.tasks.release.dependsOn(it.tasks['releaseMavenCentralPortalPublication'])
+            rootProject.tasks.release.dependsOn(it.tasks['uploadMavenCentralPortal'])
         }
     }
 }
