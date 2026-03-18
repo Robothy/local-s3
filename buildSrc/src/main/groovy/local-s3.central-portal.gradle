@@ -32,3 +32,64 @@ publishing {
         }
     }
 }
+
+tasks.register('uploadMavenCentralPortal') {
+    description = 'Uploads the Maven Central Portal zip bundle with configurable timeout'
+    group = 'publishing'
+    dependsOn tasks.named('zipMavenCentralPortalPublication')
+
+    // Configurable timeout in minutes (default: 15 minutes)
+    def uploadTimeoutMinutes = (project.findProperty("MAVEN_CENTRAL_PORTAL_UPLOAD_TIMEOUT_MINUTES") ?: "15") as int
+
+    doLast {
+        def zipTask = tasks.named('zipMavenCentralPortalPublication').get()
+        def zipFile = zipTask.archiveFile.get().asFile
+        if (!zipFile.exists()) {
+            throw new GradleException("Zip file not found: ${zipFile.absolutePath}")
+        }
+
+        def username = project.findProperty("MAVEN_CENTRAL_PORTAL_USERNAME") ?: System.getenv("MAVEN_CENTRAL_PORTAL_USERNAME")
+        def password = project.findProperty("MAVEN_CENTRAL_PORTAL_PASSWORD") ?: System.getenv("MAVEN_CENTRAL_PORTAL_PASSWORD")
+        if (!username || !password) {
+            throw new GradleException("MAVEN_CENTRAL_PORTAL_USERNAME and MAVEN_CENTRAL_PORTAL_PASSWORD must be set")
+        }
+        def token = Base64.getEncoder().encodeToString("${username}:${password}".getBytes("UTF-8"))
+        def publishingType = project.findProperty("MAVEN_CENTRAL_PORTAL_PUBLISHING_TYPE") ?: "USER_MANAGED"
+
+        def boundary = UUID.randomUUID().toString()
+        def CRLF = "\r\n"
+        def baos = new ByteArrayOutputStream()
+        baos.write("--${boundary}${CRLF}".getBytes("UTF-8"))
+        baos.write("Content-Disposition: form-data; name=\"bundle\"; filename=\"${zipFile.name}\"${CRLF}".getBytes("UTF-8"))
+        baos.write("Content-Type: application/octet-stream${CRLF}".getBytes("UTF-8"))
+        baos.write(CRLF.getBytes("UTF-8"))
+        baos.write(zipFile.bytes)
+        baos.write("${CRLF}--${boundary}--${CRLF}".getBytes("UTF-8"))
+
+        def encodedName = URLEncoder.encode(zipFile.name, "UTF-8")
+        def uploadUrl = "https://central.sonatype.com/api/v1/publisher/upload?name=${encodedName}&publishingType=${publishingType}"
+
+        logger.lifecycle("Uploading ${zipFile.name} (${zipFile.length()} bytes) to Maven Central Portal...")
+        logger.lifecycle("Publishing type: ${publishingType}, timeout: ${uploadTimeoutMinutes} minutes")
+
+        def client = java.net.http.HttpClient.newBuilder()
+            .connectTimeout(java.time.Duration.ofMinutes(5))
+            .build()
+
+        def request = java.net.http.HttpRequest.newBuilder()
+            .uri(URI.create(uploadUrl))
+            .header("Authorization", "Bearer ${token}")
+            .header("Content-Type", "multipart/form-data; boundary=${boundary}")
+            .timeout(java.time.Duration.ofMinutes(uploadTimeoutMinutes))
+            .POST(java.net.http.HttpRequest.BodyPublishers.ofByteArray(baos.toByteArray()))
+            .build()
+
+        def response = client.send(request, java.net.http.HttpResponse.BodyHandlers.ofString())
+
+        if (response.statusCode() == 201) {
+            logger.lifecycle("Upload successful! Deployment ID: ${response.body()}")
+        } else {
+            throw new GradleException("Upload to Maven Central Portal failed with status ${response.statusCode()}: ${response.body()}")
+        }
+    }
+}
