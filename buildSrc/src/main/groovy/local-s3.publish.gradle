@@ -1,10 +1,7 @@
-import io.franzbecker.gradle.lombok.task.DelombokTask
-
 import java.nio.file.Files
 
 plugins {
     id 'maven-publish'
-    id 'io.franzbecker.gradle-lombok'
     id 'signing'
     id 'local-s3.central-portal'
 }
@@ -76,12 +73,26 @@ publishing {
 }
 
 
-task delombok(type: DelombokTask, dependsOn: compileJava) {
+task delombok(type: JavaExec, dependsOn: compileJava) {
     ext.outputDir = project.layout.buildDirectory.dir("delombok").get()
     outputs.dir(outputDir)
+    mainClass.set('lombok.launch.Main')
+    classpath = configurations.annotationProcessor
     sourceSets.main.java.srcDirs.each {
-        inputs.dir(it)
-        args(it, "-d", outputDir)
+        if (it.exists()) {
+            inputs.dir(it)
+        }
+    }
+    doFirst {
+        outputDir.asFile.mkdirs()
+        def argList = ['delombok']
+        sourceSets.main.java.srcDirs.each {
+            if (it.exists()) {
+                argList += [it.absolutePath]
+            }
+        }
+        argList += ['-d', outputDir.asFile.absolutePath]
+        args = argList
     }
 }
 

@@ -9,6 +9,7 @@ apacheCommonsCollections4 = "4.5.0"
 commonsIo = "2.21.0"
 apacheCommonsLang3 = "3.20.0"
 junit5 = "5.11.4"
+junitPlatform = "1.11.4"
 mockito = "5.21.0"
 lombok = "1.18.44"
 slf4j = "2.0.17"
@@ -33,6 +34,7 @@ apacheCommonsCollections4 = { group = "org.apache.commons", name = "commons-coll
 commonsIo = { group = "commons-io", name = "commons-io", version.ref = "commonsIo" }
 apacheCommonsLang3 = { group = "org.apache.commons", name = "commons-lang3", version.ref = "apacheCommonsLang3" }
 junit5 = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junit5" }
+junitPlatformLauncher = { group = "org.junit.platform", name = "junit-platform-launcher", version.ref = "junitPlatform" }
 junit5JupiterEngine = { group = "org.junit.jupiter", name = "junit-jupiter-engine", version.ref = "junit5" }
 #mockitoInline = { group = "org.mockito", name = "mockito-inline", version.ref = "mockito" }
 mockitoCore = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }

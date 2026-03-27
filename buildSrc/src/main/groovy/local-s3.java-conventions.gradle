@@ -28,6 +28,7 @@ dependencies {
     testImplementation(libs.mockitoCore)
     testImplementation(libs.junit5JupiterEngine)
     testImplementation(libs.junit5)
+    testRuntimeOnly(libs.junitPlatformLauncher)
 }
 
 test {
