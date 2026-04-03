@@ -140,5 +140,20 @@ tasks.register('pushLatestImage', Exec) {
     }
 }
 
+tasks.register('buildAndPushMultiPlatformDockerImage', Exec) {
+    group("docker-image")
+    dependsOn('jar')
+    description = "Builds and pushes a multi-platform (linux/amd64 + linux/arm64) Docker image using buildx."
 
-rootProject.tasks.release.dependsOn(pushLatestImage, pushJava17BasedDockerImage, pushGraalVMNativeBasedDockerImage)
+    doFirst {
+        var cmd = new ArrayList(executor)
+        cmd.add("docker buildx build --platform linux/amd64,linux/arm64 --push" +
+                " -t luofuxiang/local-s3:latest" +
+                " -t luofuxiang/local-s3:${project.version}" +
+                " .")
+        commandLine(cmd)
+    }
+}
+
+
+rootProject.tasks.release.dependsOn(buildAndPushMultiPlatformDockerImage, pushGraalVMNativeBasedDockerImage)
