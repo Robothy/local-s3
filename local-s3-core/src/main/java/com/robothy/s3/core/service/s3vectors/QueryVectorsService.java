@@ -8,6 +8,7 @@ import com.robothy.s3.core.exception.vectors.LocalS3VectorErrorType;
 import com.robothy.s3.core.model.internal.s3vectors.VectorBucketMetadata;
 import com.robothy.s3.core.model.internal.s3vectors.VectorIndexMetadata;
 import com.robothy.s3.core.model.internal.s3vectors.VectorObjectMetadata;
+import com.robothy.s3.datatypes.s3vectors.DistanceMetric;
 import com.robothy.s3.datatypes.s3vectors.request.PutInputVector;
 import com.robothy.s3.datatypes.s3vectors.response.QueryVectorsResponse;
 import com.robothy.s3.datatypes.s3vectors.response.QueryOutputVector;
@@ -28,7 +29,7 @@ public interface QueryVectorsService extends S3VectorsMetadataAware, S3VectorsSt
         List<VectorObjectMetadata> candidateVectors = getCandidateVectors(indexMetadata);
         
         if (candidateVectors.isEmpty()) {
-            return buildEmptyResponse();
+            return buildEmptyResponse(indexMetadata.getDistanceMetric());
         }
 
         List<VectorSearchEngine.VectorSearchResult> searchResults = performVectorSearch(
@@ -36,7 +37,7 @@ public interface QueryVectorsService extends S3VectorsMetadataAware, S3VectorsSt
         
         List<QueryOutputVector> outputVectors = buildOutputVectors(searchResults, returnDistance, returnMetadata);
         
-        return buildResponse(outputVectors);
+        return buildResponse(outputVectors, indexMetadata.getDistanceMetric());
     }
 
     private float[] validateQueryVector(PutInputVector.VectorData queryVector, int indexDimension) {
@@ -69,9 +70,10 @@ public interface QueryVectorsService extends S3VectorsMetadataAware, S3VectorsSt
         return new ArrayList<>(indexMetadata.getVectorObjects().values());
     }
 
-    private QueryVectorsResponse buildEmptyResponse() {
+    private QueryVectorsResponse buildEmptyResponse(DistanceMetric distanceMetric) {
         return QueryVectorsResponse.builder()
             .vectors(new ArrayList<>())
+            .distanceMetric(distanceMetric)
             .build();
     }
 
@@ -127,9 +129,10 @@ public interface QueryVectorsService extends S3VectorsMetadataAware, S3VectorsSt
         return Boolean.TRUE.equals(returnMetadata) && vectorMetadata.getMetadata() != null;
     }
 
-    private QueryVectorsResponse buildResponse(List<QueryOutputVector> outputVectors) {
+    private QueryVectorsResponse buildResponse(List<QueryOutputVector> outputVectors, DistanceMetric distanceMetric) {
         return QueryVectorsResponse.builder()
             .vectors(outputVectors)
+            .distanceMetric(distanceMetric)
             .build();
     }
 }

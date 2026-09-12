@@ -1,6 +1,7 @@
 package com.robothy.s3.datatypes.s3vectors.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.robothy.s3.datatypes.s3vectors.DistanceMetric;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,5 +26,12 @@ public class QueryVectorsResponse {
    */
   @JsonProperty("vectors")
   private List<QueryOutputVector> vectors;
+
+  /**
+   * The distance metric configured for the vector index.
+   * Required: Yes
+   */
+  @JsonProperty("distanceMetric")
+  private DistanceMetric distanceMetric;
 
 }

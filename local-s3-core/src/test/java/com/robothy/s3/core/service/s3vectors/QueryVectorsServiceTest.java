@@ -47,6 +47,7 @@ class QueryVectorsServiceTest {
 
     assertNotNull(response);
     assertEquals(2, response.getVectors().size());
+    assertEquals(DistanceMetric.EUCLIDEAN, response.getDistanceMetric());
     
     QueryOutputVector firstResult = response.getVectors().get(0);
     assertEquals("vector1", firstResult.getKey());
@@ -74,6 +75,7 @@ class QueryVectorsServiceTest {
 
     assertNotNull(response);
     assertEquals(1, response.getVectors().size());
+    assertEquals(DistanceMetric.COSINE, response.getDistanceMetric());
     
     QueryOutputVector result = response.getVectors().get(0);
     assertEquals("vector1", result.getKey());
@@ -97,6 +99,7 @@ class QueryVectorsServiceTest {
 
     assertNotNull(response);
     assertTrue(response.getVectors().isEmpty());
+    assertEquals(DistanceMetric.EUCLIDEAN, response.getDistanceMetric());
   }
 
   @Test
