@@ -4,11 +4,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.robothy.s3.jupiter.LocalS3;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.jupiter.api.Test;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -22,6 +24,7 @@ import software.amazon.awssdk.services.s3.model.ListObjectVersionsResponse;
 import software.amazon.awssdk.services.s3.model.MetadataDirective;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 import software.amazon.awssdk.core.ResponseInputStream;
 
 
@@ -203,5 +206,44 @@ public class CopyObjectIntegrationTest {
     
     assertTrue(destHeadClear.metadata().isEmpty() || 
         (destHeadClear.metadata().keySet().stream().noneMatch(key -> key.startsWith("key"))));
+  }
+
+  @LocalS3
+  @Test
+  void copyObjectIfNoneMatchWildcardBlocksExistingDestination(S3Client s3) {
+    String bucket = "cond-copy-bucket-1";
+    s3.createBucket(b -> b.bucket(bucket));
+    s3.putObject(b -> b.bucket(bucket).key("src.txt"), RequestBody.fromString("source"));
+    s3.putObject(b -> b.bucket(bucket).key("dst.txt"), RequestBody.fromString("existing"));
+
+    CopyObjectRequest blocked = CopyObjectRequest.builder()
+        .sourceBucket(bucket).sourceKey("src.txt")
+        .destinationBucket(bucket).destinationKey("dst.txt")
+        .ifNoneMatch("*")
+        .build();
+    S3Exception ex = assertThrows(S3Exception.class, () -> s3.copyObject(blocked));
+    assertEquals(412, ex.statusCode());
+    assertEquals("existing", s3.getObjectAsBytes(b -> b.bucket(bucket).key("dst.txt")).asUtf8String());
+  }
+
+  @LocalS3
+  @Test
+  void copyObjectIfMatchAllowsWhenEtagMatches(S3Client s3) {
+    String bucket = "cond-copy-bucket-2";
+    s3.createBucket(b -> b.bucket(bucket));
+    s3.putObject(b -> b.bucket(bucket).key("src.txt"), RequestBody.fromString("source"));
+    s3.putObject(b -> b.bucket(bucket).key("dst.txt"), RequestBody.fromString("existing"));
+
+    CopyObjectRequest allowed = CopyObjectRequest.builder()
+        .sourceBucket(bucket).sourceKey("src.txt")
+        .destinationBucket(bucket).destinationKey("dst.txt")
+        .ifMatch(md5("existing"))
+        .build();
+    s3.copyObject(allowed);
+    assertEquals("source", s3.getObjectAsBytes(b -> b.bucket(bucket).key("dst.txt")).asUtf8String());
+  }
+
+  private static String md5(String content) {
+    return DigestUtils.md5Hex(content);
   }
 }
