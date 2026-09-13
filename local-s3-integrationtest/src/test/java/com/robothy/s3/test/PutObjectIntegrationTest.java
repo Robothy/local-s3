@@ -248,5 +248,118 @@ public class PutObjectIntegrationTest {
     // TODO: implement this test
   }
 
+  @Test
+  @LocalS3
+  void putObjectIfNoneMatchWildcardSucceedsWhenObjectAbsent(S3Client s3) {
+    String bucket = "cond-bucket-1";
+    s3.createBucket(b -> b.bucket(bucket));
+
+    s3.putObject(b -> b.bucket(bucket).key("new.txt").ifNoneMatch("*"), RequestBody.fromString("hello"));
+
+    assertEquals("hello", s3.getObjectAsBytes(b -> b.bucket(bucket).key("new.txt")).asUtf8String());
+  }
+
+  @Test
+  @LocalS3
+  void putObjectIfNoneMatchWildcardFailsWhenObjectExists(S3Client s3) {
+    String bucket = "cond-bucket-2";
+    s3.createBucket(b -> b.bucket(bucket));
+    s3.putObject(b -> b.bucket(bucket).key("exists.txt"), RequestBody.fromString("first"));
+
+    PutObjectRequest request = PutObjectRequest.builder()
+        .bucket(bucket).key("exists.txt").ifNoneMatch("*").build();
+    S3Exception ex = assertThrows(S3Exception.class,
+        () -> s3.putObject(request, RequestBody.fromString("second")));
+    assertEquals(412, ex.statusCode());
+
+    assertEquals("first", s3.getObjectAsBytes(b -> b.bucket(bucket).key("exists.txt")).asUtf8String());
+  }
+
+  @Test
+  @LocalS3
+  void putObjectIfNoneMatchExplicitEtag(S3Client s3) {
+    String bucket = "cond-bucket-3";
+    s3.createBucket(b -> b.bucket(bucket));
+    s3.putObject(b -> b.bucket(bucket).key("k.txt"), RequestBody.fromString("v1"));
+
+    PutObjectRequest matching = PutObjectRequest.builder()
+        .bucket(bucket).key("k.txt").ifNoneMatch(md5("v1")).build();
+    S3Exception ex = assertThrows(S3Exception.class,
+        () -> s3.putObject(matching, RequestBody.fromString("v2")));
+    assertEquals(412, ex.statusCode());
+
+    PutObjectRequest nonMatching = PutObjectRequest.builder()
+        .bucket(bucket).key("k.txt").ifNoneMatch(md5("v0")).build();
+    s3.putObject(nonMatching, RequestBody.fromString("v3"));
+    assertEquals("v3", s3.getObjectAsBytes(b -> b.bucket(bucket).key("k.txt")).asUtf8String());
+  }
+
+  @Test
+  @LocalS3
+  void putObjectIfMatchWildcard(S3Client s3) {
+    String bucket = "cond-bucket-4";
+    s3.createBucket(b -> b.bucket(bucket));
+
+    PutObjectRequest absent = PutObjectRequest.builder()
+        .bucket(bucket).key("absent.txt").ifMatch("*").build();
+    S3Exception ex = assertThrows(S3Exception.class,
+        () -> s3.putObject(absent, RequestBody.fromString("x")));
+    assertEquals(412, ex.statusCode());
+
+    s3.putObject(b -> b.bucket(bucket).key("present.txt"), RequestBody.fromString("v1"));
+    s3.putObject(b -> b.bucket(bucket).key("present.txt").ifMatch("*"), RequestBody.fromString("v2"));
+    assertEquals("v2", s3.getObjectAsBytes(b -> b.bucket(bucket).key("present.txt")).asUtf8String());
+  }
+
+  @Test
+  @LocalS3
+  void putObjectIfMatchExplicitEtag(S3Client s3) {
+    String bucket = "cond-bucket-5";
+    s3.createBucket(b -> b.bucket(bucket));
+    s3.putObject(b -> b.bucket(bucket).key("k.txt"), RequestBody.fromString("v1"));
+
+    PutObjectRequest mismatch = PutObjectRequest.builder()
+        .bucket(bucket).key("k.txt").ifMatch(md5("wrong")).build();
+    S3Exception ex = assertThrows(S3Exception.class,
+        () -> s3.putObject(mismatch, RequestBody.fromString("v2")));
+    assertEquals(412, ex.statusCode());
+
+    PutObjectRequest match = PutObjectRequest.builder()
+        .bucket(bucket).key("k.txt").ifMatch(md5("v1")).build();
+    s3.putObject(match, RequestBody.fromString("v3"));
+    assertEquals("v3", s3.getObjectAsBytes(b -> b.bucket(bucket).key("k.txt")).asUtf8String());
+  }
+
+  @Test
+  @LocalS3
+  void putObjectWithQuotedEtagFromServer(S3Client s3) {
+    String bucket = "cond-bucket-6";
+    s3.createBucket(b -> b.bucket(bucket));
+    String serverEtag = s3.putObject(b -> b.bucket(bucket).key("k.txt"), RequestBody.fromString("v1")).eTag();
+
+    String quoted = serverEtag.startsWith("\"") ? serverEtag : "\"" + serverEtag + "\"";
+    PutObjectRequest matching = PutObjectRequest.builder()
+        .bucket(bucket).key("k.txt").ifMatch(quoted).build();
+    s3.putObject(matching, RequestBody.fromString("v2"));
+    assertEquals("v2", s3.getObjectAsBytes(b -> b.bucket(bucket).key("k.txt")).asUtf8String());
+
+    PutObjectRequest notMatching = PutObjectRequest.builder()
+        .bucket(bucket).key("k.txt").ifMatch("\"" + md5("nope") + "\"").build();
+    S3Exception ex = assertThrows(S3Exception.class,
+        () -> s3.putObject(notMatching, RequestBody.fromString("v3")));
+    assertEquals(412, ex.statusCode());
+  }
+
+  @Test
+  @LocalS3
+  void putObjectConditionalHeadersOnNonExistentBucket(S3Client s3) {
+    PutObjectRequest request = PutObjectRequest.builder()
+        .bucket("no-such-bucket").key("k.txt").ifNoneMatch("*").build();
+    assertThrows(NoSuchBucketException.class, () -> s3.putObject(request, RequestBody.fromString("x")));
+  }
+
+  private static String md5(String content) {
+    return DigestUtils.md5Hex(content);
+  }
 
 }
