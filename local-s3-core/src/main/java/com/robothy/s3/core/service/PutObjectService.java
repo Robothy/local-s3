@@ -9,6 +9,7 @@ import com.robothy.s3.core.model.internal.BucketMetadata;
 import com.robothy.s3.core.model.internal.ObjectMetadata;
 import com.robothy.s3.core.model.internal.VersionedObjectMetadata;
 import com.robothy.s3.core.model.request.PutObjectOptions;
+import com.robothy.s3.core.util.ConditionalRequestUtils;
 import com.robothy.s3.core.util.IdUtils;
 import com.robothy.s3.core.util.S3ObjectUtils;
 
@@ -37,6 +38,14 @@ public interface PutObjectService extends LocalS3MetadataApplicable, StorageAppl
   @BucketWriteLock
   default PutObjectAns putObject(String bucketName, String key, PutObjectOptions options) {
     BucketMetadata bucketMetadata = BucketAssertions.assertBucketExists(localS3Metadata(), bucketName);
+
+    // Evaluate conditional headers before writing the content to the storage so that a failed
+    // precondition never leaves a dangling object in the storage.
+    ObjectMetadata currentObjectMetadata = bucketMetadata.getObjectMetadata(key).orElse(null);
+    boolean objectExists = Objects.nonNull(currentObjectMetadata) && !currentObjectMetadata.getLatest().isDeleted();
+    String currentEtag = objectExists ? currentObjectMetadata.getLatest().getEtag() : null;
+    ConditionalRequestUtils.assertConditionalRequest(options.getIfMatch(), options.getIfNoneMatch(),
+        currentEtag, objectExists);
 
     String versionId = IdUtils.defaultGenerator().nextStrId();
     VersionedObjectMetadata versionedObjectMetadata = new VersionedObjectMetadata();

@@ -48,7 +48,8 @@ class CompleteMultipartUploadController implements HttpRequestHandler {
                   .partNumber(part.getPartNumber())
                   .build())
               .collect(Collectors.toList());
-      completeMultipartUploadAns = uploadService.completeMultipartUpload(bucket, key, uploadId, parts);
+      completeMultipartUploadAns = uploadService.completeMultipartUpload(bucket, key, uploadId, parts,
+          request.header("If-Match").orElse(null), request.header("If-None-Match").orElse(null));
     }
 
     CompleteMultipartUploadResult result = CompleteMultipartUploadResult.builder()
