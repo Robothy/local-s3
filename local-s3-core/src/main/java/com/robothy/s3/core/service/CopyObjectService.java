@@ -41,11 +41,16 @@ public interface CopyObjectService extends GetObjectService, PutObjectService, L
       metadataToUse = srcObjectAns.getUserMetadata();
     }
 
+    // The conditional headers below only apply to the destination object. Source object
+    // conditions (x-amz-copy-source-if-match / x-amz-copy-source-if-none-match) are not
+    // supported yet.
     PutObjectAns putObjectAns = putObject(bucket, key, PutObjectOptions.builder()
         .content(srcObjectAns.getContent())
         .contentType(srcObjectAns.getContentType())
         .size(srcObjectAns.getSize())
         .userMetadata(metadataToUse)
+        .ifMatch(options.getIfMatch())
+        .ifNoneMatch(options.getIfNoneMatch())
         .build());
 
     return CopyObjectAns.builder()

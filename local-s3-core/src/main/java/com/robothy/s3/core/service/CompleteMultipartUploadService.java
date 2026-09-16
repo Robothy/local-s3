@@ -35,10 +35,27 @@ public interface CompleteMultipartUploadService extends LocalS3MetadataApplicabl
    * @param completeParts multipart upload parts to complete.
    * @return result of the complete multipart operation.
    */
+  default CompleteMultipartUploadAns completeMultipartUpload(String bucket, String key, String uploadId,
+                                                             List<CompleteMultipartUploadPartOption> completeParts) {
+    return completeMultipartUpload(bucket, key, uploadId, completeParts, null, null);
+  }
+
+  /**
+   * Compete a multipart upload.
+   *
+   * @param bucket the bucket name.
+   * @param key the object key.
+   * @param uploadId multipart upload ID.
+   * @param completeParts multipart upload parts to complete.
+   * @param ifMatch value of the {@code If-Match} header, may be null.
+   * @param ifNoneMatch value of the {@code If-None-Match} header, may be null.
+   * @return result of the complete multipart operation.
+   */
   @BucketChanged
   @BucketWriteLock
   default CompleteMultipartUploadAns completeMultipartUpload(String bucket, String key, String uploadId,
-                                                             List<CompleteMultipartUploadPartOption> completeParts) {
+                                                             List<CompleteMultipartUploadPartOption> completeParts,
+                                                             String ifMatch, String ifNoneMatch) {
     BucketMetadata bucketMetadata = BucketAssertions.assertBucketExists(localS3Metadata(), bucket);
     UploadMetadata uploadMetadata = UploadAssertions.assertUploadExists(bucketMetadata, key, uploadId);
 
@@ -73,6 +90,8 @@ public interface CompleteMultipartUploadService extends LocalS3MetadataApplicabl
           .contentType(uploadMetadata.getContentType())
           .tagging(uploadMetadata.getTagging().orElse(null))
           .userMetadata(uploadMetadata.getUserMetadata())
+          .ifMatch(ifMatch)
+          .ifNoneMatch(ifNoneMatch)
           .build();
 
       putObjectAns = putObject(bucket, key, putObjectOptions);

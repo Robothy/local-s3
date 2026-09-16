@@ -25,6 +25,10 @@ public class PutObjectOptions {
 
   private Map<String, String> userMetadata;
 
+  private String ifMatch;
+
+  private String ifNoneMatch;
+
   /**
    * Get tagging in the put object request.
    *
