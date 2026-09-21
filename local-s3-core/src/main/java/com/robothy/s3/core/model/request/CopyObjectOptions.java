@@ -37,6 +37,16 @@ public class CopyObjectOptions {
 
   private Map<String, String> userMetadata;
 
+  /**
+   * Conditional header evaluated against the destination object.
+   */
+  private String ifMatch;
+
+  /**
+   * Conditional header evaluated against the destination object.
+   */
+  private String ifNoneMatch;
+
   public Optional<String> getSourceVersion() {
     return Optional.ofNullable(sourceVersion);
   }

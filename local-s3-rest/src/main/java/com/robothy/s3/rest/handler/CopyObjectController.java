@@ -84,6 +84,8 @@ class CopyObjectController implements HttpRequestHandler {
         .sourceVersion(urlDecode(sourceInfo.versionId))
         .metadataDirective(metadataDirective)
         .userMetadata(userMetadata)
+        .ifMatch(request.header("If-Match").orElse(null))
+        .ifNoneMatch(request.header("If-None-Match").orElse(null))
         .build();
   }
 
