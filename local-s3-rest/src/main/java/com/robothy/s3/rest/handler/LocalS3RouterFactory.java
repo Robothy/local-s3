@@ -397,6 +397,12 @@ public class LocalS3RouterFactory {
         .handler(new GetPublicAccessBlockController(serviceFactory))
         .build();
 
+    Route HealthCheck = Route.builder()
+        .method(HttpMethod.GET)
+        .path(HealthCheckController.HEALTH_PATH)
+        .handler(new HealthCheckController())
+        .build();
+
     Route HeadBucket = Route.builder()
         .method(HttpMethod.HEAD)
         .path(BUCKET_PATH)
@@ -858,6 +864,7 @@ public class LocalS3RouterFactory {
         .route(GetObjectTagging)
         .route(GetObjectTorrent)
         .route(GetPublicAccessBlock)
+        .route(HealthCheck)
         .route(HeadBucket)
         .route(HeadObject)
         .route(ListBucketAnalyticsConfigurations)
