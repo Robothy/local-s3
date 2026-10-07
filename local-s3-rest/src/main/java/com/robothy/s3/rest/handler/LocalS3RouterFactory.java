@@ -747,6 +747,38 @@ public class LocalS3RouterFactory {
         .handler(new com.robothy.s3.rest.handler.s3vectors.DeleteVectorBucketPolicyController(serviceFactory))
         .build();
 
+    // S3 Vectors tagging routes. LocalS3Router has no greedy-variable support, so the
+    // ARN arrives as the object key of POST/DELETE/GET /tags/{resourceArn}; paramMatcher
+    // pins these routes to bucket == "tags" with an ARN-shaped key, which outranks
+    // CompleteMultipartUpload (no matchers) for POST.
+    java.util.function.Predicate<java.util.Map<CharSequence, java.util.List<String>>> tagsOperation =
+        params -> {
+          java.util.List<String> key = params.get("key");
+          return "tags".equals(first(params.get("bucket")))
+              && key != null && first(key).startsWith("arn:aws:s3vectors:");
+        };
+
+    Route TagResource = Route.builder()
+        .method(HttpMethod.POST)
+        .path(BUCKET_KEY_PATH)
+        .paramMatcher(params -> tagsOperation.test(params))
+        .handler(new com.robothy.s3.rest.handler.s3vectors.TagResourceController(serviceFactory))
+        .build();
+
+    Route UntagResource = Route.builder()
+        .method(HttpMethod.DELETE)
+        .path(BUCKET_KEY_PATH)
+        .paramMatcher(params -> tagsOperation.test(params))
+        .handler(new com.robothy.s3.rest.handler.s3vectors.UntagResourceController(serviceFactory))
+        .build();
+
+    Route ListTagsForResource = Route.builder()
+        .method(HttpMethod.GET)
+        .path(BUCKET_KEY_PATH)
+        .paramMatcher(params -> tagsOperation.test(params))
+        .handler(new com.robothy.s3.rest.handler.s3vectors.ListTagsForResourceController(serviceFactory))
+        .build();
+
     // S3 Vectors Index routes
     Route CreateIndex = Route.builder()
         .method(HttpMethod.POST)
@@ -925,6 +957,9 @@ public class LocalS3RouterFactory {
         .route(GetVectors)
         .route(DeleteVectors)
         .route(ListVectors)
+        .route(TagResource)
+        .route(UntagResource)
+        .route(ListTagsForResource)
         //.route(GetBucket)
 
         .notFound(new NotFoundHandler())
@@ -934,6 +969,10 @@ public class LocalS3RouterFactory {
         .exceptionHandler(LocalS3VectorException.class, new LocalS3VectorExceptionHandler(serviceFactory))
         .exceptionHandler(Exception.class, new ExceptionHandler())
         ;
+  }
+
+  private static String first(java.util.List<String> values) {
+    return values == null || values.isEmpty() ? null : values.get(0);
   }
 
 }

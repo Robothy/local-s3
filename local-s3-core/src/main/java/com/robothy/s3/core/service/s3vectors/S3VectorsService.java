@@ -19,7 +19,10 @@ public interface S3VectorsService extends
     GetVectorsService,
     DeleteVectorsService,
     QueryVectorsService,
-    ListVectorsService {
+    ListVectorsService,
+    TagResourceService,
+    UntagResourceService,
+    ListTagsForResourceService {
 
   static S3VectorsService create(LocalS3VectorsMetadata metadata, VectorStorage vectorStorage) {
     return new DefaultS3VectorsService(metadata, vectorStorage);
