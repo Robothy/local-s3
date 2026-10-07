@@ -2,7 +2,9 @@ package com.robothy.s3.core.model.internal.s3vectors;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.robothy.s3.datatypes.s3vectors.EncryptionConfiguration;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import lombok.Data;
 
@@ -54,6 +56,12 @@ public class VectorBucketMetadata {
    */
   @JsonDeserialize(converter = VectorObjectMetadataMapConverter.class)
   private ConcurrentSkipListMap<String, VectorObjectMetadata> vectorData = new ConcurrentSkipListMap<>();
+
+  /**
+   * Tags associated with this vector bucket.
+   * Key: tag key, Value: tag value
+   */
+  private Map<String, String> tags = new ConcurrentHashMap<>();
 
   /**
    * Get encryption configuration for this vector bucket.
@@ -116,5 +124,42 @@ public class VectorBucketMetadata {
    */
   public void setPolicy(String policy) {
     this.policy = policy;
+  }
+
+  /**
+   * Get the tags of this vector bucket.
+   * Always returns a non-null map, even if deserialized metadata lacks tags.
+   *
+   * @return non-null map of tag key to tag value
+   */
+  public Map<String, String> getTags() {
+    if (tags == null) {
+      tags = new ConcurrentHashMap<>();
+    }
+    return tags;
+  }
+
+  /**
+   * Add or update a tag on this vector bucket.
+   *
+   * @param key   the tag key
+   * @param value the tag value
+   * @return the previous value associated with the key, or null
+   */
+  public String putTag(String key, String value) {
+    if (key == null || key.trim().isEmpty()) {
+      throw new IllegalArgumentException("Tag key cannot be null or empty");
+    }
+    return getTags().put(key, value);
+  }
+
+  /**
+   * Remove a tag from this vector bucket.
+   *
+   * @param key the tag key
+   * @return the removed value, or null if the key did not exist
+   */
+  public String removeTag(String key) {
+    return getTags().remove(key);
   }
 }

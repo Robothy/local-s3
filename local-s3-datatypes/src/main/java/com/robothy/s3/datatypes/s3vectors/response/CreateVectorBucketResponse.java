@@ -20,19 +20,19 @@ public class CreateVectorBucketResponse {
   /**
    * The name of the created vector bucket.
    */
-  @JsonProperty("VectorBucketName")
+  @JsonProperty("vectorBucketName")
   private String vectorBucketName;
 
   /**
    * The Amazon Resource Name (ARN) of the created vector bucket.
    */
-  @JsonProperty("VectorBucketArn")
+  @JsonProperty("vectorBucketArn")
   private String vectorBucketArn;
 
   /**
    * The creation date and time of the vector bucket in ISO 8601 format.
    */
-  @JsonProperty("CreationDate")
+  @JsonProperty("creationDate")
   private String creationDate;
 
 }

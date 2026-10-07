@@ -1,5 +1,6 @@
 package com.robothy.s3.datatypes.s3vectors;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Instant;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
@@ -30,6 +31,7 @@ public class VectorBucket {
    * The Amazon Resource Name (ARN) of the vector bucket.
    * Format: arn:aws:s3vectors:::vector-bucket/{name}
    */
+  @JsonProperty("vectorBucketArn")
   private String arn;
 
   /**
